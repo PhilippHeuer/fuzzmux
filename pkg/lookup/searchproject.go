@@ -1,8 +1,10 @@
 package lookup
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -57,6 +59,16 @@ func ScanForProjects(sources []config.SourceDirectory, checks []string) ([]Proje
 func scanDirectory(source config.SourceDirectory, checks []string) ([]Project, error) {
 	var projects []Project
 
+	// Compile regex patterns for exclusion
+	var excludePatterns []*regexp.Regexp
+	for _, pattern := range source.Exclude {
+		excludePattern, err := regexp.Compile(pattern)
+		if err != nil {
+			return nil, fmt.Errorf("failed to compile exclude pattern '%s': %w", pattern, err)
+		}
+		excludePatterns = append(excludePatterns, excludePattern)
+	}
+
 	err := filepath.WalkDir(source.Directory, func(path string, info os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -65,6 +77,14 @@ func scanDirectory(source config.SourceDirectory, checks []string) ([]Project, e
 		// skip files
 		if !info.IsDir() {
 			return nil
+		}
+
+		// exclusion patterns
+		for _, pattern := range excludePatterns {
+			log.Trace().Str("path", path).Str("pattern", pattern.String()).Bool("match", pattern.MatchString(info.Name())).Msg("checking for matches with exclude pattern")
+			if pattern.MatchString(info.Name()) {
+				return filepath.SkipDir
+			}
 		}
 
 		// check depth

@@ -32,6 +32,9 @@ type SourceDirectory struct {
 
 	// Depth is the maximum depth of subdirectories that should be scanned
 	Depth int `yaml:"depth"`
+
+	// Exclude is a list of directories that should be excluded from the scan
+	Exclude []string `yaml:"exclude"`
 }
 
 type SSHProviderConfig struct {
