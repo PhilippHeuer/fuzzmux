@@ -41,8 +41,9 @@ func (p SSHProvider) Options() ([]Option, error) {
 
 			// add to list
 			options = append(options, Option{
-				DisplayName: fmt.Sprintf("%s [%s]", name, hostname),
-				Name:        name,
+				ProviderName: p.Name(),
+				DisplayName:  fmt.Sprintf("%s [%s]", name, hostname),
+				Name:         name,
 				Context: map[string]string{
 					"host": hostname,
 				},

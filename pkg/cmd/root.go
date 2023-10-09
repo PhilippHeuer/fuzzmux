@@ -78,13 +78,6 @@ func rootCmd() *cobra.Command {
 				log.Fatal().Err(err).Msg("failed to load configuration")
 			}
 
-			// template
-			templateName, _ := cmd.Flags().GetString("template")
-			template, err := config.GetTemplate(conf, templateName, "default")
-			if err != nil {
-				log.Fatal().Err(err).Str("name", templateName).Msg("failed to read template")
-			}
-
 			// collect options from providers
 			providers := provider.GetProviders(conf)
 			var options []provider.Option
@@ -103,6 +96,13 @@ func rootCmd() *cobra.Command {
 				log.Fatal().Err(err).Msg("failed to get selected option")
 			}
 			log.Debug().Str("display-name", selected.DisplayName).Str("name", selected.Name).Str("directory", selected.StartDirectory).Interface("context", selected.Context).Msg("selected item")
+
+			// template
+			templateName, _ := cmd.Flags().GetString("template")
+			template, err := config.GetTemplate(conf, templateName, selected.ProviderName)
+			if err != nil {
+				log.Fatal().Err(err).Str("name", templateName).Msg("failed to read template")
+			}
 
 			// create session or window and attach
 			err = gotmuxutil.Run(selected, gotmuxutil.Opts{

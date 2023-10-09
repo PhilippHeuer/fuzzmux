@@ -27,6 +27,7 @@ func (p ProjectProvider) Options() ([]Option, error) {
 
 	for _, project := range projects {
 		options = append(options, Option{
+			ProviderName:   p.Name(),
 			DisplayName:    project.Name, // TODO: display name with additional information
 			Name:           project.Name,
 			StartDirectory: project.Path,

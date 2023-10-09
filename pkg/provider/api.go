@@ -9,6 +9,7 @@ import (
 )
 
 type Option struct {
+	ProviderName   string            `json:"provider_name"`   // provider name
 	DisplayName    string            `json:"display_name"`    // display name for the fuzzy finder
 	Name           string            `json:"name"`            // name
 	StartDirectory string            `json:"start_directory"` // sets the initial working directory
