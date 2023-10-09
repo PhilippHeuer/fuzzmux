@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var configDir = filepath.Join(getAppDataDir(), "tms")
+var configDir = filepath.Join(getAppDataDir(), "fuzzmux")
 
 var defaultChecks = []string{".git", ".gitignore", ".hg", ".hgignore", ".svn", ".vscode", ".idea"}
 
