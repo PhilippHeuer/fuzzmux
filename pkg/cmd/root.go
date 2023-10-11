@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/PhilippHeuer/tmux-tms/pkg/config"
+	"github.com/PhilippHeuer/tmux-tms/pkg/extensions"
 	"github.com/PhilippHeuer/tmux-tms/pkg/gotmuxutil"
 	"github.com/PhilippHeuer/tmux-tms/pkg/provider"
 	"github.com/mattn/go-colorable"
@@ -26,6 +27,8 @@ var (
 
 type RootFlags struct {
 	template    string
+	mode        string
+	selected    string
 	maxCacheAge int
 }
 
@@ -97,10 +100,29 @@ func rootCmd() *cobra.Command {
 				options = append(options, opts...)
 			}
 
-			// fuzzy finder
-			selected, err := provider.FuzzyFinder(options)
-			if err != nil {
-				log.Fatal().Err(err).Msg("failed to get selected option")
+			// custom output mode for external finder
+			if flags.mode != "" {
+				err = extensions.OptionsForFinder(flags.mode, options)
+				if err != nil {
+					log.Fatal().Err(err).Str("mode", flags.mode).Msg("failed to render options")
+				}
+				return
+			}
+
+			// fuzzy finder or direct selection
+			var selected *provider.Option
+			if flags.selected == "" {
+				selected, err = provider.FuzzyFinder(options)
+				if err != nil {
+					log.Fatal().Err(err).Msg("failed to get selected option")
+				}
+			} else {
+				for _, o := range options {
+					if o.Id == flags.selected {
+						selected = &o
+						break
+					}
+				}
 			}
 			log.Debug().Str("display-name", selected.DisplayName).Str("name", selected.Name).Str("directory", selected.StartDirectory).Interface("context", selected.Context).Msg("selected item")
 
@@ -129,6 +151,8 @@ func rootCmd() *cobra.Command {
 	cmd.PersistentFlags().BoolVar(&cfg.LogCaller, "log-caller", false, "include caller in log functions")
 
 	cmd.PersistentFlags().StringVarP(&flags.template, "template", "t", "", "template to create the tmux session")
+	cmd.PersistentFlags().StringVar(&flags.mode, "mode", "", "return data in custom format to use an external fuzzy finder (valid: telescope)")
+	cmd.PersistentFlags().StringVar(&flags.selected, "select", "", "skips the finder and directly selects the given id")
 	cmd.PersistentFlags().IntVar(&flags.maxCacheAge, "cache-age", 300, "maximum age of the cache in seconds")
 
 	cmd.AddCommand(versionCmd())

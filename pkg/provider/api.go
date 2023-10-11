@@ -65,6 +65,7 @@ func FuzzyFinder(options []Option) (*Option, error) {
 		func(i int) string {
 			return options[i].DisplayName
 		},
+		fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionBottom),
 		/*
 			fuzzyfinder.WithPreviewWindow(func(i, w, h int) string {
 				if i == -1 {
