@@ -141,6 +141,16 @@ func rootCmd() *cobra.Command {
 				log.Fatal().Err(err).Str("name", templateName).Msg("failed to read template")
 			}
 
+			// call select
+			selectedProvider, err := provider.GetProviderByName(providers, selected.ProviderName)
+			if err != nil {
+				log.Fatal().Err(err).Str("provider", selected.ProviderName).Msg("failed to get provider of selected item")
+			}
+			err = selectedProvider.SelectOption(selected)
+			if err != nil {
+				log.Fatal().Err(err).Str("provider", selected.ProviderName).Msg("failed to run select")
+			}
+
 			// create session or window and attach
 			err = gotmuxutil.Run(selected, gotmuxutil.Opts{
 				SessionName: selected.Name,

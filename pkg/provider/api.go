@@ -20,9 +20,10 @@ type Option struct {
 }
 
 type Provider interface {
-	Name() string
-	Options() ([]Option, error)
-	OptionsOrCache(maxAge float64) ([]Option, error)
+	Name() string                                    // Name returns the name of the provider
+	Options() ([]Option, error)                      // Options returns the options
+	OptionsOrCache(maxAge float64) ([]Option, error) // OptionsOrCache returns the options from cache or calls Options
+	SelectOption(options *Option) error              // Select can be used to run actions / enrich the context before opening the session
 }
 
 func GetProviders(config config.Config) []Provider {
@@ -40,8 +41,8 @@ func GetProviders(config config.Config) []Provider {
 	return providers
 }
 
-func GetProviderByName(config config.Config, name string) (Provider, error) {
-	for _, p := range GetProviders(config) {
+func GetProviderByName(providers []Provider, name string) (Provider, error) {
+	for _, p := range providers {
 		if p.Name() == name {
 			return p, nil
 		}
@@ -50,16 +51,16 @@ func GetProviderByName(config config.Config, name string) (Provider, error) {
 	return nil, fmt.Errorf("provider '%s' not found", name)
 }
 
-func GetProvidersByName(config config.Config, names []string) []Provider {
-	var providers []Provider
+func GetProvidersByName(providers []Provider, names []string) []Provider {
+	var result []Provider
 
-	for _, p := range GetProviders(config) {
+	for _, p := range providers {
 		if slices.Contains(names, p.Name()) {
-			providers = append(providers, p)
+			result = append(result, p)
 		}
 	}
 
-	return providers
+	return result
 }
 
 // FilterOptions filters the options, showTags are required, hideTags

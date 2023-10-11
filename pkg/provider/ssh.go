@@ -31,13 +31,17 @@ func (p SSHProvider) Options() ([]Option, error) {
 			}
 
 			// parse
-			name := host.Patterns[0].String()
+			name := pattern.String()
 			hostname := ""
+			user := "root@"
 			var tags []string
 			for _, node := range host.Nodes {
 				line := strings.TrimSpace(node.String())
 				if strings.HasPrefix(line, "Hostname ") {
 					hostname = strings.TrimSpace(strings.TrimPrefix(line, "Hostname "))
+				}
+				if strings.HasPrefix(line, "User ") {
+					user = strings.TrimSpace(strings.TrimPrefix(line, "User ")) + "@"
 				}
 
 				if strings.HasPrefix(line, "# tag: ") {
@@ -46,14 +50,20 @@ func (p SSHProvider) Options() ([]Option, error) {
 			}
 
 			// add to list
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				return nil, fmt.Errorf("failed to get user home directory: %w", err)
+			}
 			options = append(options, Option{
-				ProviderName: p.Name(),
-				Id:           name,
-				DisplayName:  fmt.Sprintf("%s [%s]", name, hostname),
-				Name:         name,
-				Tags:         tags,
+				ProviderName:   p.Name(),
+				Id:             name,
+				DisplayName:    fmt.Sprintf("%s [%s%s]", name, user, hostname),
+				Name:           name,
+				StartDirectory: filepath.Join(homeDir, "ssh", name),
+				Tags:           tags,
 				Context: map[string]string{
 					"host": hostname,
+					"user": user,
 				},
 			})
 		}
@@ -79,4 +89,16 @@ func (p SSHProvider) OptionsOrCache(maxAge float64) ([]Option, error) {
 	}
 
 	return options, nil
+}
+
+func (p SSHProvider) SelectOption(option *Option) error {
+	// create startDirectory
+	if _, err := os.Stat(option.StartDirectory); os.IsNotExist(err) {
+		err = os.MkdirAll(option.StartDirectory, 0755)
+		if err != nil {
+			return fmt.Errorf("failed to create start directory: %w", err)
+		}
+	}
+
+	return nil
 }

@@ -60,6 +60,10 @@ func (p ProjectProvider) OptionsOrCache(maxAge float64) ([]Option, error) {
 	return options, nil
 }
 
+func (p ProjectProvider) SelectOption(option *Option) error {
+	return nil
+}
+
 func renderProjectDisplayName(project lookup.Project, displayFormat config.ProjectDisplayFormat) string {
 	output := project.Name
 	if displayFormat == config.AbsolutePath {

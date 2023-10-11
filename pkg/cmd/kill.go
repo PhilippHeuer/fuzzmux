@@ -13,12 +13,8 @@ func killCmd() *cobra.Command {
 		Use:     "kill",
 		Aliases: []string{"k"},
 		Short:   "Kill the current tmux session and jump to another",
+		Args:    cobra.MinimumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			if len(args) == 0 {
-				log.Fatal().Msg("specify one or more sessions to kill")
-				cmd.Help()
-			}
-
 			server := new(gotmux.Server)
 
 			// query sessions
