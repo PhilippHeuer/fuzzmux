@@ -63,7 +63,7 @@ func (p SSHProvider) Options() ([]Option, error) {
 				Tags:           tags,
 				Context: map[string]string{
 					"host": hostname,
-					"user": user,
+					"user": strings.TrimRight(user, "@"),
 				},
 			})
 		}
