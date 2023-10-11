@@ -10,6 +10,7 @@ import (
 
 type Option struct {
 	ProviderName   string            `json:"provider_name"`   // provider name
+	Id             string            `json:"id"`              // unique id
 	DisplayName    string            `json:"display_name"`    // display name for the fuzzy finder
 	Name           string            `json:"name"`            // name
 	StartDirectory string            `json:"start_directory"` // sets the initial working directory
@@ -19,6 +20,7 @@ type Option struct {
 type Provider interface {
 	Name() string
 	Options() ([]Option, error)
+	OptionsOrCache(maxAge float64) ([]Option, error)
 }
 
 func GetProviders(config config.Config) []Provider {

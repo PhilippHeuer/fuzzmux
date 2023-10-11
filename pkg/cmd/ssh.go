@@ -8,13 +8,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type Host struct {
-	Name     string
-	Hostname string
-}
-
 func sshCmd() *cobra.Command {
 	const providerName = "ssh"
+	flags := RootFlags{}
 
 	cmd := &cobra.Command{
 		Use:     "ssh",
@@ -28,10 +24,9 @@ func sshCmd() *cobra.Command {
 			}
 
 			// template
-			templateName, _ := cmd.Flags().GetString("template")
-			template, err := config.GetTemplate(conf, templateName, providerName)
+			template, err := config.GetTemplate(conf, flags.template, providerName)
 			if err != nil {
-				log.Fatal().Err(err).Str("name", templateName).Msg("failed to read template")
+				log.Fatal().Err(err).Str("name", flags.template).Msg("failed to read template")
 			}
 
 			// provider
@@ -39,7 +34,7 @@ func sshCmd() *cobra.Command {
 			if err != nil {
 				log.Fatal().Err(err).Str("provider", providerName).Msg("failed to get provider")
 			}
-			options, err := p.Options()
+			options, err := p.OptionsOrCache(float64(flags.maxCacheAge))
 			if err != nil {
 				log.Fatal().Err(err).Str("provider", p.Name()).Msg("failed to get options")
 			}
@@ -64,7 +59,8 @@ func sshCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP("template", "t", "", "template to create the tmux session")
+	cmd.PersistentFlags().StringVarP(&flags.template, "template", "t", "", "template to create the tmux session")
+	cmd.PersistentFlags().IntVar(&flags.maxCacheAge, "cache-age", 300, "maximum age of the cache in seconds")
 
 	return cmd
 }

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/kevinburke/ssh_config"
+	"github.com/rs/zerolog/log"
 )
 
 type SSHProvider struct {
@@ -42,6 +43,7 @@ func (p SSHProvider) Options() ([]Option, error) {
 			// add to list
 			options = append(options, Option{
 				ProviderName: p.Name(),
+				Id:           name,
 				DisplayName:  fmt.Sprintf("%s [%s]", name, hostname),
 				Name:         name,
 				Context: map[string]string{
@@ -49,6 +51,25 @@ func (p SSHProvider) Options() ([]Option, error) {
 				},
 			})
 		}
+	}
+
+	return options, nil
+}
+
+func (p SSHProvider) OptionsOrCache(maxAge float64) ([]Option, error) {
+	options, err := LoadOptions(p.Name(), maxAge)
+	if err == nil {
+		return options, nil
+	}
+
+	options, err = p.Options()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get options: %w", err)
+	}
+
+	err = SaveOptions(p.Name(), options)
+	if err != nil {
+		log.Warn().Err(err).Msg("failed to save options to cache")
 	}
 
 	return options, nil

@@ -5,11 +5,12 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/PhilippHeuer/tmux-tms/pkg/util"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 )
 
-var configDir = filepath.Join(getAppDataDir(), "fuzzmux")
+var configDir = filepath.Join(util.GetAppDataDir(), "fuzzmux")
 
 var defaultChecks = []string{".git", ".gitignore", ".hg", ".hgignore", ".svn", ".vscode", ".idea"}
 

@@ -24,7 +24,14 @@ var (
 	validLogFormats = []string{"plain", "color", "json"}
 )
 
+type RootFlags struct {
+	template    string
+	maxCacheAge int
+}
+
 func rootCmd() *cobra.Command {
+	flags := RootFlags{}
+
 	cmd := &cobra.Command{
 		Use:   `tms`,
 		Short: `scans source directories for projects to create tmux sessions`,
@@ -82,7 +89,7 @@ func rootCmd() *cobra.Command {
 			providers := provider.GetProviders(conf)
 			var options []provider.Option
 			for _, p := range providers {
-				opts, err := p.Options()
+				opts, err := p.OptionsOrCache(float64(flags.maxCacheAge))
 				if err != nil {
 					log.Fatal().Err(err).Str("provider", p.Name()).Msg("failed to get options")
 				}
@@ -120,7 +127,9 @@ func rootCmd() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&cfg.LogLevel, "log-level", "info", "log level - allowed: "+strings.Join(validLogLevels, ","))
 	cmd.PersistentFlags().StringVar(&cfg.LogFormat, "log-format", "color", "log format - allowed: "+strings.Join(validLogFormats, ","))
 	cmd.PersistentFlags().BoolVar(&cfg.LogCaller, "log-caller", false, "include caller in log functions")
-	cmd.Flags().StringP("template", "t", "", "template to create the tmux session")
+
+	cmd.PersistentFlags().StringVarP(&flags.template, "template", "t", "", "template to create the tmux session")
+	cmd.PersistentFlags().IntVar(&flags.maxCacheAge, "cache-age", 300, "maximum age of the cache in seconds")
 
 	cmd.AddCommand(versionCmd())
 	cmd.AddCommand(projectCmd())

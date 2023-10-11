@@ -10,6 +10,7 @@ import (
 
 func projectCmd() *cobra.Command {
 	const providerName = "project"
+	flags := RootFlags{}
 
 	cmd := &cobra.Command{
 		Use:     "project",
@@ -34,7 +35,7 @@ func projectCmd() *cobra.Command {
 			if err != nil {
 				log.Fatal().Err(err).Str("provider", providerName).Msg("failed to get provider")
 			}
-			options, err := p.Options()
+			options, err := p.OptionsOrCache(float64(flags.maxCacheAge))
 			if err != nil {
 				log.Fatal().Err(err).Str("provider", p.Name()).Msg("failed to get options")
 			}
@@ -59,7 +60,8 @@ func projectCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringP("template", "t", "", "template to create the tmux session")
+	cmd.PersistentFlags().StringVarP(&flags.template, "template", "t", "", "template to create the tmux session")
+	cmd.PersistentFlags().IntVar(&flags.maxCacheAge, "cache-age", 300, "maximum age of the cache in seconds")
 
 	return cmd
 }
