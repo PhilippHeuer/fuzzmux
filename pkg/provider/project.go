@@ -11,6 +11,7 @@ import (
 type ProjectProvider struct {
 	Checks            []string
 	SourceDirectories []config.SourceDirectory
+	DisplayFormat     config.ProjectDisplayFormat
 }
 
 func (p ProjectProvider) Name() string {
@@ -30,7 +31,7 @@ func (p ProjectProvider) Options() ([]Option, error) {
 		options = append(options, Option{
 			ProviderName:   p.Name(),
 			Id:             project.Path,
-			DisplayName:    project.Name, // TODO: display name with additional information
+			DisplayName:    renderProjectDisplayName(project, p.DisplayFormat),
 			Name:           project.Name,
 			StartDirectory: project.Path,
 			Tags:           project.Tags,
@@ -57,4 +58,15 @@ func (p ProjectProvider) OptionsOrCache(maxAge float64) ([]Option, error) {
 	}
 
 	return options, nil
+}
+
+func renderProjectDisplayName(project lookup.Project, displayFormat config.ProjectDisplayFormat) string {
+	output := project.Name
+	if displayFormat == config.AbsolutePath {
+		output = project.Path
+	} else if displayFormat == config.RelativePath {
+		output = project.RelativePath
+	}
+
+	return output
 }

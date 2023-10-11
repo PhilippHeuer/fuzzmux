@@ -104,7 +104,7 @@ func scanDirectory(source config.SourceDirectory, checks []string) ([]Project, e
 				projects = append(projects, Project{
 					Name:         filepath.Base(path),
 					Path:         path,
-					RelativePath: rel,
+					RelativePath: filepath.Base(source.Directory) + "/" + filepath.ToSlash(rel),
 					Tags:         source.Tags,
 				})
 				return filepath.SkipDir

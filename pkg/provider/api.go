@@ -31,6 +31,7 @@ func GetProviders(config config.Config) []Provider {
 	providers = append(providers, ProjectProvider{
 		SourceDirectories: config.ProjectProvider.SourceDirectories,
 		Checks:            config.ProjectProvider.Checks,
+		DisplayFormat:     config.ProjectProvider.DisplayFormat,
 	})
 	providers = append(providers, SSHProvider{
 		// Mode: config.SSHProviderConfig.Mode,

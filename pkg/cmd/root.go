@@ -83,6 +83,7 @@ func rootCmd() *cobra.Command {
 			// logging config
 			log.Debug().Str("log-level", cfg.LogLevel).Str("log-format", cfg.LogFormat).Bool("log-caller", cfg.LogCaller).Msg("configured logging")
 		},
+		Args: cobra.MinimumNArgs(0),
 		Run: func(cmd *cobra.Command, args []string) {
 			// load config
 			conf, err := config.ResolvedConfig()
@@ -94,6 +95,10 @@ func rootCmd() *cobra.Command {
 			providers := provider.GetProviders(conf)
 			var options []provider.Option
 			for _, p := range providers {
+				if len(args) > 0 && !slices.Contains(args, p.Name()) {
+					continue
+				}
+
 				opts, err := p.OptionsOrCache(float64(flags.maxCacheAge))
 				if err != nil {
 					log.Fatal().Err(err).Str("provider", p.Name()).Msg("failed to get options")
@@ -161,8 +166,6 @@ func rootCmd() *cobra.Command {
 	cmd.PersistentFlags().StringSliceVar(&flags.hideTags, "hide-tags", []string{}, "tags to hide from the fuzzy finder")
 
 	cmd.AddCommand(versionCmd())
-	cmd.AddCommand(projectCmd())
-	cmd.AddCommand(sshCmd())
 	cmd.AddCommand(killCmd())
 	cmd.AddCommand(killAllCmd())
 

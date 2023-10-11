@@ -61,8 +61,8 @@ type Window struct {
 type ProjectDisplayFormat string
 
 const (
-	AbsolutePath ProjectDisplayFormat = "abs"
-	RelativePath ProjectDisplayFormat = "rel"
+	AbsolutePath ProjectDisplayFormat = "absolute"
+	RelativePath ProjectDisplayFormat = "relative"
 	BaseName     ProjectDisplayFormat = "base"
 )
 
