@@ -39,6 +39,7 @@ func sshCmd() *cobra.Command {
 			if err != nil {
 				log.Fatal().Err(err).Str("provider", p.Name()).Msg("failed to get options")
 			}
+			options = provider.FilterOptions(options, flags.showTags, flags.hideTags)
 
 			// custom output mode for external finder
 			if flags.mode != "" {
@@ -83,6 +84,8 @@ func sshCmd() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&flags.mode, "mode", "", "return data in custom format to use an external fuzzy finder (valid: telescope)")
 	cmd.PersistentFlags().StringVar(&flags.selected, "select", "", "skips the finder and directly selects the given id")
 	cmd.PersistentFlags().IntVar(&flags.maxCacheAge, "cache-age", 300, "maximum age of the cache in seconds")
+	cmd.PersistentFlags().StringSliceVar(&flags.showTags, "show-tags", []string{}, "tags to show in the fuzzy finder, all others will be hidden. Overrides --hide-tags.")
+	cmd.PersistentFlags().StringSliceVar(&flags.hideTags, "hide-tags", []string{}, "tags to hide from the fuzzy finder")
 
 	return cmd
 }

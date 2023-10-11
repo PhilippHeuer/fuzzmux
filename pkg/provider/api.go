@@ -3,6 +3,7 @@ package provider
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/PhilippHeuer/tmux-tms/pkg/config"
 	"github.com/ktr0731/go-fuzzyfinder"
@@ -14,6 +15,7 @@ type Option struct {
 	DisplayName    string            `json:"display_name"`    // display name for the fuzzy finder
 	Name           string            `json:"name"`            // name
 	StartDirectory string            `json:"start_directory"` // sets the initial working directory
+	Tags           []string          `json:"tags"`            // tags
 	Context        map[string]string `json:"context"`         // additional context information
 }
 
@@ -59,6 +61,35 @@ func GetProvidersByName(config config.Config, names []string) []Provider {
 	return providers
 }
 
+// FilterOptions filters the options, showTags are required, hideTags
+func FilterOptions(options []Option, showTags []string, hideTags []string) []Option {
+	var filtered []Option
+
+	for _, o := range options {
+		showTagFound := false
+		for _, showTag := range showTags {
+			if slices.Contains(o.Tags, showTag) {
+				showTagFound = true
+				break
+			}
+		}
+
+		hideTagFound := false
+		for _, hideTag := range hideTags {
+			if slices.Contains(o.Tags, hideTag) {
+				hideTagFound = true
+				break
+			}
+		}
+
+		if (showTagFound && !hideTagFound) || (len(showTags) == 0 && !hideTagFound) {
+			filtered = append(filtered, o)
+		}
+	}
+
+	return filtered
+}
+
 func FuzzyFinder(options []Option) (*Option, error) {
 	idx, err := fuzzyfinder.Find(
 		options,
@@ -66,15 +97,13 @@ func FuzzyFinder(options []Option) (*Option, error) {
 			return options[i].DisplayName
 		},
 		fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionBottom),
-		/*
-			fuzzyfinder.WithPreviewWindow(func(i, w, h int) string {
-				if i == -1 {
-					return ""
-				}
+		fuzzyfinder.WithPreviewWindow(func(i, w, h int) string {
+			if i == -1 {
+				return ""
+			}
 
-				return fmt.Sprintf("%s\n\n%s", options[i].DisplayName, options[i].StartDirectory)
-			}),
-		*/
+			return fmt.Sprintf("%s\n\nProvider: %s\nDirectory: %s\nTags: %s\n", options[i].DisplayName, options[i].ProviderName, options[i].StartDirectory, strings.Join(options[i].Tags, ", "))
+		}),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find option: %w", err)

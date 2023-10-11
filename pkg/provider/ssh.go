@@ -33,10 +33,15 @@ func (p SSHProvider) Options() ([]Option, error) {
 			// parse
 			name := host.Patterns[0].String()
 			hostname := ""
+			var tags []string
 			for _, node := range host.Nodes {
 				line := strings.TrimSpace(node.String())
 				if strings.HasPrefix(line, "Hostname ") {
 					hostname = strings.TrimSpace(strings.TrimPrefix(line, "Hostname "))
+				}
+
+				if strings.HasPrefix(line, "# tag: ") {
+					tags = append(tags, strings.TrimSpace(strings.TrimPrefix(line, "# tag: ")))
 				}
 			}
 
@@ -46,6 +51,7 @@ func (p SSHProvider) Options() ([]Option, error) {
 				Id:           name,
 				DisplayName:  fmt.Sprintf("%s [%s]", name, hostname),
 				Name:         name,
+				Tags:         tags,
 				Context: map[string]string{
 					"host": hostname,
 				},

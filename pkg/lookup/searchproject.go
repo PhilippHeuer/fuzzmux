@@ -13,9 +13,10 @@ import (
 )
 
 type Project struct {
-	Name         string // Name is the name of the project
-	Path         string // Path is the absolute path to the project
-	RelativePath string // RelativePath is the path relative to the source directory
+	Name         string   // Name is the name of the project
+	Path         string   // Path is the absolute path to the project
+	RelativePath string   // RelativePath is the path relative to the source directory
+	Tags         []string // Tags are the tags of the project
 }
 
 type ScanResult struct {
@@ -104,6 +105,7 @@ func scanDirectory(source config.SourceDirectory, checks []string) ([]Project, e
 					Name:         filepath.Base(path),
 					Path:         path,
 					RelativePath: rel,
+					Tags:         source.Tags,
 				})
 				return filepath.SkipDir
 			}

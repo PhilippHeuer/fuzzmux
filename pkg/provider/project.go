@@ -33,6 +33,7 @@ func (p ProjectProvider) Options() ([]Option, error) {
 			DisplayName:    project.Name, // TODO: display name with additional information
 			Name:           project.Name,
 			StartDirectory: project.Path,
+			Tags:           project.Tags,
 		})
 	}
 

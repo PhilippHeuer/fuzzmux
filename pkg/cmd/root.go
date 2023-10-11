@@ -30,6 +30,8 @@ type RootFlags struct {
 	mode        string
 	selected    string
 	maxCacheAge int
+	showTags    []string
+	hideTags    []string
 }
 
 func rootCmd() *cobra.Command {
@@ -99,6 +101,7 @@ func rootCmd() *cobra.Command {
 
 				options = append(options, opts...)
 			}
+			options = provider.FilterOptions(options, flags.showTags, flags.hideTags)
 
 			// custom output mode for external finder
 			if flags.mode != "" {
@@ -154,11 +157,12 @@ func rootCmd() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&flags.mode, "mode", "", "return data in custom format to use an external fuzzy finder (valid: telescope)")
 	cmd.PersistentFlags().StringVar(&flags.selected, "select", "", "skips the finder and directly selects the given id")
 	cmd.PersistentFlags().IntVar(&flags.maxCacheAge, "cache-age", 300, "maximum age of the cache in seconds")
+	cmd.PersistentFlags().StringSliceVar(&flags.showTags, "show-tags", []string{}, "only show elements with the given tags, all others will be hidden")
+	cmd.PersistentFlags().StringSliceVar(&flags.hideTags, "hide-tags", []string{}, "tags to hide from the fuzzy finder")
 
 	cmd.AddCommand(versionCmd())
 	cmd.AddCommand(projectCmd())
 	cmd.AddCommand(sshCmd())
-	cmd.AddCommand(switchCmd())
 	cmd.AddCommand(killCmd())
 	cmd.AddCommand(killAllCmd())
 

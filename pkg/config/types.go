@@ -35,6 +35,9 @@ type SourceDirectory struct {
 
 	// Exclude is a list of directories that should be excluded from the scan
 	Exclude []string `yaml:"exclude"`
+
+	// Tags can be used to filter directories
+	Tags []string `yaml:"tags"`
 }
 
 type SSHProviderConfig struct {
