@@ -29,14 +29,28 @@ type Provider interface {
 func GetProviders(config config.Config) []Provider {
 	var providers []Provider
 
-	providers = append(providers, ProjectProvider{
-		SourceDirectories: config.ProjectProvider.SourceDirectories,
-		Checks:            config.ProjectProvider.Checks,
-		DisplayFormat:     config.ProjectProvider.DisplayFormat,
-	})
-	providers = append(providers, SSHProvider{
-		// Mode: config.SSHProviderConfig.Mode,
-	})
+	if config.ProjectProvider != nil {
+		providers = append(providers, ProjectProvider{
+			SourceDirectories: config.ProjectProvider.SourceDirectories,
+			Checks:            config.ProjectProvider.Checks,
+			DisplayFormat:     config.ProjectProvider.DisplayFormat,
+		})
+	}
+	if config.SSHProvider != nil {
+		providers = append(providers, SSHProvider{
+			// Mode: config.SSHProviderConfig.Mode,
+		})
+	}
+	if config.KubernetesProvider != nil {
+		providers = append(providers, KubernetesProvider{
+			Clusters: config.KubernetesProvider.Clusters,
+		})
+	}
+	if config.OpenShiftProvider != nil {
+		providers = append(providers, OpenShiftProvider{
+			Clusters: config.OpenShiftProvider.Clusters,
+		})
+	}
 
 	return providers
 }

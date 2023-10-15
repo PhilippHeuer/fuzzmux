@@ -72,6 +72,21 @@ func ResolvedConfig() (Config, error) {
 			},
 		}
 	}
+	if _, exists := config.WindowTemplates["kubernetes"]; !exists {
+		config.WindowTemplates["kubernetes"] = []Window{
+			{
+				Name:     "k9s",
+				Commands: []string{"k9s --logoless --headless --readonly --kubeconfig \"${kubeconfig}\" --namespace \"${namespace}\""},
+			},
+			{
+				Name: "kubectl",
+				Commands: []string{
+					"export KUBECONFIG=\"${kubeconfig}\"",
+					"kubectl config set-context --current --namespace=\"${namespace}\"",
+				},
+			},
+		}
+	}
 
 	// resolve config
 	log.Debug().Interface("config", config).Msg("resolved config")

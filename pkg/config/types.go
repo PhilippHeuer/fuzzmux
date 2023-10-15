@@ -10,6 +10,13 @@ type Config struct {
 	// SSHProvider is the configuration for ssh connections
 	SSHProvider *SSHProviderConfig `yaml:"ssh"`
 
+	// KubernetesProvider is the configuration for k8s connections
+	KubernetesProvider *KubernetesProviderConfig `yaml:"kubernetes"`
+
+	// OpenShiftProvider is the configuration for k8s connections
+	OpenShiftProvider *KubernetesProviderConfig `yaml:"openshift"`
+
+	// WindowTemplates is a map of tmux layouts
 	WindowTemplates map[string][]Window `yaml:"window-template"`
 }
 
@@ -45,6 +52,24 @@ type SSHProviderConfig struct {
 
 	// Mode controls how sessions or windows are created for SSH connections
 	Mode SSHMode `yaml:"mode"`
+}
+
+type KubernetesProviderConfig struct {
+	Enabled bool `yaml:"enabled"`
+
+	// Clusters is a list of kubernetes clusters that should be scanned
+	Clusters []KubernetesCluster `yaml:"clusters"`
+}
+
+type KubernetesCluster struct {
+	// Name of the cluster
+	Name string `yaml:"name"`
+
+	// Tags that apply to the cluster
+	Tags []string `yaml:"tags"`
+
+	// KubeConfig is the absolute path to the kubeconfig file
+	KubeConfig string `yaml:"kubeconfig"`
 }
 
 type Window struct {

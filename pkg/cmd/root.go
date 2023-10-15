@@ -107,6 +107,9 @@ func rootCmd() *cobra.Command {
 				options = append(options, opts...)
 			}
 			options = provider.FilterOptions(options, flags.showTags, flags.hideTags)
+			if len(options) == 0 {
+				log.Fatal().Strs("args", args).Msg("no options found")
+			}
 
 			// custom output mode for external finder
 			if flags.mode != "" {

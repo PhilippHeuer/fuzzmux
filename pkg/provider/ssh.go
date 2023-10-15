@@ -20,6 +20,12 @@ func (p SSHProvider) Name() string {
 func (p SSHProvider) Options() ([]Option, error) {
 	var options []Option
 
+	// get home directory
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user home directory: %w", err)
+	}
+
 	// parse ssh config
 	f, _ := os.Open(filepath.Join(os.Getenv("HOME"), ".ssh", "config"))
 	sshConfig, _ := ssh_config.Decode(f)
@@ -50,16 +56,12 @@ func (p SSHProvider) Options() ([]Option, error) {
 			}
 
 			// add to list
-			homeDir, err := os.UserHomeDir()
-			if err != nil {
-				return nil, fmt.Errorf("failed to get user home directory: %w", err)
-			}
 			options = append(options, Option{
 				ProviderName:   p.Name(),
 				Id:             name,
 				DisplayName:    fmt.Sprintf("%s [%s%s]", name, user, hostname),
 				Name:           name,
-				StartDirectory: filepath.Join(homeDir, "ssh", name),
+				StartDirectory: filepath.Join(homeDir, "fuzzmux", "ssh", name),
 				Tags:           tags,
 				Context: map[string]string{
 					"host": hostname,
