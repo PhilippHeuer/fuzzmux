@@ -165,8 +165,8 @@ func applyWindows(windows []gotmux.Window, add []config.Window, baseIndex int, s
 
 func expandCommand(option *provider.Option, command string) string {
 	command = expandPlaceholders(command, "name", option.Name)
-	command = expandPlaceholders(command, "display-name", option.DisplayName)
-	command = expandPlaceholders(command, "start-directory", option.StartDirectory)
+	command = expandPlaceholders(command, "displayName", option.DisplayName)
+	command = expandPlaceholders(command, "startDirectory", option.StartDirectory)
 	for k, v := range option.Context {
 		command = expandPlaceholders(command, k, v)
 	}
@@ -177,6 +177,10 @@ func expandCommand(option *provider.Option, command string) string {
 func expandPlaceholders(command string, key string, value string) string {
 	command = strings.ReplaceAll(command, "$"+key, value)
 	command = strings.ReplaceAll(command, "${"+key+"}", value)
+	command = strings.ReplaceAll(command, "$"+strings.ToUpper(key), value)
+	command = strings.ReplaceAll(command, "${"+strings.ToUpper(key)+"}", value)
+	command = strings.ReplaceAll(command, "$"+strings.ToLower(key), value)
+	command = strings.ReplaceAll(command, "${"+strings.ToLower(key)+"}", value)
 
 	return command
 }

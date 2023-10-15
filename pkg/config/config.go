@@ -76,12 +76,12 @@ func ResolvedConfig() (Config, error) {
 		config.WindowTemplates["kubernetes"] = []Window{
 			{
 				Name:     "k9s",
-				Commands: []string{"k9s --logoless --headless --readonly --kubeconfig \"${kubeconfig}\" --namespace \"${namespace}\""},
+				Commands: []string{"k9s --logoless --headless --readonly --kubeconfig \"${kubeConfig}\" --namespace \"${namespace}\""},
 			},
 			{
 				Name: "kubectl",
 				Commands: []string{
-					"export KUBECONFIG=\"${kubeconfig}\"",
+					"export KUBECONFIG=\"${kubeConfig}\"",
 					"kubectl config set-context --current --namespace=\"${namespace}\"",
 				},
 			},

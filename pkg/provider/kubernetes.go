@@ -31,14 +31,19 @@ func (p KubernetesProvider) Options() ([]Option, error) {
 	}
 
 	for _, cluster := range p.Clusters {
+		clusterName := "default"
+		if cluster.Name != "" {
+			clusterName = cluster.Name
+		}
+
 		// read config
-		config, err := clientcmd.BuildConfigFromFlags("", cluster.KubeConfig)
+		conf, err := clientcmd.BuildConfigFromFlags("", cluster.KubeConfig)
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse kubeconfig: %w", err)
 		}
 
 		// create client
-		client, err := kubernetes.NewForConfig(config)
+		client, err := kubernetes.NewForConfig(conf)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create client from config: %w", err)
 		}
@@ -62,11 +67,14 @@ func (p KubernetesProvider) Options() ([]Option, error) {
 				Id:             item.GetName(),
 				DisplayName:    displayName,
 				Name:           item.GetName(),
-				StartDirectory: filepath.Join(homeDir, "fuzzmux", "k8s", item.GetName()),
+				StartDirectory: filepath.Join(homeDir, "fuzzmux", "k8s", clusterName, item.GetName()),
 				Tags:           cluster.Tags,
 				Context: map[string]string{
-					"kubeconfig": cluster.KubeConfig,
-					"namespace":  item.GetName(),
+					"clusterName": clusterName,
+					"clusterHost": conf.Host,
+					"clusterUser": conf.Username,
+					"kubeConfig":  cluster.KubeConfig,
+					"namespace":   item.GetName(),
 				},
 			})
 		}

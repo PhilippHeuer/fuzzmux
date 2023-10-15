@@ -118,7 +118,33 @@ func FuzzyFinder(options []Option) (*Option, error) {
 				return ""
 			}
 
-			return fmt.Sprintf("%s\n\nProvider: %s\nDirectory: %s\nTags: %s\n", options[i].DisplayName, options[i].ProviderName, options[i].StartDirectory, strings.Join(options[i].Tags, ", "))
+			var builder strings.Builder
+			builder.WriteString(options[i].DisplayName + "\n\n")
+			builder.WriteString("Provider: " + options[i].ProviderName + "\n")
+			if options[i].StartDirectory != "" {
+				builder.WriteString("Directory: " + options[i].StartDirectory + "\n")
+			}
+			if len(options[i].Tags) > 0 {
+				builder.WriteString("Tags: " + strings.Join(options[i].Tags, ", ") + "\n")
+			}
+
+			// k8s, openshift
+			if options[i].Context["clusterName"] != "" {
+				builder.WriteString("K8S Cluster Name: " + options[i].Context["clusterName"] + "\n")
+			}
+			if options[i].Context["clusterHost"] != "" {
+				builder.WriteString("K8S Cluster API: " + options[i].Context["clusterHost"] + "\n")
+			}
+			if options[i].Context["clusterUser"] != "" {
+				builder.WriteString("K8S Cluster User: " + options[i].Context["clusterUser"] + "\n")
+			}
+
+			// free-text description
+			if options[i].Context["description"] != "" {
+				builder.WriteString("\n\n" + options[i].Context["description"] + "\n")
+			}
+
+			return builder.String()
 		}),
 	)
 	if err != nil {
