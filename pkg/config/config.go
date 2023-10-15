@@ -56,7 +56,7 @@ func ResolvedConfig() (Config, error) {
 		config.WindowTemplates["ssh"] = []Window{
 			{
 				Name:     "bash",
-				Commands: []string{"ssh ${name}"},
+				Commands: []string{"exec ssh ${name}"},
 			},
 		}
 	}
@@ -76,7 +76,7 @@ func ResolvedConfig() (Config, error) {
 		config.WindowTemplates["kubernetes"] = []Window{
 			{
 				Name:     "k9s",
-				Commands: []string{"k9s --logoless --headless --readonly --kubeconfig \"${kubeConfig}\" --namespace \"${namespace}\""},
+				Commands: []string{"exec k9s --logoless --headless --readonly --kubeconfig \"${kubeConfig}\" --namespace \"${namespace}\""},
 			},
 			{
 				Name: "kubectl",
