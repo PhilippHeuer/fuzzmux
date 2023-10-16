@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/PhilippHeuer/tmux-tms/pkg/util"
 	"github.com/kevinburke/ssh_config"
 	"github.com/rs/zerolog/log"
 )
@@ -19,12 +20,6 @@ func (p SSHProvider) Name() string {
 
 func (p SSHProvider) Options() ([]Option, error) {
 	var options []Option
-
-	// get home directory
-	homeDir, err := os.UserHomeDir()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get user home directory: %w", err)
-	}
 
 	// parse ssh config
 	f, _ := os.Open(filepath.Join(os.Getenv("HOME"), ".ssh", "config"))
@@ -61,7 +56,7 @@ func (p SSHProvider) Options() ([]Option, error) {
 				Id:             name,
 				DisplayName:    fmt.Sprintf("%s [%s%s]", name, user, hostname),
 				Name:           name,
-				StartDirectory: filepath.Join(homeDir, "fuzzmux", "ssh", name),
+				StartDirectory: filepath.Join(util.GetHomeDir(), "fuzzmux", "ssh", name),
 				Tags:           tags,
 				Context: map[string]string{
 					"host": hostname,

@@ -46,11 +46,6 @@ func GetProviders(config config.Config) []Provider {
 			Clusters: config.KubernetesProvider.Clusters,
 		})
 	}
-	if config.OpenShiftProvider != nil {
-		providers = append(providers, OpenShiftProvider{
-			Clusters: config.OpenShiftProvider.Clusters,
-		})
-	}
 
 	return providers
 }
@@ -137,6 +132,9 @@ func FuzzyFinder(options []Option) (*Option, error) {
 			}
 			if options[i].Context["clusterUser"] != "" {
 				builder.WriteString("K8S Cluster User: " + options[i].Context["clusterUser"] + "\n")
+			}
+			if options[i].Context["clusterType"] != "" {
+				builder.WriteString("K8S Cluster Type: " + options[i].Context["clusterType"] + "\n")
 			}
 
 			// free-text description

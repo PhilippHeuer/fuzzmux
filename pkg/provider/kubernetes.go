@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/PhilippHeuer/tmux-tms/pkg/config"
+	"github.com/PhilippHeuer/tmux-tms/pkg/util"
+	projectsv1 "github.com/openshift/client-go/project/clientset/versioned/typed/project/v1"
 	"github.com/rs/zerolog/log"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -24,60 +26,21 @@ func (p KubernetesProvider) Name() string {
 func (p KubernetesProvider) Options() ([]Option, error) {
 	var options []Option
 
-	// get home directory
-	homeDir, homeErr := os.UserHomeDir()
-	if homeErr != nil {
-		return nil, fmt.Errorf("failed to get user home directory: %w", homeErr)
-	}
-
 	for _, cluster := range p.Clusters {
-		clusterName := "default"
-		if cluster.Name != "" {
-			clusterName = cluster.Name
+		if cluster.OpenShift {
+			opts, err := processOpenShiftCluster(cluster)
+			if err != nil {
+				return nil, err
+			}
+			options = append(options, opts...)
+			continue
 		}
 
-		// read config
-		conf, err := clientcmd.BuildConfigFromFlags("", cluster.KubeConfig)
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse kubeconfig: %w", err)
-		}
-
-		// create client
-		client, err := kubernetes.NewForConfig(conf)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create client from config: %w", err)
-		}
-
-		// list namespaces
-		list, err := client.CoreV1().Namespaces().List(context.Background(), v1.ListOptions{})
+		opts, err := processKubernetesCluster(cluster)
 		if err != nil {
 			return nil, err
 		}
-
-		// add namespaces
-		for _, item := range list.Items {
-			displayName := item.GetName()
-			if cluster.Name != "" {
-				displayName = fmt.Sprintf("%s @ %s", displayName, cluster.Name)
-			}
-
-			// add option
-			options = append(options, Option{
-				ProviderName:   p.Name(),
-				Id:             item.GetName(),
-				DisplayName:    displayName,
-				Name:           item.GetName(),
-				StartDirectory: filepath.Join(homeDir, "fuzzmux", "k8s", clusterName, item.GetName()),
-				Tags:           cluster.Tags,
-				Context: map[string]string{
-					"clusterName": clusterName,
-					"clusterHost": conf.Host,
-					"clusterUser": conf.Username,
-					"kubeConfig":  cluster.KubeConfig,
-					"namespace":   item.GetName(),
-				},
-			})
-		}
+		options = append(options, opts...)
 	}
 
 	return options, nil
@@ -112,4 +75,117 @@ func (p KubernetesProvider) SelectOption(option *Option) error {
 	}
 
 	return nil
+}
+
+func processKubernetesCluster(cluster config.KubernetesCluster) (options []Option, err error) {
+	clusterName := "default"
+	if cluster.Name != "" {
+		clusterName = cluster.Name
+	}
+
+	// read config
+	conf, err := clientcmd.BuildConfigFromFlags("", cluster.KubeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse kubeconfig: %w", err)
+	}
+
+	// create client
+	client, err := kubernetes.NewForConfig(conf)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create client from config: %w", err)
+	}
+
+	// list namespaces
+	list, err := client.CoreV1().Namespaces().List(context.Background(), v1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+
+	// add namespaces
+	for _, item := range list.Items {
+		displayName := item.GetName()
+		if cluster.Name != "" {
+			displayName = fmt.Sprintf("%s @ %s", displayName, cluster.Name)
+		}
+
+		// add option
+		options = append(options, Option{
+			ProviderName:   "kubernetes",
+			Id:             item.GetName(),
+			DisplayName:    displayName,
+			Name:           item.GetName(),
+			StartDirectory: filepath.Join(util.GetHomeDir(), "fuzzmux", "k8s", clusterName, item.GetName()),
+			Tags:           cluster.Tags,
+			Context: map[string]string{
+				"clusterName": clusterName,
+				"clusterHost": conf.Host,
+				"clusterUser": conf.Username,
+				"clusterType": "kubernetes",
+				"kubeConfig":  cluster.KubeConfig,
+				"namespace":   item.GetName(),
+			},
+		})
+	}
+
+	return options, nil
+}
+
+func processOpenShiftCluster(cluster config.KubernetesCluster) (options []Option, err error) {
+	clusterName := "default"
+	if cluster.Name != "" {
+		clusterName = cluster.Name
+	}
+
+	// read config
+	conf, err := clientcmd.BuildConfigFromFlags("", cluster.KubeConfig)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse kubeconfig: %w", err)
+	}
+
+	// create client
+	client, err := projectsv1.NewForConfig(conf)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create client from config: %w", err)
+	}
+
+	// list namespaces
+	list, err := client.Projects().List(context.Background(), v1.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	for _, item := range list.Items {
+		displayName := item.GetName()
+		if item.Annotations["openshift.io/display-name"] != "" {
+			displayName = fmt.Sprintf("[%s] %s", item.GetName(), item.Annotations["openshift.io/display-name"])
+		}
+		if cluster.Name != "" {
+			displayName = fmt.Sprintf("%s @ %s", displayName, cluster.Name)
+		}
+
+		description := ""
+		if item.Annotations["openshift.io/description"] != "" {
+			description = item.Annotations["openshift.io/description"]
+		}
+
+		// add option
+		options = append(options, Option{
+			ProviderName:   "kubernetes",
+			Id:             item.GetName(),
+			DisplayName:    displayName,
+			Name:           item.GetName(),
+			StartDirectory: filepath.Join(util.GetHomeDir(), "fuzzmux", "k8s", clusterName, item.GetName()),
+			Tags:           cluster.Tags,
+			Context: map[string]string{
+				"clusterName": clusterName,
+				"clusterHost": conf.Host,
+				"clusterUser": conf.Username,
+				"clusterType": "openshift",
+				"kubeConfig":  cluster.KubeConfig,
+				"namespace":   item.GetName(),
+				"description": description,
+			},
+		})
+	}
+
+	return options, nil
 }

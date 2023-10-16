@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+
+	"github.com/rs/zerolog/log"
 )
 
 func GetAppDataDir() string {
@@ -27,4 +29,13 @@ func GetAppDataDir() string {
 	}
 
 	return appDataDir
+}
+
+func GetHomeDir() string {
+	homeDir, homeErr := os.UserHomeDir()
+	if homeErr != nil {
+		log.Fatal().Err(homeErr).Msg("failed to get user home directory")
+	}
+
+	return homeDir
 }

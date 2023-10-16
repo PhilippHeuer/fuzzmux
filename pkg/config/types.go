@@ -13,9 +13,6 @@ type Config struct {
 	// KubernetesProvider is the configuration for k8s connections
 	KubernetesProvider *KubernetesProviderConfig `yaml:"kubernetes"`
 
-	// OpenShiftProvider is the configuration for k8s connections
-	OpenShiftProvider *KubernetesProviderConfig `yaml:"openshift"`
-
 	// WindowTemplates is a map of tmux layouts
 	WindowTemplates map[string][]Window `yaml:"window-template"`
 }
@@ -67,6 +64,9 @@ type KubernetesCluster struct {
 
 	// Tags that apply to the cluster
 	Tags []string `yaml:"tags"`
+
+	// OpenShift indicates if this is an OpenShift cluster (default: false)
+	OpenShift bool `yaml:"openshift"`
 
 	// KubeConfig is the absolute path to the kubeconfig file
 	KubeConfig string `yaml:"kubeconfig"`
