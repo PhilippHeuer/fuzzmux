@@ -7,6 +7,7 @@ import (
 
 	"github.com/PhilippHeuer/tmux-tms/pkg/backend"
 	"github.com/PhilippHeuer/tmux-tms/pkg/config"
+	"github.com/PhilippHeuer/tmux-tms/pkg/core/layout"
 	"github.com/PhilippHeuer/tmux-tms/pkg/extensions"
 	"github.com/PhilippHeuer/tmux-tms/pkg/provider"
 	"github.com/mattn/go-colorable"
@@ -137,13 +138,6 @@ func rootCmd() *cobra.Command {
 			}
 			log.Debug().Str("display-name", selected.DisplayName).Str("name", selected.Name).Str("directory", selected.StartDirectory).Interface("context", selected.Context).Msg("selected item")
 
-			// template
-			templateName, _ := cmd.Flags().GetString("template")
-			template, err := config.GetTemplate(conf, templateName, selected.ProviderName)
-			if err != nil {
-				log.Fatal().Err(err).Str("name", templateName).Msg("failed to read template")
-			}
-
 			// call select
 			selectedProvider, err := provider.GetProviderByName(providers, selected.ProviderName)
 			if err != nil {
@@ -154,11 +148,18 @@ func rootCmd() *cobra.Command {
 				log.Fatal().Err(err).Str("provider", selected.ProviderName).Msg("failed to run select")
 			}
 
+			// template
+			templateName, _ := cmd.Flags().GetString("template")
+			template, err := layout.GetLayout(conf, selected, templateName, selected.ProviderName)
+			if err != nil {
+				log.Fatal().Err(err).Str("name", templateName).Msg("failed to read template")
+			}
+
 			// create session or window and attach
 			be := backend.TMUX{}
 			err = be.Run(selected, backend.Opts{
 				SessionName: selected.Name,
-				Windows:     template,
+				Layout:      template,
 				AppendMode:  backend.CreateOrAttachSession,
 				BaseIndex:   conf.TMUXBaseIndex,
 			})

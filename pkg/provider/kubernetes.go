@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/PhilippHeuer/tmux-tms/pkg/config"
-	"github.com/PhilippHeuer/tmux-tms/pkg/util"
+	"github.com/PhilippHeuer/tmux-tms/pkg/core/util"
 	projectsv1 "github.com/openshift/client-go/project/clientset/versioned/typed/project/v1"
 	"github.com/rs/zerolog/log"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"

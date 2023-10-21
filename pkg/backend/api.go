@@ -9,7 +9,7 @@ import (
 
 type Opts struct {
 	SessionName string
-	Windows     []config.Window
+	Layout      config.Layout
 	AppendMode  AppendMode
 	BaseIndex   int
 }

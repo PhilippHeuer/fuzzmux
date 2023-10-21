@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/PhilippHeuer/tmux-tms/pkg/util"
+	"github.com/PhilippHeuer/tmux-tms/pkg/core/util"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 )
@@ -42,47 +42,55 @@ func ResolvedConfig() (Config, error) {
 	}
 
 	// default templates
-	if config.WindowTemplates == nil {
-		config.WindowTemplates = make(map[string][]Window)
+	if config.Layouts == nil {
+		config.Layouts = make(map[string]Layout)
 	}
-	if _, exists := config.WindowTemplates["default"]; !exists {
-		config.WindowTemplates["default"] = []Window{
-			{
-				Name: "bash",
+	if _, exists := config.Layouts["default"]; !exists {
+		config.Layouts["default"] = Layout{
+			Windows: []Window{
+				{
+					Name: "bash",
+				},
 			},
 		}
 	}
-	if _, exists := config.WindowTemplates["ssh"]; !exists {
-		config.WindowTemplates["ssh"] = []Window{
-			{
-				Name:     "bash",
-				Commands: []string{"exec ssh ${name}"},
+	if _, exists := config.Layouts["ssh"]; !exists {
+		config.Layouts["ssh"] = Layout{
+			Windows: []Window{
+				{
+					Name:     "bash",
+					Commands: []string{"exec ssh ${name}"},
+				},
 			},
 		}
 	}
-	if _, exists := config.WindowTemplates["project"]; !exists {
-		config.WindowTemplates["project"] = []Window{
-			{
-				Name:    "bash",
-				Default: true,
-			},
-			{
-				Name:     "nvim",
-				Commands: []string{"nvim +'Telescope find_files hidden=false layout_config={height=0.9}'"},
+	if _, exists := config.Layouts["project"]; !exists {
+		config.Layouts["project"] = Layout{
+			Windows: []Window{
+				{
+					Name:    "bash",
+					Default: true,
+				},
+				{
+					Name:     "nvim",
+					Commands: []string{"nvim +'Telescope find_files hidden=false layout_config={height=0.9}'"},
+				},
 			},
 		}
 	}
-	if _, exists := config.WindowTemplates["kubernetes"]; !exists {
-		config.WindowTemplates["kubernetes"] = []Window{
-			{
-				Name:     "k9s",
-				Commands: []string{"exec k9s --logoless --headless --readonly --kubeconfig \"${kubeConfig}\" --namespace \"${namespace}\""},
-			},
-			{
-				Name: "kubectl",
-				Commands: []string{
-					"export KUBECONFIG=\"${kubeConfig}\"",
-					"kubectl config set-context --current --namespace=\"${namespace}\"",
+	if _, exists := config.Layouts["kubernetes"]; !exists {
+		config.Layouts["kubernetes"] = Layout{
+			Windows: []Window{
+				{
+					Name:     "k9s",
+					Commands: []string{"exec k9s --logoless --headless --readonly --kubeconfig \"${kubeConfig}\" --namespace \"${namespace}\""},
+				},
+				{
+					Name: "kubectl",
+					Commands: []string{
+						"export KUBECONFIG=\"${kubeConfig}\"",
+						"kubectl config set-context --current --namespace=\"${namespace}\"",
+					},
 				},
 			},
 		}

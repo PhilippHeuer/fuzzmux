@@ -47,7 +47,7 @@ func (p TMUX) Run(option *provider.Option, opts Opts) error {
 
 	// create session if it doesn't exist
 	if session == nil {
-		windows, windowIds := applyWindows([]gotmux.Window{}, opts.Windows, opts.BaseIndex, startDirectory)
+		windows, windowIds := applyWindows([]gotmux.Window{}, opts.Layout.Windows, opts.BaseIndex, startDirectory)
 		session = &gotmux.Session{
 			Name:           opts.SessionName,
 			StartDirectory: startDirectory,
@@ -70,7 +70,7 @@ func (p TMUX) Run(option *provider.Option, opts Opts) error {
 		windowCommands = make(map[string][]string)
 
 		// exec commands
-		for i, w := range opts.Windows {
+		for i, w := range opts.Layout.Windows {
 			if len(w.Commands) > 0 {
 				windowCommands[strconv.Itoa(windowIds[i])] = w.Commands
 			}

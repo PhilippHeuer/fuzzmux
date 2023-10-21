@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/PhilippHeuer/tmux-tms/pkg/parser/sshconfig"
-	"github.com/PhilippHeuer/tmux-tms/pkg/util"
+	"github.com/PhilippHeuer/tmux-tms/pkg/core/parser/sshconfig"
+	"github.com/PhilippHeuer/tmux-tms/pkg/core/util"
 	"github.com/rs/zerolog/log"
 )
 

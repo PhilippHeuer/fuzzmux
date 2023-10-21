@@ -13,8 +13,8 @@ type Config struct {
 	// KubernetesProvider is the configuration for k8s connections
 	KubernetesProvider *KubernetesProviderConfig `yaml:"kubernetes"`
 
-	// WindowTemplates is a map of tmux layouts
-	WindowTemplates map[string][]Window `yaml:"window-template"`
+	// Layouts is a map of tmux layouts
+	Layouts map[string]Layout `yaml:"layouts"`
 }
 
 type ProjectProviderConfig struct {
@@ -72,6 +72,14 @@ type KubernetesCluster struct {
 	KubeConfig string `yaml:"kubeconfig"`
 }
 
+type Layout struct {
+	// Windows contains the list of windows
+	Windows []Window `yaml:"windows"`
+
+	// Rules is a list of rules, at least one must match for this layout to be selected
+	Rules []string `yaml:"rules,omitempty"`
+}
+
 type Window struct {
 	// Name of the window
 	Name string `yaml:"name"`
@@ -81,6 +89,9 @@ type Window struct {
 
 	// Default indicates if this window should be selected by default
 	Default bool `yaml:"default,omitempty"`
+
+	// Rules is a list of rules, at least one must match for the window to be created
+	Rules []string `yaml:"rules,omitempty"`
 }
 
 type ProjectDisplayFormat string

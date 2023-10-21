@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/PhilippHeuer/tmux-tms/pkg/config"
-	"github.com/PhilippHeuer/tmux-tms/pkg/lookup"
+	"github.com/PhilippHeuer/tmux-tms/pkg/core/lookup"
 	"github.com/rs/zerolog/log"
 )
 
