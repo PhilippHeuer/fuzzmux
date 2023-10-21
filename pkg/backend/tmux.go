@@ -1,10 +1,9 @@
-package gotmuxutil
+package backend
 
 import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/PhilippHeuer/tmux-tms/pkg/config"
 	"github.com/PhilippHeuer/tmux-tms/pkg/provider"
@@ -14,22 +13,14 @@ import (
 
 var server = new(gotmux.Server)
 
-type Opts struct {
-	SessionName string
-	Windows     []config.Window
-	AppendMode  AppendMode
-	BaseIndex   int
+type TMUX struct {
 }
 
-type AppendMode string
+func (p TMUX) Name() string {
+	return "tmux"
+}
 
-const (
-	CreateOrAttachSession AppendMode = "session"
-	//CreateOrAttachWindow  AppendMode = "rel"
-)
-
-// Run will take the selected option from the provider and apply changes to tmux, taking into account the config for the template.
-func Run(option *provider.Option, opts Opts) error {
+func (p TMUX) Run(option *provider.Option, opts Opts) error {
 	// references
 	var session *gotmux.Session
 	var windowCommands = make(map[string][]string)
@@ -163,24 +154,24 @@ func applyWindows(windows []gotmux.Window, add []config.Window, baseIndex int, s
 	return windows, windowIds
 }
 
-func expandCommand(option *provider.Option, command string) string {
-	command = expandPlaceholders(command, "name", option.Name)
-	command = expandPlaceholders(command, "displayName", option.DisplayName)
-	command = expandPlaceholders(command, "startDirectory", option.StartDirectory)
-	for k, v := range option.Context {
-		command = expandPlaceholders(command, k, v)
-	}
+// ListPanes finds a window by id
+func ListPanes(window gotmux.Window) ([]gotmux.Pane, error) {
+	log.Warn().Str("test", strconv.Itoa(window.Id)).Msg("yo")
 
-	return command
+	return gotmux.ListPanes([]string{"-t", strconv.Itoa(window.Id)})
 }
 
-func expandPlaceholders(command string, key string, value string) string {
-	command = strings.ReplaceAll(command, "$"+key, value)
-	command = strings.ReplaceAll(command, "${"+key+"}", value)
-	command = strings.ReplaceAll(command, "$"+strings.ToUpper(key), value)
-	command = strings.ReplaceAll(command, "${"+strings.ToUpper(key)+"}", value)
-	command = strings.ReplaceAll(command, "$"+strings.ToLower(key), value)
-	command = strings.ReplaceAll(command, "${"+strings.ToLower(key)+"}", value)
+// FindSession finds a session by name
+func FindSession(sessionName string) (*gotmux.Session, error) {
+	sessions, err := server.ListSessions()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list sessions: %w", err)
+	}
+	for _, session := range sessions {
+		if session.Name == sessionName {
+			return &session, nil
+		}
+	}
 
-	return command
+	return nil, nil
 }

@@ -5,9 +5,9 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/PhilippHeuer/tmux-tms/pkg/backend"
 	"github.com/PhilippHeuer/tmux-tms/pkg/config"
 	"github.com/PhilippHeuer/tmux-tms/pkg/extensions"
-	"github.com/PhilippHeuer/tmux-tms/pkg/gotmuxutil"
 	"github.com/PhilippHeuer/tmux-tms/pkg/provider"
 	"github.com/mattn/go-colorable"
 	"github.com/rs/zerolog"
@@ -155,10 +155,11 @@ func rootCmd() *cobra.Command {
 			}
 
 			// create session or window and attach
-			err = gotmuxutil.Run(selected, gotmuxutil.Opts{
+			be := backend.TMUX{}
+			err = be.Run(selected, backend.Opts{
 				SessionName: selected.Name,
 				Windows:     template,
-				AppendMode:  gotmuxutil.CreateOrAttachSession,
+				AppendMode:  backend.CreateOrAttachSession,
 				BaseIndex:   conf.TMUXBaseIndex,
 			})
 			if err != nil {
