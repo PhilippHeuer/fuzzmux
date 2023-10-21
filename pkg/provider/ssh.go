@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/PhilippHeuer/tmux-tms/pkg/parser/sshconfig"
 	"github.com/PhilippHeuer/tmux-tms/pkg/util"
-	"github.com/kevinburke/ssh_config"
 	"github.com/rs/zerolog/log"
 )
 
@@ -22,8 +22,10 @@ func (p SSHProvider) Options() ([]Option, error) {
 	var options []Option
 
 	// parse ssh config
-	f, _ := os.Open(filepath.Join(os.Getenv("HOME"), ".ssh", "config"))
-	sshConfig, _ := ssh_config.Decode(f)
+	sshConfig, err := sshconfig.ParseFile(filepath.Join(os.Getenv("HOME"), ".ssh", "config"))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse ssh config: %w", err)
+	}
 	for _, host := range sshConfig.Hosts {
 		for _, pattern := range host.Patterns {
 			// skip wildcards
