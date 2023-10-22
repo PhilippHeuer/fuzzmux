@@ -85,10 +85,18 @@ type Window struct {
 	Name string `yaml:"name"`
 
 	// Commands that should be executed in the window
-	Commands []string `yaml:"commands,omitempty"`
+	Commands []Command `yaml:"commands,omitempty"`
 
 	// Default indicates if this window should be selected by default
 	Default bool `yaml:"default,omitempty"`
+
+	// Rules is a list of rules, at least one must match for the window to be created
+	Rules []string `yaml:"rules,omitempty"`
+}
+
+type Command struct {
+	// Command that should be executed
+	Command string `yaml:"command"`
 
 	// Rules is a list of rules, at least one must match for the window to be created
 	Rules []string `yaml:"rules,omitempty"`

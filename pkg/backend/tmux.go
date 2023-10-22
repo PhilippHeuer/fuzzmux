@@ -72,7 +72,7 @@ func (p TMUX) Run(option *provider.Option, opts Opts) error {
 		// exec commands
 		for i, w := range opts.Layout.Windows {
 			if len(w.Commands) > 0 {
-				windowCommands[strconv.Itoa(windowIds[i])] = w.Commands
+				windowCommands[strconv.Itoa(windowIds[i])] = config.CommandsAsStringSlice(w.Commands)
 			}
 			if w.Default {
 				defaultWindowId = windowIds[i]

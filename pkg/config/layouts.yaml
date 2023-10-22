@@ -1,0 +1,34 @@
+# default layouts
+layouts:
+  default:
+    windows:
+      - name: sh
+  ssh:
+    windows:
+      - name: ssh
+        default: true
+        commands:
+          - command: exec ssh ${name}
+      - name: sshfs
+        rules:
+          - contains(TAGS, "sftp")
+        commands:
+          - command: mkdir -p ~/mnt/ssh/${name}
+          - command: sshfs -o default_permissions,idmap=user,noatime,follow_symlinks,_netdev,reconnect ${name}:/ ~/mnt/ssh/${name}
+  project:
+    windows:
+      - name: sh
+        default: true
+      - name: nvim
+        commands:
+          - command: nvim +'Telescope find_files hidden=false layout_config={height=0.9}'
+  kubernetes:
+    windows:
+      - name: kubectl
+        default: true
+        commands:
+          - command: export KUBECONFIG="${kubeConfig}"
+          - command: kubectl config set-context --current --namespace="${namespace}"
+      - name: k9s
+        commands:
+          - command: exec k9s --logoless --headless --readonly --kubeconfig "${kubeConfig}" --namespace "${namespace}"

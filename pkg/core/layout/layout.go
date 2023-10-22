@@ -42,5 +42,36 @@ func GetLayout(conf config.Config, selected *provider.Option, templateName strin
 	if !exists {
 		return config.Layout{}, fmt.Errorf("template '%s' not found", templateName)
 	}
+
+	// filter windows and commands
+	template.Windows = FilterWindows(template.Windows, ruleContext)
+
 	return template, nil
+}
+
+func FilterWindows(windows []config.Window, ruleContext map[string]interface{}) []config.Window {
+	var result []config.Window
+
+	for _, window := range windows {
+		if len(window.Rules) == 0 || rules.EvaluateRules(window.Rules, ruleContext) > 0 {
+			// filter commands
+			window.Commands = FilterCommands(window.Commands, ruleContext)
+
+			result = append(result, window)
+		}
+	}
+
+	return result
+}
+
+func FilterCommands(commands []config.Command, ruleContext map[string]interface{}) []config.Command {
+	var result []config.Command
+
+	for _, command := range commands {
+		if len(command.Rules) == 0 || rules.EvaluateRules(command.Rules, ruleContext) > 0 {
+			result = append(result, command)
+		}
+	}
+
+	return result
 }

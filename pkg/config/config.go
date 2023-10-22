@@ -1,7 +1,9 @@
 package config
 
 import (
+	_ "embed"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -13,6 +15,9 @@ import (
 var configDir = filepath.Join(util.GetAppDataDir(), "fuzzmux")
 
 var defaultChecks = []string{".git", ".gitignore", ".hg", ".hgignore", ".svn", ".vscode", ".idea"}
+
+//go:embed layouts.yaml
+var layoutsConfig []byte
 
 func ResolvedConfig() (Config, error) {
 	// load config
@@ -41,58 +46,19 @@ func ResolvedConfig() (Config, error) {
 		config.ProjectProvider.DisplayFormat = BaseName
 	}
 
-	// default templates
+	// load default templates
 	if config.Layouts == nil {
 		config.Layouts = make(map[string]Layout)
 	}
-	if _, exists := config.Layouts["default"]; !exists {
-		config.Layouts["default"] = Layout{
-			Windows: []Window{
-				{
-					Name: "bash",
-				},
-			},
-		}
+
+	var layouts Config
+	err = yaml.Unmarshal(layoutsConfig, &layouts)
+	if err != nil {
+		return Config{}, fmt.Errorf("failed to parse default layouts: %w", err)
 	}
-	if _, exists := config.Layouts["ssh"]; !exists {
-		config.Layouts["ssh"] = Layout{
-			Windows: []Window{
-				{
-					Name:     "bash",
-					Commands: []string{"exec ssh ${name}"},
-				},
-			},
-		}
-	}
-	if _, exists := config.Layouts["project"]; !exists {
-		config.Layouts["project"] = Layout{
-			Windows: []Window{
-				{
-					Name:    "bash",
-					Default: true,
-				},
-				{
-					Name:     "nvim",
-					Commands: []string{"nvim +'Telescope find_files hidden=false layout_config={height=0.9}'"},
-				},
-			},
-		}
-	}
-	if _, exists := config.Layouts["kubernetes"]; !exists {
-		config.Layouts["kubernetes"] = Layout{
-			Windows: []Window{
-				{
-					Name:     "k9s",
-					Commands: []string{"exec k9s --logoless --headless --readonly --kubeconfig \"${kubeConfig}\" --namespace \"${namespace}\""},
-				},
-				{
-					Name: "kubectl",
-					Commands: []string{
-						"export KUBECONFIG=\"${kubeConfig}\"",
-						"kubectl config set-context --current --namespace=\"${namespace}\"",
-					},
-				},
-			},
+	for key, layout := range layouts.Layouts {
+		if _, exists := config.Layouts[key]; !exists {
+			config.Layouts[key] = layout
 		}
 	}
 
@@ -129,4 +95,14 @@ func SaveConfig(config Config) {
 	// save file
 	file, _ := json.MarshalIndent(config, "", " ")
 	_ = os.WriteFile(filepath.Join(configDir, "config.yaml"), file, 0644)
+}
+
+func CommandsAsStringSlice(commands []Command) []string {
+	var result []string
+
+	for _, cmd := range commands {
+		result = append(result, cmd.Command)
+	}
+
+	return result
 }
