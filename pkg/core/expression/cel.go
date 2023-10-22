@@ -2,6 +2,7 @@ package expression
 
 import (
 	"fmt"
+	"os/exec"
 	"reflect"
 	"slices"
 	"strings"
@@ -69,6 +70,20 @@ var (
 				cel.BoolType,
 				cel.BinaryBinding(func(lhs, rhs ref.Val) ref.Val {
 					return types.Bool(strings.HasPrefix(string(lhs.(types.String)), string(rhs.(types.String))))
+				}),
+			),
+		),
+		cel.Function("inPath",
+			cel.Overload("inPath",
+				[]*cel.Type{cel.StringType},
+				cel.BoolType,
+				cel.UnaryBinding(func(key ref.Val) ref.Val {
+					_, err := exec.LookPath(string(key.(types.String)))
+					if err == nil {
+						return types.Bool(true)
+					}
+
+					return types.Bool(false)
 				}),
 			),
 		),
