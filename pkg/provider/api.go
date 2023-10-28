@@ -151,3 +151,9 @@ func FuzzyFinder(options []Option) (*Option, error) {
 
 	return &options[idx], nil
 }
+
+func addTagToOption(option *Option, tag string) {
+	if !slices.Contains(option.Tags, tag) {
+		option.Tags = append(option.Tags, tag)
+	}
+}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/PhilippHeuer/tmux-tms/pkg/config"
 	"github.com/PhilippHeuer/tmux-tms/pkg/core/lookup"
+	"github.com/cidverse/repoanalyzer"
 	"github.com/rs/zerolog/log"
 )
 
@@ -61,6 +62,18 @@ func (p ProjectProvider) OptionsOrCache(maxAge float64) ([]Option, error) {
 }
 
 func (p ProjectProvider) SelectOption(option *Option) error {
+	// run repo analyzer
+	modules := repoanalyzer.AnalyzeProject(option.StartDirectory, option.StartDirectory)
+	for _, m := range modules {
+		// languages
+		for k := range m.Language {
+			addTagToOption(option, "language-"+string(k))
+		}
+
+		// build system
+		addTagToOption(option, "buildsystem-"+string(m.BuildSystem))
+	}
+
 	return nil
 }
 
