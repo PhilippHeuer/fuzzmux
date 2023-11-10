@@ -75,6 +75,7 @@ func GetProvidersByName(providers []Provider, names []string) []Provider {
 // FilterOptions filters the options, showTags are required, hideTags
 func FilterOptions(options []Option, showTags []string, hideTags []string) []Option {
 	var filtered []Option
+	hideTags = append(hideTags, "hidden") // always hide hidden options, used for e.g. git ssh hosts
 
 	for _, o := range options {
 		showTagFound := false
