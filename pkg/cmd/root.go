@@ -5,11 +5,12 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/PhilippHeuer/tmux-tms/pkg/backend"
-	"github.com/PhilippHeuer/tmux-tms/pkg/config"
-	"github.com/PhilippHeuer/tmux-tms/pkg/core/layout"
-	"github.com/PhilippHeuer/tmux-tms/pkg/extensions"
-	"github.com/PhilippHeuer/tmux-tms/pkg/provider"
+	"github.com/PhilippHeuer/fuzzmux/pkg/backend"
+	"github.com/PhilippHeuer/fuzzmux/pkg/config"
+	"github.com/PhilippHeuer/fuzzmux/pkg/core/layout"
+	"github.com/PhilippHeuer/fuzzmux/pkg/extensions"
+	"github.com/PhilippHeuer/fuzzmux/pkg/finder"
+	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
 	"github.com/mattn/go-colorable"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -124,7 +125,7 @@ func rootCmd() *cobra.Command {
 			// fuzzy finder or direct selection
 			var selected *provider.Option
 			if flags.selected == "" {
-				selected, err = provider.FuzzyFinder(options)
+				selected, err = finder.FuzzyFinder("", options)
 				if err != nil {
 					log.Fatal().Err(err).Msg("failed to get selected option")
 				}

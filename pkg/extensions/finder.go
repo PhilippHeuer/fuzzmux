@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/PhilippHeuer/tmux-tms/pkg/provider"
+	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
 )
 
 func OptionsForFinder(mode string, options []provider.Option) error {

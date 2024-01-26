@@ -3,8 +3,8 @@ package provider
 import (
 	"fmt"
 
-	"github.com/PhilippHeuer/tmux-tms/pkg/config"
-	"github.com/PhilippHeuer/tmux-tms/pkg/core/lookup"
+	"github.com/PhilippHeuer/fuzzmux/pkg/config"
+	"github.com/PhilippHeuer/fuzzmux/pkg/core/lookup"
 	"github.com/cidverse/repoanalyzer"
 	"github.com/rs/zerolog/log"
 )

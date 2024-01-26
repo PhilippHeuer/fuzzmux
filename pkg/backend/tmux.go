@@ -5,8 +5,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/PhilippHeuer/tmux-tms/pkg/config"
-	"github.com/PhilippHeuer/tmux-tms/pkg/provider"
+	"github.com/PhilippHeuer/fuzzmux/pkg/config"
+	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
 	gotmux "github.com/jubnzv/go-tmux"
 	"github.com/rs/zerolog/log"
 )

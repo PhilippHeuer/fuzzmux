@@ -3,8 +3,8 @@ package backend
 import (
 	"strings"
 
-	"github.com/PhilippHeuer/tmux-tms/pkg/config"
-	"github.com/PhilippHeuer/tmux-tms/pkg/provider"
+	"github.com/PhilippHeuer/fuzzmux/pkg/config"
+	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
 )
 
 type Opts struct {

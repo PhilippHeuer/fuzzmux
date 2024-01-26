@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/PhilippHeuer/tmux-tms/pkg/config"
+	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/rs/zerolog/log"
 )
 

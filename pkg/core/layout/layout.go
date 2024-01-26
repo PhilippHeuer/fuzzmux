@@ -3,8 +3,8 @@ package layout
 import (
 	"fmt"
 
-	"github.com/PhilippHeuer/tmux-tms/pkg/config"
-	"github.com/PhilippHeuer/tmux-tms/pkg/provider"
+	"github.com/PhilippHeuer/fuzzmux/pkg/config"
+	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
 	"github.com/cidverse/go-rules/pkg/expr"
 	"github.com/rs/zerolog/log"
 )
@@ -25,7 +25,7 @@ func GetLayout(conf config.Config, selected *provider.Option, templateName strin
 	if templateName == "" {
 		log.Debug().Str("template-name", templateName).Interface("layouts", conf.Layouts).Interface("context", ruleContext).Msg("no template specified, auto-detecting")
 		for key, l := range conf.Layouts {
-			if len(l.Rules) > 0 && expr.EvaluateRules(l.Rules, ruleContext) > 0 {
+			if len(l.Rules) > 0 && evalRules(l.Rules, ruleContext) > 0 {
 				templateName = key
 				break
 			}
@@ -53,7 +53,7 @@ func FilterWindows(windows []config.Window, ruleContext map[string]interface{}) 
 	var result []config.Window
 
 	for _, window := range windows {
-		if len(window.Rules) == 0 || expr.EvaluateRules(window.Rules, ruleContext) > 0 {
+		if len(window.Rules) == 0 || evalRules(window.Rules, ruleContext) > 0 {
 			// filter commands
 			window.Commands = FilterCommands(window.Commands, ruleContext)
 
@@ -68,10 +68,19 @@ func FilterCommands(commands []config.Command, ruleContext map[string]interface{
 	var result []config.Command
 
 	for _, command := range commands {
-		if len(command.Rules) == 0 || expr.EvaluateRules(command.Rules, ruleContext) > 0 {
+		if len(command.Rules) == 0 || evalRules(command.Rules, ruleContext) > 0 {
 			result = append(result, command)
 		}
 	}
 
 	return result
+}
+
+func evalRules(rules []string, ctx map[string]interface{}) int {
+	count, err := expr.EvaluateRules(rules, ctx)
+	if err != nil {
+		log.Warn().Interface("rules", rules).Interface("context", ctx).Msg("failed to evaluate rules")
+		return 0
+	}
+	return count
 }

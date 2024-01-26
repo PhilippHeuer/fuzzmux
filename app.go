@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/PhilippHeuer/tmux-tms/pkg/cmd"
+	"github.com/PhilippHeuer/fuzzmux/pkg/cmd"
 	"github.com/rs/zerolog/log"
 )
 

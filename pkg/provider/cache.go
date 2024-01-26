@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/PhilippHeuer/tmux-tms/pkg/core/util"
+	"github.com/PhilippHeuer/fuzzmux/pkg/core/util"
 )
 
 var configDir = filepath.Join(util.GetAppDataDir(), "fuzzmux")

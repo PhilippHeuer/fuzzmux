@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/PhilippHeuer/tmux-tms/pkg/core/util"
+	"github.com/PhilippHeuer/fuzzmux/pkg/core/util"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 )
