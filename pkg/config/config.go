@@ -71,7 +71,7 @@ func ResolvedConfig() (Config, error) {
 func LoadConfig() (Config, error) {
 	var config Config
 
-	file, err := os.Open(filepath.Join(configDir, "config.yaml"))
+	file, err := os.Open(filepath.Join(configDir, "fuzzmux.yaml"))
 	if err != nil {
 		return Config{}, err
 	}
@@ -94,7 +94,7 @@ func SaveConfig(config Config) {
 
 	// save file
 	file, _ := json.MarshalIndent(config, "", " ")
-	_ = os.WriteFile(filepath.Join(configDir, "config.yaml"), file, 0644)
+	_ = os.WriteFile(filepath.Join(configDir, "fuzzmux.yaml"), file, 0644)
 }
 
 func CommandsAsStringSlice(commands []Command) []string {

@@ -12,8 +12,6 @@ func GetAppDataDir() string {
 	var appDataDir string
 
 	switch runtime.GOOS {
-	case "windows":
-		appDataDir, _ = os.UserConfigDir()
 	case "darwin":
 		appDataDir, _ = os.UserHomeDir()
 		appDataDir = filepath.Join(appDataDir, "Library", "Application Support")
@@ -25,6 +23,28 @@ func GetAppDataDir() string {
 		} else {
 			// Default to home directory + .config
 			appDataDir, _ = os.UserConfigDir()
+		}
+	}
+
+	return appDataDir
+}
+
+func GetAppStateDir() string {
+	var appDataDir string
+
+	switch runtime.GOOS {
+	case "darwin":
+		appDataDir, _ = os.UserHomeDir()
+		appDataDir = filepath.Join(appDataDir, "Library", "Application Support")
+	default:
+		// On Linux and other platforms, follow XDG Base Directory Specification
+		// Use XDG_DATA_HOME if set, otherwise fallback to the default
+		if dataHome := os.Getenv("XDG_DATA_HOME"); dataHome != "" {
+			appDataDir = dataHome
+		} else {
+			// Default to home directory + .local/state
+			appDataDir, _ = os.UserHomeDir()
+			appDataDir = filepath.Join(appDataDir, ".local", "state")
 		}
 	}
 

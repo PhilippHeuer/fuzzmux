@@ -10,7 +10,7 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/core/util"
 )
 
-var configDir = filepath.Join(util.GetAppDataDir(), "fuzzmux")
+var dataDir = filepath.Join(util.GetAppStateDir(), "fuzzmux")
 
 type OptionsCache struct {
 	ProviderName string
@@ -28,7 +28,12 @@ func SaveOptions(providerName string, options []Option) error {
 		return fmt.Errorf("failed to marshal options: %w", err)
 	}
 
-	err = os.WriteFile(filepath.Join(configDir, fmt.Sprintf("provider-%s.json", providerName)), jsonData, 0644)
+	err = os.MkdirAll(dataDir, 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create data directory: %w", err)
+	}
+
+	err = os.WriteFile(filepath.Join(dataDir, fmt.Sprintf("provider-%s.json", providerName)), jsonData, 0644)
 	if err != nil {
 		return fmt.Errorf("failed to write options: %w", err)
 	}
@@ -39,7 +44,7 @@ func SaveOptions(providerName string, options []Option) error {
 func LoadOptions(providerName string, maxAge float64) ([]Option, error) {
 	var optionsCache OptionsCache
 
-	jsonData, err := os.ReadFile(filepath.Join(configDir, fmt.Sprintf("provider-%s.json", providerName)))
+	jsonData, err := os.ReadFile(filepath.Join(dataDir, fmt.Sprintf("provider-%s.json", providerName)))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read options: %w", err)
 	}

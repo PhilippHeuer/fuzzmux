@@ -24,38 +24,6 @@ set -g exit-empty off
 set -g exit-unattached off
 ```
 
-## config
-
-### schema support
-
-Add the following to your config to enable schema support:
-
-```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/PhilippHeuer/fuzzmux/main/configschema/v1.json
-```
-
-### project provider
-
-```yaml
-project:
-  enabled: true
-  display-format: rel
-  directories:
-    - path: ~/projects/Golang
-      depth: 1
-    - path: ~/projects/Rust
-      depth: 1
-    - path: ~/projects/Java
-      depth: 1
-```
-
-### ssh provider
-
-```yaml
-ssh:
-  enabled: true
-```
-
 ## Usage
 
 | Command                 | Description                                                                   |
@@ -85,6 +53,38 @@ The command can contain placeholders, e.g.:
 - `${name}` - name of the option (for ssh this would be the server alias -> `ssh ${name}`)
 - `${display-name}` - display name of the option
 - `${start-directory}` - start directory of the option
+
+## config
+
+The configuration is stored in `~/.config/fuzzmux/fuzzmux.yaml`.
+
+Add the following to your config to enable schema support:
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/PhilippHeuer/fuzzmux/main/configschema/v1.json
+```
+
+### project provider
+
+```yaml
+project:
+  enabled: true
+  display-format: rel
+  directories:
+    - path: ~/projects/Golang
+      depth: 1
+    - path: ~/projects/Rust
+      depth: 1
+    - path: ~/projects/Java
+      depth: 1
+```
+
+### ssh provider
+
+```yaml
+ssh:
+  enabled: true
+```
 
 ## License
 
