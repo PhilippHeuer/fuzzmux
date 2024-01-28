@@ -13,6 +13,8 @@ import (
 
 var server = new(gotmux.Server)
 
+var tmuxBaseIndex = 1
+
 type TMUX struct {
 }
 
@@ -20,11 +22,16 @@ func (p TMUX) Name() string {
 	return "tmux"
 }
 
+func (p TMUX) Check() bool {
+	_, ok := os.LookupEnv("TMUX")
+	return ok
+}
+
 func (p TMUX) Run(option *provider.Option, opts Opts) error {
 	// references
 	var session *gotmux.Session
 	var windowCommands = make(map[string][]string)
-	var defaultWindowId = opts.BaseIndex
+	var defaultWindowId = tmuxBaseIndex
 
 	// resolve vars
 	startDirectory := os.ExpandEnv(option.StartDirectory)
@@ -47,7 +54,7 @@ func (p TMUX) Run(option *provider.Option, opts Opts) error {
 
 	// create session if it doesn't exist
 	if session == nil {
-		windows, windowIds := applyWindows([]gotmux.Window{}, opts.Layout.Windows, opts.BaseIndex, startDirectory)
+		windows, windowIds := applyWindows([]gotmux.Window{}, opts.Layout.Apps, tmuxBaseIndex, startDirectory)
 		session = &gotmux.Session{
 			Name:           opts.SessionName,
 			StartDirectory: startDirectory,
@@ -70,7 +77,7 @@ func (p TMUX) Run(option *provider.Option, opts Opts) error {
 		windowCommands = make(map[string][]string)
 
 		// exec commands
-		for i, w := range opts.Layout.Windows {
+		for i, w := range opts.Layout.Apps {
 			if len(w.Commands) > 0 {
 				windowCommands[strconv.Itoa(windowIds[i])] = config.CommandsAsStringSlice(w.Commands)
 			}
@@ -116,7 +123,7 @@ func (p TMUX) Run(option *provider.Option, opts Opts) error {
 }
 
 // applyWindows will add missing windows to the session
-func applyWindows(windows []gotmux.Window, add []config.Window, baseIndex int, startDirectory string) ([]gotmux.Window, []int) {
+func applyWindows(windows []gotmux.Window, add []config.App, baseIndex int, startDirectory string) ([]gotmux.Window, []int) {
 	var windowIds []int
 
 	// create windows if none exist

@@ -1,0 +1,200 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "number",
+      "enum": [
+        1
+      ],
+      "default": 1
+    },
+    "project": {
+      "$ref": "#/definitions/projectProviderConfig"
+    },
+    "ssh": {
+      "$ref": "#/definitions/sshProviderConfig"
+    },
+    "kubernetes": {
+      "$ref": "#/definitions/kubernetesProviderConfig"
+    },
+    "layouts": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/layout"
+      }
+    }
+  },
+  "definitions": {
+    "projectProviderConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "directories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/sourceDirectory"
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "display-format": {
+          "enum": ["absolute", "relative", "base"]
+        }
+      },
+      "required": ["enabled", "directories", "checks", "display-format"]
+    },
+    "sourceDirectory": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "depth": {
+          "type": "integer"
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["path", "depth", "exclude", "tags"]
+    },
+    "sshProviderConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "mode": {
+          "enum": ["session", "window"]
+        }
+      },
+      "required": ["enabled", "mode"]
+    },
+    "kubernetesProviderConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "clusters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/kubernetesCluster"
+          }
+        }
+      },
+      "required": ["enabled", "clusters"]
+    },
+    "kubernetesCluster": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Tags to identify the cluster, can be used to filter results",
+          "items": {
+            "type": "string"
+          }
+        },
+        "openshift": {
+          "type": "boolean",
+          "description": "Whether the cluster is an OpenShift cluster",
+          "default": false
+        },
+        "kubeconfig": {
+          "type": "string",
+          "description": "The path to the kubeconfig file"
+        }
+      },
+      "required": ["name", "tags", "openshift", "kubeconfig"]
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "apps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/app"
+          }
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "clear-workspace": {
+          "type": "boolean",
+          "description": "Whether to clear the workspace before starting the apps",
+          "default": false
+        }
+      },
+      "required": ["apps"]
+    },
+    "app": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "commands": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/command"
+          }
+        },
+        "default": {
+          "type": "boolean"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "gui": {
+          "type": "boolean",
+          "description": "Whether the app has a graphical user interface"
+        },
+        "group": {
+          "type": "string",
+          "description": "The group the app belongs to, only one app in a group can be started"
+        }
+      },
+      "required": ["name"]
+    },
+    "command": {
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["command"]
+    }
+  }
+}

@@ -1,9 +1,6 @@
 package config
 
 type Config struct {
-	// TmuxBaseIndex is the base index (base-index in your tmux.conf)
-	TMUXBaseIndex int `yaml:"tmux-base-index"`
-
 	// ProjectProvider is the configuration for projects
 	ProjectProvider *ProjectProviderConfig `yaml:"project"`
 
@@ -73,14 +70,17 @@ type KubernetesCluster struct {
 }
 
 type Layout struct {
-	// Windows contains the list of windows
-	Windows []Window `yaml:"windows"`
+	// Apps contains the list of apps that should be started
+	Apps []App `yaml:"apps"`
 
 	// Rules is a list of rules, at least one must match for this layout to be selected
 	Rules []string `yaml:"rules,omitempty"`
+
+	// ClearWorkspace indicates if the workspace should be cleared before starting the applications (only applies to window managers, default: false)
+	ClearWorkspace bool `yaml:"clear-workspace,omitempty"`
 }
 
-type Window struct {
+type App struct {
 	// Name of the window
 	Name string `yaml:"name"`
 
@@ -92,6 +92,12 @@ type Window struct {
 
 	// Rules is a list of rules, at least one must match for the window to be created
 	Rules []string `yaml:"rules,omitempty"`
+
+	// GUI indicates that this app is a GUI application (will not be started in a terminal)
+	GUI bool `yaml:"gui,omitempty"`
+
+	// Group a app belongs to, only the first matching option within a group will be used
+	Group string `yaml:"group,omitempty"`
 }
 
 type Command struct {

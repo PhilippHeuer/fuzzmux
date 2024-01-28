@@ -1,10 +1,10 @@
 # default layouts
 layouts:
   default:
-    windows:
+    apps:
       - name: sh
   ssh:
-    windows:
+    apps:
       - name: ssh
         default: true
         commands:
@@ -13,10 +13,10 @@ layouts:
         rules:
           - inPath("sshfs") && contains(TAGS, "sftp")
         commands:
-          - command: mkdir -p ~/mnt/ssh/${name}
+          - command: mkdir -p "~/mnt/ssh/${name}"
           - command: sshfs -o default_permissions,idmap=user,noatime,follow_symlinks,_netdev,reconnect ${name}:/ ~/mnt/ssh/${name}
   project:
-    windows:
+    apps:
       - name: sh
         default: true
       - name: nvim
@@ -24,13 +24,14 @@ layouts:
           - inPath("nvim")
         commands:
           - command: nvim +'Telescope find_files hidden=false layout_config={height=0.9}'
+        group: editor
       - name: git
         rules:
           - inPath("lazygit")
         commands:
           - command: lazygit
   kubernetes:
-    windows:
+    apps:
       - name: kubectl
         default: true
         commands:

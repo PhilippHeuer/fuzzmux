@@ -26,6 +26,14 @@ set -g exit-unattached off
 
 ## config
 
+### schema support
+
+Add the following to your config to enable schema support:
+
+```yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/PhilippHeuer/fuzzmux/main/configschema/v1.json
+```
+
 ### project provider
 
 ```yaml

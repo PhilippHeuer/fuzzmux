@@ -2,6 +2,7 @@ package layout
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
@@ -44,20 +45,30 @@ func GetLayout(conf config.Config, selected *provider.Option, templateName strin
 	}
 
 	// filter windows and commands
-	template.Windows = FilterWindows(template.Windows, ruleContext)
+	template.Apps = FilterApps(template.Apps, ruleContext)
 
 	return template, nil
 }
 
-func FilterWindows(windows []config.Window, ruleContext map[string]interface{}) []config.Window {
-	var result []config.Window
+func FilterApps(apps []config.App, ruleContext map[string]interface{}) []config.App {
+	var result []config.App
 
-	for _, window := range windows {
-		if len(window.Rules) == 0 || evalRules(window.Rules, ruleContext) > 0 {
+	var groupIDs []string
+	for _, app := range apps {
+		if len(app.Rules) == 0 || evalRules(app.Rules, ruleContext) > 0 {
+			// groupID check
+			if app.Group != "" {
+				if slices.Contains(groupIDs, app.Group) {
+					continue
+				}
+
+				groupIDs = append(groupIDs, app.Group)
+			}
+
 			// filter commands
-			window.Commands = FilterCommands(window.Commands, ruleContext)
+			app.Commands = FilterCommands(app.Commands, ruleContext)
 
-			result = append(result, window)
+			result = append(result, app)
 		}
 	}
 

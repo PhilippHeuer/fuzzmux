@@ -125,7 +125,7 @@ func rootCmd() *cobra.Command {
 			// fuzzy finder or direct selection
 			var selected *provider.Option
 			if flags.selected == "" {
-				selected, err = finder.FuzzyFinder("", options)
+				selected, err = finder.FuzzyFinder(os.Getenv("TMX_FINDER"), options)
 				if err != nil {
 					log.Fatal().Err(err).Msg("failed to get selected option")
 				}
@@ -157,12 +157,14 @@ func rootCmd() *cobra.Command {
 			}
 
 			// create session or window and attach
-			be := backend.TMUX{}
+			be, err := backend.ChooseBackend("")
+			if err != nil {
+				log.Fatal().Err(err).Msg("no suitable backend found")
+			}
 			err = be.Run(selected, backend.Opts{
 				SessionName: selected.Name,
 				Layout:      template,
 				AppendMode:  backend.CreateOrAttachSession,
-				BaseIndex:   conf.TMUXBaseIndex,
 			})
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed to modify tmux state")

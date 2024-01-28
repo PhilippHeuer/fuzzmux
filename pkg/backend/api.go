@@ -11,7 +11,6 @@ type Opts struct {
 	SessionName string
 	Layout      config.Layout
 	AppendMode  AppendMode
-	BaseIndex   int
 }
 
 type AppendMode string
@@ -22,6 +21,7 @@ const (
 
 type Provider interface {
 	Name() string
+	Check() bool
 	Run(option *provider.Option, opts Opts) error
 }
 
