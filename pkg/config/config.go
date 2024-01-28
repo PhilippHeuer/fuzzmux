@@ -69,9 +69,25 @@ func ResolvedConfig() (Config, error) {
 }
 
 func LoadConfig() (Config, error) {
+	// main config
+	config, err := loadConfig(filepath.Join(configDir, "fuzzmux.yaml"))
+	if err != nil {
+		return Config{}, err
+	}
+
+	// user config
+	userConfig, err := loadConfig(filepath.Join(configDir, "fuzzmux.user.yaml"))
+	if err == nil {
+		config = MergeConfig(config, userConfig)
+	}
+
+	return config, nil
+}
+
+func loadConfig(path string) (Config, error) {
 	var config Config
 
-	file, err := os.Open(filepath.Join(configDir, "fuzzmux.yaml"))
+	file, err := os.Open(path)
 	if err != nil {
 		return Config{}, err
 	}
@@ -105,4 +121,26 @@ func CommandsAsStringSlice(commands []Command) []string {
 	}
 
 	return result
+}
+
+func MergeConfig(a Config, b Config) Config {
+	// overwrite providers
+	if b.SSHProvider != nil {
+		a.SSHProvider = b.SSHProvider
+	}
+	if b.ProjectProvider != nil {
+		a.ProjectProvider = b.ProjectProvider
+	}
+	if b.KubernetesProvider != nil {
+		a.KubernetesProvider = b.KubernetesProvider
+	}
+
+	// merge layouts
+	if b.Layouts != nil {
+		for key, layout := range b.Layouts {
+			a.Layouts[key] = layout
+		}
+	}
+
+	return a
 }
