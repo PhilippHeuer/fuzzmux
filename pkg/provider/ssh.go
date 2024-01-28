@@ -58,7 +58,7 @@ func (p SSHProvider) Options() ([]Option, error) {
 				Id:             name,
 				DisplayName:    fmt.Sprintf("%s [%s%s]", name, user, hostname),
 				Name:           name,
-				StartDirectory: filepath.Join(util.GetHomeDir(), "fuzzmux", "ssh", name),
+				StartDirectory: filepath.Join(util.GetHomeDir()),
 				Tags:           tags,
 				Context: map[string]string{
 					"host": hostname,
