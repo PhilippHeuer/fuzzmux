@@ -45,10 +45,11 @@
           }
         },
         "display-format": {
-          "enum": ["absolute", "relative", "base"]
+          "enum": ["absolute", "relative", "base"],
+          "default": "base"
         }
       },
-      "required": ["enabled", "directories", "checks", "display-format"]
+      "required": ["enabled", "directories"]
     },
     "sourceDirectory": {
       "type": "object",
@@ -72,7 +73,7 @@
           }
         }
       },
-      "required": ["path", "depth", "exclude", "tags"]
+      "required": ["path"]
     },
     "sshProviderConfig": {
       "type": "object",
@@ -124,7 +125,7 @@
           "description": "The path to the kubeconfig file"
         }
       },
-      "required": ["name", "tags", "openshift", "kubeconfig"]
+      "required": ["name", "kubeconfig"]
     },
     "layout": {
       "type": "object",

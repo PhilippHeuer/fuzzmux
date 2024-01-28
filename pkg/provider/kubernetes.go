@@ -83,8 +83,14 @@ func processKubernetesCluster(cluster config.KubernetesCluster) (options []Optio
 		clusterName = cluster.Name
 	}
 
+	// file exists?
+	configFile := util.ResolvePath(cluster.KubeConfig)
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		return nil, fmt.Errorf("kubeconfig file does not exist: %w", err)
+	}
+
 	// read config
-	conf, err := clientcmd.BuildConfigFromFlags("", cluster.KubeConfig)
+	conf, err := clientcmd.BuildConfigFromFlags("", configFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse kubeconfig: %w", err)
 	}
@@ -121,7 +127,7 @@ func processKubernetesCluster(cluster config.KubernetesCluster) (options []Optio
 				"clusterHost": conf.Host,
 				"clusterUser": conf.Username,
 				"clusterType": "kubernetes",
-				"kubeConfig":  cluster.KubeConfig,
+				"kubeConfig":  configFile,
 				"namespace":   item.GetName(),
 			},
 		})
@@ -136,8 +142,14 @@ func processOpenShiftCluster(cluster config.KubernetesCluster) (options []Option
 		clusterName = cluster.Name
 	}
 
+	// file exists?
+	configFile := util.ResolvePath(cluster.KubeConfig)
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+		return nil, fmt.Errorf("kubeconfig file does not exist: %w", err)
+	}
+
 	// read config
-	conf, err := clientcmd.BuildConfigFromFlags("", cluster.KubeConfig)
+	conf, err := clientcmd.BuildConfigFromFlags("", configFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse kubeconfig: %w", err)
 	}
@@ -180,7 +192,7 @@ func processOpenShiftCluster(cluster config.KubernetesCluster) (options []Option
 				"clusterHost": conf.Host,
 				"clusterUser": conf.Username,
 				"clusterType": "openshift",
-				"kubeConfig":  cluster.KubeConfig,
+				"kubeConfig":  configFile,
 				"namespace":   item.GetName(),
 				"description": description,
 			},

@@ -59,3 +59,15 @@ func GetHomeDir() string {
 
 	return homeDir
 }
+
+func ResolvePath(input string) string {
+	// expand ~
+	if input[0] == '~' {
+		input = filepath.Join(GetHomeDir(), input[1:])
+	}
+
+	// env vars
+	input = os.ExpandEnv(input)
+
+	return input
+}

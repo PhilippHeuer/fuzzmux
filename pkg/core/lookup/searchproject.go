@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
+	"github.com/PhilippHeuer/fuzzmux/pkg/core/util"
 	"github.com/rs/zerolog/log"
 )
 
@@ -32,6 +33,8 @@ func ScanForProjects(sources []config.SourceDirectory, checks []string) ([]Proje
 	)
 
 	for _, source := range sources {
+		source.Directory = util.ResolvePath(source.Directory)
+
 		wg.Add(1)
 		go func(source config.SourceDirectory) {
 			defer wg.Done()
