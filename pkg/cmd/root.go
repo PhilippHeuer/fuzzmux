@@ -125,7 +125,7 @@ func rootCmd() *cobra.Command {
 			// fuzzy finder or direct selection
 			var selected *provider.Option
 			if flags.selected == "" {
-				selected, err = finder.FuzzyFinder(os.Getenv("TMX_FINDER"), options)
+				selected, err = finder.FuzzyFinder(conf.Finder.Executable, options, conf.Finder.Preview)
 				if err != nil {
 					log.Fatal().Err(err).Msg("failed to get selected option")
 				}
@@ -183,6 +183,7 @@ func rootCmd() *cobra.Command {
 	cmd.PersistentFlags().StringSliceVar(&flags.showTags, "show-tags", []string{}, "only show elements with the given tags, all others will be hidden")
 	cmd.PersistentFlags().StringSliceVar(&flags.hideTags, "hide-tags", []string{}, "tags to hide from the fuzzy finder")
 
+	cmd.AddCommand(previewCmd())
 	cmd.AddCommand(versionCmd())
 	cmd.AddCommand(killCmd())
 	cmd.AddCommand(killAllCmd())

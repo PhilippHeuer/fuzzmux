@@ -12,6 +12,17 @@ type Config struct {
 
 	// Layouts is a map of tmux layouts
 	Layouts map[string]Layout `yaml:"layouts"`
+
+	// Finder
+	Finder *FinderConfig `yaml:"finder"`
+}
+
+type FinderConfig struct {
+	// Executable is the fuzzy finder, e.g. "fzf" or "embedded"
+	Executable string `yaml:"executable"`
+
+	// Preview indicates if the preview should be shown
+	Preview bool `yaml:"preview"`
 }
 
 type ProjectProviderConfig struct {

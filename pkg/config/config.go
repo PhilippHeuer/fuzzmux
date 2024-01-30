@@ -26,6 +26,14 @@ func ResolvedConfig() (Config, error) {
 		return Config{}, err
 	}
 
+	// finder
+	if config.Finder == nil {
+		config.Finder = &FinderConfig{
+			Executable: "",
+			Preview:    true,
+		}
+	}
+
 	// ssh provider
 	if config.SSHProvider == nil {
 		config.SSHProvider = &SSHProviderConfig{Enabled: false}

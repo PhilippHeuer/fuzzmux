@@ -60,3 +60,13 @@ func LoadOptions(providerName string, maxAge float64) ([]Option, error) {
 
 	return optionsCache.Options, nil
 }
+
+func OptionById(options []Option, id string) (*Option, error) {
+	for _, o := range options {
+		if o.Id == id {
+			return &o, nil
+		}
+	}
+
+	return &Option{}, fmt.Errorf("option with id '%s' not found", id)
+}

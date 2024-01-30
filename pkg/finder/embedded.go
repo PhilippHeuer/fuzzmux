@@ -8,14 +8,13 @@ import (
 	"github.com/ktr0731/go-fuzzyfinder"
 )
 
-func FuzzyFinderEmbedded(options []provider.Option) (*provider.Option, error) {
-	idx, err := fuzzyfinder.Find(
-		options,
-		func(i int) string {
-			return options[i].DisplayName
-		},
+func FuzzyFinderEmbedded(options []provider.Option, preview bool) (*provider.Option, error) {
+	var fOptions = []fuzzyfinder.Option{
 		fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionBottom),
-		fuzzyfinder.WithPreviewWindow(func(i, w, h int) string {
+	}
+
+	if preview {
+		fOptions = append(fOptions, fuzzyfinder.WithPreviewWindow(func(i, w, h int) string {
 			if i == -1 {
 				return ""
 			}
@@ -50,7 +49,15 @@ func FuzzyFinderEmbedded(options []provider.Option) (*provider.Option, error) {
 			}
 
 			return builder.String()
-		}),
+		}))
+	}
+
+	idx, err := fuzzyfinder.Find(
+		options,
+		func(i int) string {
+			return options[i].DisplayName
+		},
+		fOptions...,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to find option: %w", err)

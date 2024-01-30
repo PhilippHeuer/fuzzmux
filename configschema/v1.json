@@ -9,6 +9,9 @@
       ],
       "default": 1
     },
+    "finder": {
+      "$ref": "#/definitions/finderConfig"
+    },
     "project": {
       "$ref": "#/definitions/projectProviderConfig"
     },
@@ -26,6 +29,19 @@
     }
   },
   "definitions": {
+    "finderConfig": {
+      "type": "object",
+      "properties": {
+        "executable": {
+          "enum": ["fzf", "embedded"],
+          "default": "embedded"
+        },
+        "preview": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
     "projectProviderConfig": {
       "type": "object",
       "properties": {

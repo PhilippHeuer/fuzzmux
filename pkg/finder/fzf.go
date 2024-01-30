@@ -10,11 +10,11 @@ import (
 )
 
 // FuzzyFinderFZF uses fzf to find the selected option
-func FuzzyFinderFZF(options []provider.Option) (*provider.Option, error) {
+func FuzzyFinderFZF(options []provider.Option, preview bool) (*provider.Option, error) {
 	// write options to file
 	var builder strings.Builder
 	for _, option := range options {
-		builder.WriteString(fmt.Sprintf("%s: %s\n", option.Id, option.DisplayName))
+		builder.WriteString(fmt.Sprintf("%s:%s\n", option.Id, option.DisplayName))
 	}
 	optionFile, err := os.CreateTemp("/tmp", "tms-fzf")
 	if err != nil {
@@ -26,8 +26,24 @@ func FuzzyFinderFZF(options []provider.Option) (*provider.Option, error) {
 		return nil, fmt.Errorf("failed to write options to file: %w", err)
 	}
 
+	// get executable path
+	executablePath, err := os.Executable()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get executable path: %w", err)
+	}
+
+	// highlight
+	previewCmd := ""
+	if preview {
+		highlightCmd := ""
+		if _, err := exec.LookPath("bat"); err == nil {
+			highlightCmd = " | bat --color=always -l markdown --style=plain"
+		}
+		previewCmd = fmt.Sprintf("--preview=\"%s preview \"{}\"%s\"", executablePath, highlightCmd)
+	}
+
 	// run fzf (capture output as var)
-	cmd := exec.Command("bash", "-c", "cat "+optionFile.Name()+" | fzf --with-nth=2")
+	cmd := exec.Command("bash", "-c", fmt.Sprintf("cat %s | fzf -d \":\" --with-nth=2 %s", optionFile.Name(), previewCmd))
 	cmd.Stdin = os.Stdin
 	cmd.Stderr = os.Stderr
 
