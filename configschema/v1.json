@@ -101,7 +101,7 @@
           "enum": ["session", "window"]
         }
       },
-      "required": ["enabled", "mode"]
+      "required": ["enabled"]
     },
     "kubernetesProviderConfig": {
       "type": "object",
