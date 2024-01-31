@@ -33,6 +33,9 @@ func ResolvedConfig() (Config, error) {
 			Preview:    true,
 		}
 	}
+	if config.Finder.FZFDelimiter == "" {
+		config.Finder.FZFDelimiter = "\x1F"
+	}
 
 	// ssh provider
 	if config.SSHProvider == nil {

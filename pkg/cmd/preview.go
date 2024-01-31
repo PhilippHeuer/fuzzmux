@@ -23,11 +23,6 @@ func previewCmd() *cobra.Command {
 			}
 			optionId := args[0]
 
-			// keep first part of option (fzf option id)
-			if os.Getenv("FZF_PREVIEW_TOP") != "" {
-				optionId = strings.Split(optionId, ":")[0]
-			}
-
 			// load config
 			conf, err := config.ResolvedConfig()
 			if err != nil {
@@ -42,6 +37,11 @@ func previewCmd() *cobra.Command {
 				}
 
 				options = append(options, opts...)
+			}
+
+			// keep first part of option (fzf option id)
+			if os.Getenv("FZF_PREVIEW_TOP") != "" {
+				optionId = strings.Split(optionId, conf.Finder.FZFDelimiter)[0]
 			}
 
 			// query option from cache

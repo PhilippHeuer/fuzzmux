@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
 	"github.com/ktr0731/go-fuzzyfinder"
 )
 
-func FuzzyFinderEmbedded(options []provider.Option, preview bool) (*provider.Option, error) {
+func FuzzyFinderEmbedded(options []provider.Option, cfg config.FinderConfig) (*provider.Option, error) {
 	var fOptions = []fuzzyfinder.Option{
 		fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionBottom),
 	}
 
-	if preview {
+	if cfg.Preview {
 		fOptions = append(fOptions, fuzzyfinder.WithPreviewWindow(func(i, w, h int) string {
 			if i == -1 {
 				return ""

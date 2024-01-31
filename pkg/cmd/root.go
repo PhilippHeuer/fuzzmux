@@ -125,7 +125,7 @@ func rootCmd() *cobra.Command {
 			// fuzzy finder or direct selection
 			var selected *provider.Option
 			if flags.selected == "" {
-				selected, err = finder.FuzzyFinder(conf.Finder.Executable, options, conf.Finder.Preview)
+				selected, err = finder.FuzzyFinder(options, *conf.Finder)
 				if err != nil {
 					log.Fatal().Err(err).Msg("failed to get selected option")
 				}

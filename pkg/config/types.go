@@ -23,6 +23,9 @@ type FinderConfig struct {
 
 	// Preview indicates if the preview should be shown
 	Preview bool `yaml:"preview"`
+
+	// FZFPreview can be used to overwrite the option delimiter
+	FZFDelimiter string `yaml:"fzf-delimiter"`
 }
 
 type ProjectProviderConfig struct {
