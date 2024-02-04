@@ -1,45 +1,33 @@
 package backend
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
-	"github.com/joshuarubin/go-sway"
 	"github.com/rs/zerolog/log"
+	"go.i3wm.org/i3/v4"
 )
 
-type SWAY struct {
+type I3 struct {
 }
 
-func (p SWAY) Name() string {
-	return "sway"
+func (p I3) Name() string {
+	return "i3"
 }
 
-func (p SWAY) Check() bool {
-	_, ok := os.LookupEnv("SWAYSOCK")
+func (p I3) Check() bool {
+	_, ok := os.LookupEnv("I3SOCK")
 	return ok
 }
 
-func (p SWAY) Run(option *provider.Option, opts Opts) error {
+func (p I3) Run(option *provider.Option, opts Opts) error {
 	// resolve vars
 	startDirectory := os.ExpandEnv(option.StartDirectory)
 
-	// context
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
-	defer cancel()
-
-	// sway client
-	client, err := sway.New(ctx)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to connect to sway")
-	}
-
 	// get sway workspace
-	ws, err := currentSwayWorkspace(ctx, client)
+	ws, err := currentI3Workspace()
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to get focused workspace")
 	}
@@ -48,7 +36,7 @@ func (p SWAY) Run(option *provider.Option, opts Opts) error {
 	if opts.Layout.ClearWorkspace {
 		for _, node := range ws.Nodes {
 			if node.Type == "con" {
-				_, killErr := client.RunCommand(ctx, fmt.Sprintf("[con_id=%d] kill", node.ID))
+				_, killErr := i3.RunCommand(fmt.Sprintf("[con_id=%d] kill", node.ID))
 				if killErr != nil {
 					log.Warn().Err(killErr).Msg("failed to kill window")
 				}
@@ -79,7 +67,7 @@ func (p SWAY) Run(option *provider.Option, opts Opts) error {
 			}
 		}
 
-		_, cmdErr := client.RunCommand(ctx, fmt.Sprintf("exec cd %q && %s", startDirectory, cmd))
+		_, cmdErr := i3.RunCommand(fmt.Sprintf("exec cd %q && %s", startDirectory, cmd))
 		if cmdErr != nil {
 			log.Fatal().Err(cmdErr).Str("name", app.Name).Msg("failed to start app")
 		}
@@ -88,13 +76,13 @@ func (p SWAY) Run(option *provider.Option, opts Opts) error {
 	return nil
 }
 
-func currentSwayWorkspace(ctx context.Context, client sway.Client) (*sway.Node, error) {
+func currentI3Workspace() (*i3.Node, error) {
 	// get current tree and workspace
-	n, err := client.GetTree(ctx)
+	n, err := i3.GetTree()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get sway tree: %w", err)
 	}
-	ws, err := focusedWorkspace(n, n.Focus[0])
+	ws, err := focusedI3Workspace(n.Root, n.Root.Focus[0])
 	if err != nil {
 		return nil, fmt.Errorf("failed to get focused workspace: %w", err)
 	}
@@ -103,16 +91,16 @@ func currentSwayWorkspace(ctx context.Context, client sway.Client) (*sway.Node, 
 }
 
 // focusedWorkspace returns the focused workspace
-func focusedWorkspace(n *sway.Node, targetID int64) (*sway.Node, error) {
+func focusedI3Workspace(n *i3.Node, targetID i3.NodeID) (*i3.Node, error) {
 	for _, node := range n.Nodes {
 		if node.ID != targetID {
 			continue
 		}
 
-		if node.Type == sway.NodeWorkspace {
+		if node.Type == i3.WorkspaceNode {
 			return node, nil
 		} else {
-			return focusedWorkspace(node, node.Focus[0])
+			return focusedI3Workspace(node, node.Focus[0])
 		}
 	}
 

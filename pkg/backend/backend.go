@@ -7,14 +7,20 @@ import (
 func ChooseBackend(backend string) (Provider, error) {
 	// tmux
 	tmux := TMUX{}
-	if tmux.Check() {
+	if tmux.Check() || backend == "tmux" {
 		return tmux, nil
 	}
 
 	// sway
 	sway := SWAY{}
-	if sway.Check() {
+	if sway.Check() || backend == "sway" {
 		return sway, nil
+	}
+
+	// i3
+	i3 := I3{}
+	if i3.Check() || backend == "i3" {
+		return i3, nil
 	}
 
 	return nil, fmt.Errorf("no available backend found")

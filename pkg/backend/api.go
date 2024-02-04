@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
@@ -45,4 +46,17 @@ func expandPlaceholders(command string, key string, value string) string {
 	command = strings.ReplaceAll(command, "${"+strings.ToLower(key)+"}", value)
 
 	return command
+}
+
+func getTerminalCommand(term string, startDirectory string, script string) (string, error) {
+	switch term {
+	case "alacritty":
+		return fmt.Sprintf("alacritty --working-directory %q -e bash -c %q", startDirectory, script), nil
+	case "kitty":
+		return fmt.Sprintf("kitty -d %q bash -c %q", startDirectory, script), nil
+	case "xterm-kitty":
+		return fmt.Sprintf("kitty -d %q bash -c %q", startDirectory, script), nil
+	default:
+		return "", fmt.Errorf("unsupported terminal: %s", term)
+	}
 }
