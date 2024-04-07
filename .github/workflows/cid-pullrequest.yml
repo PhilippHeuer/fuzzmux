@@ -49,7 +49,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CID_WORKFLOW: main
+  CID_WORKFLOW: unix
   CID_VERSION: latest
   CID_LOGLEVEL: ${{ github.event.inputs.loglevel || 'info' }}
   # allowed modes are 'block' and 'audit'. Using https://github.com/step-security/harden-runner to harden the runner.

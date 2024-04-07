@@ -24,16 +24,16 @@ func previewCmd() *cobra.Command {
 			optionId := args[0]
 
 			// load config
-			conf, err := config.ResolvedConfig()
-			if err != nil {
-				log.Fatal().Err(err).Msg("failed to load configuration")
+			conf, confErr := config.ResolvedConfig()
+			if confErr != nil {
+				log.Fatal().Err(confErr).Msg("failed to load configuration")
 			}
 			providers := provider.GetProviders(conf)
 			var options []provider.Option
 			for _, p := range providers {
 				opts, err := p.OptionsOrCache(3600)
 				if err != nil {
-					log.Fatal().Err(err).Str("provider", p.Name()).Msg("failed to get options")
+					log.Debug().Err(err).Str("provider", p.Name()).Msg("failed to get options")
 				}
 
 				options = append(options, opts...)
@@ -47,7 +47,7 @@ func previewCmd() *cobra.Command {
 			// query option from cache
 			option, err := provider.OptionById(options, optionId)
 			if err != nil {
-				log.Fatal().Err(err).Msg("failed to find option on cache")
+				log.Fatal().Err(err).Msg("failed to find option in cache")
 			}
 
 			// call select
