@@ -5,7 +5,7 @@ import (
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/core/lookup"
-	"github.com/cidverse/repoanalyzer"
+	"github.com/cidverse/repoanalyzer/analyzer"
 	"github.com/rs/zerolog/log"
 )
 
@@ -63,7 +63,7 @@ func (p ProjectProvider) OptionsOrCache(maxAge float64) ([]Option, error) {
 
 func (p ProjectProvider) SelectOption(option *Option) error {
 	// run repo analyzer
-	modules := repoanalyzer.AnalyzeProject(option.StartDirectory, option.StartDirectory)
+	modules := analyzer.ScanDirectory(option.StartDirectory)
 	for _, m := range modules {
 		// languages
 		for k := range m.Language {
