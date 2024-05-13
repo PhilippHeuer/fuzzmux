@@ -41,7 +41,7 @@ func rootCmd() *cobra.Command {
 	flags := RootFlags{}
 
 	cmd := &cobra.Command{
-		Use:   `tms`,
+		Use:   `tmx`,
 		Short: `scans source directories for projects to create tmux sessions`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			// log format
@@ -150,9 +150,16 @@ func rootCmd() *cobra.Command {
 				log.Fatal().Err(err).Str("provider", selected.ProviderName).Msg("failed to run select")
 			}
 
+			// layout
+			defaultLayout := selected.ProviderName
+			if selected.Context["layout"] != "" {
+				defaultLayout = selected.Context["layout"]
+			}
+			log.Debug().Str("default-layout", defaultLayout).Msg("default layout, if template is not specified")
+
 			// template
 			templateName, _ := cmd.Flags().GetString("template")
-			template, err := layout.GetLayout(conf, selected, templateName, selected.ProviderName)
+			template, err := layout.GetLayout(conf, selected, templateName, defaultLayout)
 			if err != nil {
 				log.Fatal().Err(err).Str("name", templateName).Msg("failed to read template")
 			}

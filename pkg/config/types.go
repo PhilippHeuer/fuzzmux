@@ -10,6 +10,9 @@ type Config struct {
 	// KubernetesProvider is the configuration for k8s connections
 	KubernetesProvider *KubernetesProviderConfig `yaml:"kubernetes"`
 
+	// StaticProvider allows to define static options
+	StaticProvider *StaticProviderConfig `yaml:"static"`
+
 	// Layouts is a map of tmux layouts
 	Layouts map[string]Layout `yaml:"layouts"`
 
@@ -81,6 +84,36 @@ type KubernetesCluster struct {
 
 	// KubeConfig is the absolute path to the kubeconfig file
 	KubeConfig string `yaml:"kubeconfig"`
+}
+
+type StaticProviderConfig struct {
+	Enabled bool `yaml:"enabled"`
+
+	// Options is a list of static options
+	StaticOptions []StaticOption `yaml:"options"`
+}
+
+type StaticOption struct {
+	// Id is a unique identifier for the option
+	Id string `yaml:"id"`
+
+	// DisplayName is the name that should be displayed in the fuzzy finder
+	DisplayName string `yaml:"display-name"`
+
+	// Name is the name of the option
+	Name string `yaml:"name"`
+
+	// StartDirectory is the initial working directory
+	StartDirectory string `yaml:"start-directory"`
+
+	// Tags can be used to filter options
+	Tags []string `yaml:"tags"`
+
+	// Layout can be used to override the default layout used by the option (e.g. ssh/project)
+	Layout string `yaml:"layout"`
+
+	// Preview to render in the preview window
+	Preview string `yaml:"preview"`
 }
 
 type Layout struct {

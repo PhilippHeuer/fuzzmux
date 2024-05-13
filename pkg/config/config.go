@@ -145,6 +145,9 @@ func MergeConfig(a Config, b Config) Config {
 	if b.KubernetesProvider != nil {
 		a.KubernetesProvider = b.KubernetesProvider
 	}
+	if b.StaticProvider != nil {
+		a.StaticProvider = b.StaticProvider
+	}
 
 	// merge layouts
 	if b.Layouts != nil {

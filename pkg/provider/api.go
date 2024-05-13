@@ -27,21 +27,26 @@ type Provider interface {
 func GetProviders(config config.Config) []Provider {
 	var providers []Provider
 
-	if config.ProjectProvider != nil {
+	if config.ProjectProvider != nil && config.ProjectProvider.Enabled {
 		providers = append(providers, ProjectProvider{
 			SourceDirectories: config.ProjectProvider.SourceDirectories,
 			Checks:            config.ProjectProvider.Checks,
 			DisplayFormat:     config.ProjectProvider.DisplayFormat,
 		})
 	}
-	if config.SSHProvider != nil {
+	if config.SSHProvider != nil && config.SSHProvider.Enabled {
 		providers = append(providers, SSHProvider{
 			// Mode: config.SSHProviderConfig.Mode,
 		})
 	}
-	if config.KubernetesProvider != nil {
+	if config.KubernetesProvider != nil && config.KubernetesProvider.Enabled {
 		providers = append(providers, KubernetesProvider{
 			Clusters: config.KubernetesProvider.Clusters,
+		})
+	}
+	if config.StaticProvider != nil && config.StaticProvider.Enabled {
+		providers = append(providers, StaticProvider{
+			StaticOptions: config.StaticProvider.StaticOptions,
 		})
 	}
 
