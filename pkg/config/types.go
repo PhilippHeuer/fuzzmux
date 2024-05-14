@@ -109,6 +109,9 @@ type StaticOption struct {
 	// Tags can be used to filter options
 	Tags []string `yaml:"tags"`
 
+	// Context
+	Context map[string]string `yaml:"context"`
+
 	// Layout can be used to override the default layout used by the option (e.g. ssh/project)
 	Layout string `yaml:"layout"`
 

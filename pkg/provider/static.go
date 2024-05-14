@@ -18,18 +18,26 @@ func (p StaticProvider) Options() ([]Option, error) {
 	var options []Option
 
 	for _, staticOption := range p.StaticOptions {
-		options = append(options, Option{
+		op := Option{
 			ProviderName:   p.Name(),
 			Id:             staticOption.Id,
 			DisplayName:    staticOption.DisplayName,
 			Name:           staticOption.Name,
 			StartDirectory: staticOption.StartDirectory,
 			Tags:           staticOption.Tags,
-			Context: map[string]string{
-				"preview": staticOption.Preview,
-				"layout":  staticOption.Layout,
-			},
-		})
+			Context:        staticOption.Context,
+		}
+		if op.Context == nil {
+			op.Context = make(map[string]string)
+		}
+		if staticOption.Preview != "" {
+			op.Context["preview"] = staticOption.Preview
+		}
+		if staticOption.Layout != "" {
+			op.Context["layout"] = staticOption.Layout
+		}
+
+		options = append(options, op)
 	}
 
 	return options, nil
