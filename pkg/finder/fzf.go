@@ -11,7 +11,7 @@ import (
 )
 
 // FuzzyFinderFZF uses fzf to find the selected option
-func FuzzyFinderFZF(options []provider.Option, cfg config.FinderConfig) (*provider.Option, error) {
+func FuzzyFinderFZF(options []provider.Option, cfg config.FinderConfig) (provider.Option, error) {
 	// write options to file
 	var builder strings.Builder
 	for _, option := range options {
@@ -19,18 +19,18 @@ func FuzzyFinderFZF(options []provider.Option, cfg config.FinderConfig) (*provid
 	}
 	optionFile, err := os.CreateTemp("/tmp", "tms-fzf")
 	if err != nil {
-		return nil, fmt.Errorf("failed to create temp file for options: %w", err)
+		return provider.Option{}, fmt.Errorf("failed to create temp file for options: %w", err)
 	}
 	defer os.Remove(optionFile.Name())
 	_, err = optionFile.WriteString(builder.String())
 	if err != nil {
-		return nil, fmt.Errorf("failed to write options to file: %w", err)
+		return provider.Option{}, fmt.Errorf("failed to write options to file: %w", err)
 	}
 
 	// get executable path
 	executablePath, err := os.Executable()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get executable path: %w", err)
+		return provider.Option{}, fmt.Errorf("failed to get executable path: %w", err)
 	}
 
 	// highlight
@@ -51,19 +51,19 @@ func FuzzyFinderFZF(options []provider.Option, cfg config.FinderConfig) (*provid
 	// execute command
 	out, err := cmd.Output()
 	if err != nil {
-		return nil, fmt.Errorf("failed to run fzf: %w", err)
+		return provider.Option{}, fmt.Errorf("failed to run fzf: %w", err)
 	}
 	optionId := strings.Split(string(out), cfg.FZFDelimiter)
 	if len(optionId) == 0 {
-		return nil, fmt.Errorf("failed to parse fzf output")
+		return provider.Option{}, fmt.Errorf("failed to parse fzf output")
 	}
 
 	// find option
 	for _, option := range options {
 		if option.Id == optionId[0] {
-			return &option, nil
+			return option, nil
 		}
 	}
 
-	return nil, fmt.Errorf("failed to find option")
+	return provider.Option{}, fmt.Errorf("failed to find option")
 }

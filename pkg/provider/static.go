@@ -6,12 +6,14 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 )
 
+const StaticProviderName = "static"
+
 type StaticProvider struct {
 	StaticOptions []config.StaticOption
 }
 
 func (p StaticProvider) Name() string {
-	return "static"
+	return StaticProviderName
 }
 
 func (p StaticProvider) Options() ([]Option, error) {

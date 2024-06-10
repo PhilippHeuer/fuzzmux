@@ -9,7 +9,7 @@ import (
 	"github.com/ktr0731/go-fuzzyfinder"
 )
 
-func FuzzyFinderEmbedded(options []provider.Option, cfg config.FinderConfig) (*provider.Option, error) {
+func FuzzyFinderEmbedded(options []provider.Option, cfg config.FinderConfig) (provider.Option, error) {
 	var fOptions = []fuzzyfinder.Option{
 		fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionBottom),
 	}
@@ -61,8 +61,8 @@ func FuzzyFinderEmbedded(options []provider.Option, cfg config.FinderConfig) (*p
 		fOptions...,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to find option: %w", err)
+		return provider.Option{}, fmt.Errorf("failed to find option: %w", err)
 	}
 
-	return &options[idx], nil
+	return options[idx], nil
 }

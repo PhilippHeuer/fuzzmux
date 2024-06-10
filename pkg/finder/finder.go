@@ -8,7 +8,7 @@ import (
 )
 
 // FuzzyFinder uses the best available fuzzy finder
-func FuzzyFinder(options []provider.Option, cfg config.FinderConfig) (*provider.Option, error) {
+func FuzzyFinder(options []provider.Option, cfg config.FinderConfig) (provider.Option, error) {
 	// user specified?
 	if cfg.Executable == "fzf" {
 		return FuzzyFinderFZF(options, cfg)
