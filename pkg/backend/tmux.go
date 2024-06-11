@@ -23,8 +23,18 @@ func (p TMUX) Name() string {
 }
 
 func (p TMUX) Check() bool {
-	_, ok := os.LookupEnv("TMUX")
-	return ok
+	// inside tmux
+	if _, ok := os.LookupEnv("TMUX"); ok {
+		return true
+	}
+
+	// tmux server running?
+	_, _, err := gotmux.RunCmd([]string{"list-sessions"})
+	if err == nil {
+		return true
+	}
+
+	return false
 }
 
 func (p TMUX) Run(option *provider.Option, opts Opts) error {
