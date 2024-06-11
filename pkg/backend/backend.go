@@ -23,5 +23,11 @@ func ChooseBackend(backend string) (Provider, error) {
 		return i3, nil
 	}
 
+	// shell (fallback, exec in current shell)
+	simple := Shell{}
+	if simple.Check() || backend == "shell" {
+		return simple, nil
+	}
+
 	return nil, fmt.Errorf("no available backend found")
 }

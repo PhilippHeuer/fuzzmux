@@ -36,7 +36,7 @@ func menuCmd() *cobra.Command {
 
 			// select provider options (static options by tag, providers by name)
 			if len(selected.Tags) > 0 {
-				selected, err = optionFuzzyFinder(conf, []string{}, RootFlags{
+				selected, err = optionFuzzyFinder(conf, []string{provider.StaticProviderName}, RootFlags{
 					backend:  flags.backend,
 					template: flags.template,
 					showTags: []string{selected.Id},
@@ -111,7 +111,7 @@ func providerMenuFuzzyFinder(conf config.Config) (provider.Option, error) {
 
 			var addedProviderNames []string
 			for _, o := range opts {
-				if len(o.Tags) == 0 {
+				if len(o.Tags) != 1 {
 					continue
 				}
 

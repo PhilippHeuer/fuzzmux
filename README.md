@@ -1,19 +1,36 @@
 # FuzzMux
 
-> FuzzMux (**tmx**) is a generic fuzzy finder to start workspace layouts (or tmux sessions).
+[![Go Report Card](https://goreportcard.com/badge/github.com/PhilippHeuer/fuzzmux)](https://goreportcard.com/report/github.com/PhilippHeuer/fuzzmux)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/philippheuer/fuzzmux/badge)](https://securityscorecards.dev/viewer/?uri=github.com/philippheuer/fuzzmux)
 
-Supports multiple option providers, e.g.:
+## What is FuzzMux?
 
-- projects (with customizable checks for git, svn, hg, ...)
+FuzzMux provides a global fuzzy finder menu for your projects, ssh connections, namespaces in kubernetes, ... to quickly switch between contexts.
+Additionally, it provides a way to define layouts / rules, to start specific applications based on the selected item.
+
+For example:
+
+- open `IntelliJ IDEA` if the project is a `Java project`
+- open `Goland` if the project is a `Go project`
+- open `Visual Studio Code` if the project is a `JavaScript project`
+- open `NeoVIM` for all other projects
+
+Similar rules can be defined for ssh connections, kubernetes namespaces, ... - see the [examples/config.yaml](examples/config.yaml).
+
+## Supported Providers
+
+- projects (with depth and customizable checks for git, svn, hg, ...)
 - ssh config (parses `~/.ssh/config`)
 - kubernetes
 
-The supported window managers / terminal workspace managers are:
+## Supported Window Managers / Terminal Workspace Managers
 
 - sway
-- tmux (only works if no matching option is flagged with `gui: true`)
+- i3
+- tmux
+- shell (fallback, runs the default command in the current shell)
 
-Feel free to open a PR to add support for your favorite window manager / terminal workspace manager.
+**Note:**: `tmux` and `shell` will ignore options flagged as `gui: true`.
 
 ## Download
 
@@ -31,6 +48,7 @@ curl -o ~/.local/bin/tmx -L https://github.com/PhilippHeuer/fuzzmux/releases/lat
 | `tmx project`           | Start a layout for a project                                        |
 | `tmx ssh`               | Start a layout for a ssh connection                                 |
 | `tmx project -t editor` | Start a layout for a project with a custom layout (bash, nvim, ...) |
+| `tmx menu`              | Interactive menu to choose a provider, and then an option           |
 
 ## Configure your Providers
 
@@ -109,24 +127,22 @@ The command can contain placeholders, e.g.:
 
 ## Window Manager / Terminal Workspace Manager Setup
 
-Contains information about special setup steps if required.
+Specific setup steps, if required.
 
-### tmux
+#### tmux
 
-When using tmux, you might want to add the following to your `~/.tmux.conf`:
+- Ensure you have a tmux server running (`tmux start-server`, preferably as a user service) to jump into your sessions quickly.
+- Add the options in [tmux.conf](examples/tmux.conf) to your `~/.tmux.conf`.
 
-```bash
-# don't exit server without sessions
-set -g exit-empty off
+## Credits
 
-# don't exit without attached clients
-set -g exit-unattached off
+- [junegunn/fzf](https://github.com/junegunn/fzf) - A command-line fuzzy finder
+- [ktr0731/go-fuzzyfinder](https://github.com/ktr0731/go-fuzzyfinder) - A fuzzy finder for Go
+- [cidverse/repoanalyzer](https://github.com/cidverse/repoanalyzer) - Analyze your repositories to get insights about the languages, build systems, and more for your rules.
 
-# start at index 1
-set -g base-index 1
-```
+## Contributing
 
-Also ensure you always have a tmux server running (`tmux start-server`, preferably as a user service) to jump into your sessions quickly.
+Contributions are welcome!
 
 ## License
 
