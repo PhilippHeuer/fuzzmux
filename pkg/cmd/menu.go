@@ -28,7 +28,7 @@ func menuCmd() *cobra.Command {
 			}
 
 			// select provider
-			selected, err := providerMenuFuzzyFinder(conf)
+			selected, err := providerMenuFuzzyFinder(conf, args)
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed to get selected provider")
 			}
@@ -91,7 +91,7 @@ func menuCmd() *cobra.Command {
 	return cmd
 }
 
-func providerMenuFuzzyFinder(conf config.Config) (provider.Option, error) {
+func providerMenuFuzzyFinder(conf config.Config, filter []string) (provider.Option, error) {
 	// collect options from providers
 	providers := provider.GetProviders(conf)
 	var options []provider.Option
@@ -129,6 +129,15 @@ func providerMenuFuzzyFinder(conf config.Config) (provider.Option, error) {
 				}
 			}
 		}
+	}
+	if len(filter) > 0 {
+		var filteredOptions []provider.Option
+		for _, o := range options {
+			if slices.Contains(filter, o.ProviderName) || (len(o.Tags) > 0 && slices.Contains(filter, o.Tags[0])) {
+				filteredOptions = append(filteredOptions, o)
+			}
+		}
+		options = filteredOptions
 	}
 	if len(options) == 0 {
 		return provider.Option{}, errs.ErrNoProvidersAvailable
