@@ -7,7 +7,7 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/backend"
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/core/layout"
-	"github.com/PhilippHeuer/fuzzmux/pkg/errs"
+	"github.com/PhilippHeuer/fuzzmux/pkg/errtypes"
 	"github.com/PhilippHeuer/fuzzmux/pkg/finder"
 	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
 	"github.com/rs/zerolog/log"
@@ -106,7 +106,7 @@ func providerMenuFuzzyFinder(conf config.Config, filter []string) (provider.Opti
 		if p.Name() == provider.StaticProviderName {
 			opts, err := p.Options()
 			if err != nil {
-				return provider.Option{}, errors.Join(errs.ErrFailedToGetOptionsFromProvider, err)
+				return provider.Option{}, errors.Join(errtypes.ErrFailedToGetOptionsFromProvider, err)
 			}
 
 			var addedProviderNames []string
@@ -140,7 +140,7 @@ func providerMenuFuzzyFinder(conf config.Config, filter []string) (provider.Opti
 		options = filteredOptions
 	}
 	if len(options) == 0 {
-		return provider.Option{}, errs.ErrNoProvidersAvailable
+		return provider.Option{}, errtypes.ErrNoProvidersAvailable
 	}
 
 	// fuzzy finder
@@ -150,7 +150,7 @@ func providerMenuFuzzyFinder(conf config.Config, filter []string) (provider.Opti
 		FZFDelimiter: conf.Finder.FZFDelimiter,
 	})
 	if err != nil {
-		return provider.Option{}, errors.Join(errs.ErrNoOptionSelected, err)
+		return provider.Option{}, errors.Join(errtypes.ErrNoOptionSelected, err)
 	}
 
 	return selected, nil

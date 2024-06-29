@@ -3,13 +3,12 @@ package cmd
 import (
 	"errors"
 	"os"
-	"slices"
 	"strings"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/backend"
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/core/layout"
-	"github.com/PhilippHeuer/fuzzmux/pkg/errs"
+	"github.com/PhilippHeuer/fuzzmux/pkg/errtypes"
 	"github.com/PhilippHeuer/fuzzmux/pkg/extensions"
 	"github.com/PhilippHeuer/fuzzmux/pkg/finder"
 	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
@@ -110,28 +109,22 @@ func optionFuzzyFinder(conf config.Config, args []string, flags RootFlags) (prov
 	// collect options from providers
 	providers := provider.GetProviders(conf)
 	var options []provider.Option
-	for _, p := range providers {
-		if len(args) > 0 && !slices.Contains(args, p.Name()) {
-			continue
-		}
-
-		opts, err := p.OptionsOrCache(float64(flags.maxCacheAge))
-		if err != nil {
-			return provider.Option{}, errors.Join(errs.ErrFailedToGetOptionsFromProvider, err)
-		}
-
-		options = append(options, opts...)
+	options, errs := provider.CollectOptions(providers, args, flags.maxCacheAge)
+	if len(options) == 0 && len(errs) > 0 {
+		return provider.Option{}, errors.Join(errtypes.ErrFailedToGetOptionsFromProvider, errors.Join(errs...))
+	} else if len(errs) > 0 {
+		log.Warn().Errs("errors", errs).Msg("at least one provider failed to collect options")
 	}
 	options = provider.FilterOptions(options, flags.showTags, flags.hideTags)
 	if len(options) == 0 {
-		return provider.Option{}, errs.ErrNoOptionsAvailable
+		return provider.Option{}, errtypes.ErrNoOptionsAvailable
 	}
 
 	// custom output mode for external finder
 	if flags.mode != "" {
 		err := extensions.OptionsForFinder(flags.mode, options)
 		if err != nil {
-			return provider.Option{}, errors.Join(errs.ErrFailedToRenderOptions, err)
+			return provider.Option{}, errors.Join(errtypes.ErrFailedToRenderOptions, err)
 		}
 		os.Exit(0) // exit after rendering options for external tools, TODO: move this somewhere else
 	}
@@ -141,7 +134,7 @@ func optionFuzzyFinder(conf config.Config, args []string, flags RootFlags) (prov
 	if flags.selected == "" {
 		s, err := finder.FuzzyFinder(options, *conf.Finder)
 		if err != nil {
-			return provider.Option{}, errors.Join(errs.ErrNoOptionSelected, err)
+			return provider.Option{}, errors.Join(errtypes.ErrNoOptionSelected, err)
 		}
 		selected = s
 	} else {

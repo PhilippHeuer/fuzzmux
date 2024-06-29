@@ -1,10 +1,12 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
+	"github.com/PhilippHeuer/fuzzmux/pkg/errtypes"
 )
 
 type Option struct {
@@ -73,6 +75,27 @@ func GetProvidersByName(providers []Provider, names []string) []Provider {
 	}
 
 	return result
+}
+
+// CollectOptions collects the options from the providers, optionally filtered by name
+func CollectOptions(providers []Provider, byName []string, maxCacheAge int) ([]Option, []error) {
+	var options []Option
+	var errs []error
+
+	for _, p := range providers {
+		if len(byName) > 0 && !slices.Contains(byName, p.Name()) {
+			continue
+		}
+
+		opts, err := p.OptionsOrCache(float64(maxCacheAge))
+		if err != nil {
+			errs = append(errs, errors.Join(errtypes.ErrFailedToGetOptionsFromProvider, err))
+		}
+
+		options = append(options, opts...)
+	}
+
+	return options, errs
 }
 
 // FilterOptions filters the options, showTags are required, hideTags
