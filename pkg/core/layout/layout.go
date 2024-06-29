@@ -36,6 +36,9 @@ func GetLayout(conf config.Config, selected *provider.Option, templateName strin
 	// fallback to default
 	if templateName == "" {
 		templateName = defaultName
+	} else if _, ok := conf.Layouts[templateName]; !ok {
+		log.Warn().Str("template-name", templateName).Msg("template name not found - check your configuration, falling back to default")
+		templateName = defaultName
 	}
 
 	// get template
