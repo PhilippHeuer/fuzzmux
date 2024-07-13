@@ -2,31 +2,28 @@ package backend
 
 import (
 	"fmt"
+	"sort"
 )
 
 func ChooseBackend(backend string) (Provider, error) {
-	// tmux
-	tmux := TMUX{}
-	if tmux.Check() || backend == "tmux" {
-		return tmux, nil
+	// sort by order
+	var providerBackends = []Provider{
+		TMUX{},
+		SWAY{},
+		I3{},
+		Shell{},
 	}
+	sort.Slice(providerBackends, func(i, j int) bool {
+		return providerBackends[i].Order() > providerBackends[j].Order()
+	})
 
-	// sway
-	sway := SWAY{}
-	if sway.Check() || backend == "sway" {
-		return sway, nil
-	}
-
-	// i3
-	i3 := I3{}
-	if i3.Check() || backend == "i3" {
-		return i3, nil
-	}
-
-	// shell (fallback, exec in current shell)
-	simple := Shell{}
-	if simple.Check() || backend == "shell" {
-		return simple, nil
+	// select backend by calling check
+	for _, p := range providerBackends {
+		if backend == "" && p.Check() {
+			return p, nil
+		} else if backend != "" && backend == p.Name() {
+			return p, nil
+		}
 	}
 
 	return nil, fmt.Errorf("no available backend found")

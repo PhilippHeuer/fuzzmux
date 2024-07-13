@@ -22,6 +22,10 @@ func (p I3) Check() bool {
 	return ok
 }
 
+func (p I3) Order() int {
+	return 200
+}
+
 func (p I3) Run(option *provider.Option, opts Opts) error {
 	// resolve vars
 	startDirectory := os.ExpandEnv(option.StartDirectory)

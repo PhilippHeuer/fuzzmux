@@ -13,11 +13,15 @@ type Shell struct {
 }
 
 func (p Shell) Name() string {
-	return "simple"
+	return "shell"
 }
 
 func (p Shell) Check() bool {
 	return true
+}
+
+func (p Shell) Order() int {
+	return 0
 }
 
 func (p Shell) Run(option *provider.Option, opts Opts) error {

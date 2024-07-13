@@ -23,6 +23,7 @@ const (
 type Provider interface {
 	Name() string
 	Check() bool
+	Order() int
 	Run(option *provider.Option, opts Opts) error
 }
 

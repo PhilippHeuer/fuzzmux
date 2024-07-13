@@ -24,7 +24,6 @@ func (p TMUX) Name() string {
 }
 
 func (p TMUX) Check() bool {
-	// inside tmux
 	if _, ok := os.LookupEnv("TMUX"); ok {
 		return true
 	}
@@ -36,6 +35,14 @@ func (p TMUX) Check() bool {
 	}
 
 	return false
+}
+
+func (p TMUX) Order() int {
+	if _, ok := os.LookupEnv("TMUX"); ok {
+		return 1000
+	}
+
+	return 100
 }
 
 func (p TMUX) Run(option *provider.Option, opts Opts) error {

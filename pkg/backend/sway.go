@@ -24,6 +24,10 @@ func (p SWAY) Check() bool {
 	return ok
 }
 
+func (p SWAY) Order() int {
+	return 201
+}
+
 func (p SWAY) Run(option *provider.Option, opts Opts) error {
 	// resolve vars
 	startDirectory := os.ExpandEnv(option.StartDirectory)
