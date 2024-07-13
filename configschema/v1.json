@@ -21,6 +21,9 @@
     "kubernetes": {
       "$ref": "#/definitions/kubernetesProviderConfig"
     },
+    "usql": {
+      "$ref": "#/definitions/usqlProviderConfig"
+    },
     "layouts": {
       "type": "object",
       "additionalProperties": {
@@ -97,6 +100,10 @@
         "enabled": {
           "type": "boolean"
         },
+        "file": {
+          "type": "string",
+          "description": "path to ssh config file, if not using the default (~/.ssh/config)"
+        },
         "mode": {
           "enum": ["session", "window"]
         }
@@ -142,6 +149,19 @@
         }
       },
       "required": ["name", "kubeconfig"]
+    },
+    "usqlProviderConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "file": {
+          "type": "string",
+          "description": "path to usql config file, if not using the default (~/.config/usql/config.yaml)"
+        }
+      },
+      "required": ["enabled"]
     },
     "layout": {
       "type": "object",
