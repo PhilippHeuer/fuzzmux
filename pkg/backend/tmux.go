@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 	"os"
+	"os/user"
 	"strconv"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
@@ -159,10 +160,19 @@ func applyWindows(windows []gotmux.Window, add []config.App, baseIndex int, star
 		}
 
 		if !found {
+			startDirectoryOrHome := startDirectory
+			if _, err := os.Stat(startDirectoryOrHome); os.IsNotExist(err) {
+				usr, err := user.Current()
+				if err != nil {
+					log.Fatal().Err(err).Msg("failed to get current user")
+				}
+				startDirectoryOrHome = usr.HomeDir
+			}
+
 			windows = append(windows, gotmux.Window{
 				Name:           w.Name,
 				Id:             len(windows) + baseIndex,
-				StartDirectory: startDirectory,
+				StartDirectory: startDirectoryOrHome,
 			})
 			windowIds = append(windowIds, len(windows)+baseIndex)
 		}
