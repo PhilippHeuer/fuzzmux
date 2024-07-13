@@ -12,7 +12,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var SSHConfigDefaultPath = filepath.Join(os.Getenv("HOME"), ".ssh", "config")
+
 type SSHProvider struct {
+	ConfigPath string
 }
 
 func (p SSHProvider) Name() string {
@@ -23,7 +26,7 @@ func (p SSHProvider) Options() ([]Option, error) {
 	var options []Option
 
 	// parse ssh config
-	sshConfig, err := sshconfig.ParseFile(filepath.Join(os.Getenv("HOME"), ".ssh", "config"))
+	sshConfig, err := sshconfig.ParseFile(p.ConfigPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ssh config: %w", err)
 	}
@@ -105,4 +108,14 @@ func (p SSHProvider) SelectOption(option *Option) error {
 	}
 
 	return nil
+}
+
+func NewSSHProvider(configPath string) SSHProvider {
+	if configPath == "" {
+		configPath = SSHConfigDefaultPath
+	}
+
+	return SSHProvider{
+		ConfigPath: configPath,
+	}
 }

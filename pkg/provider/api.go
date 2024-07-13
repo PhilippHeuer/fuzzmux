@@ -7,6 +7,7 @@ import (
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/errtypes"
+	"github.com/cidverse/cidverseutils/filesystem"
 )
 
 type Option struct {
@@ -29,6 +30,7 @@ type Provider interface {
 func GetProviders(config config.Config) []Provider {
 	var providers []Provider
 
+	// projects
 	if config.ProjectProvider != nil && config.ProjectProvider.Enabled {
 		providers = append(providers, ProjectProvider{
 			SourceDirectories: config.ProjectProvider.SourceDirectories,
@@ -36,19 +38,29 @@ func GetProviders(config config.Config) []Provider {
 			DisplayFormat:     config.ProjectProvider.DisplayFormat,
 		})
 	}
+
+	// ssh
 	if config.SSHProvider != nil && config.SSHProvider.Enabled {
-		providers = append(providers, SSHProvider{
-			// Mode: config.SSHProviderConfig.Mode,
-		})
+		providers = append(providers, NewSSHProvider(config.SSHProvider.ConfigFile))
+	} else if config.SSHProvider == nil && filesystem.FileExists(SSHConfigDefaultPath) {
+		providers = append(providers, NewSSHProvider(""))
 	}
+
+	// k8s
 	if config.KubernetesProvider != nil && config.KubernetesProvider.Enabled {
 		providers = append(providers, KubernetesProvider{
 			Clusters: config.KubernetesProvider.Clusters,
 		})
 	}
+
+	// usql
 	if config.USQLProvider != nil && config.USQLProvider.Enabled {
-		providers = append(providers, USQLProvider{})
+		providers = append(providers, NewUSQLProvider(config.USQLProvider.ConfigFile))
+	} else if config.USQLProvider == nil && filesystem.FileExists(USQLConfigDefaultPath) {
+		providers = append(providers, NewUSQLProvider(""))
 	}
+
+	// static
 	if config.StaticProvider != nil && config.StaticProvider.Enabled {
 		providers = append(providers, StaticProvider{
 			StaticOptions: config.StaticProvider.StaticOptions,

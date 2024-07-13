@@ -64,6 +64,8 @@ type SourceDirectory struct {
 type SSHProviderConfig struct {
 	Enabled bool `yaml:"enabled"`
 
+	ConfigFile string `yaml:"file"`
+
 	// Mode controls how sessions or windows are created for SSH connections
 	Mode SSHMode `yaml:"mode"`
 }
@@ -91,6 +93,8 @@ type KubernetesCluster struct {
 
 type USQLProviderConfig struct {
 	Enabled bool `yaml:"enabled"`
+
+	ConfigFile string `yaml:"file"`
 }
 
 type StaticProviderConfig struct {

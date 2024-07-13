@@ -11,7 +11,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var USQLConfigDefaultPath = filepath.Join(os.Getenv("HOME"), ".config", "usql", "config.yaml")
+
 type USQLProvider struct {
+	ConfigPath string
 }
 
 func (p USQLProvider) Name() string {
@@ -22,7 +25,7 @@ func (p USQLProvider) Options() ([]Option, error) {
 	var options []Option
 
 	// parse config
-	conf, err := usql.ParseFile(filepath.Join(os.Getenv("HOME"), ".config", "usql", "config.yaml"))
+	conf, err := usql.ParseFile(p.ConfigPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse usql config: %w", err)
 	}
@@ -85,4 +88,14 @@ func (p USQLProvider) SelectOption(option *Option) error {
 	}
 
 	return nil
+}
+
+func NewUSQLProvider(configPath string) USQLProvider {
+	if configPath == "" {
+		configPath = USQLConfigDefaultPath
+	}
+
+	return USQLProvider{
+		ConfigPath: configPath,
+	}
 }

@@ -12,8 +12,7 @@ For example:
 
 - open `IntelliJ IDEA` if the project is a `Java project`
 - open `Goland` if the project is a `Go project`
-- open `Visual Studio Code` if the project is a `JavaScript project`
-- open `NeoVIM` for all other projects
+- open `Neovim` for all other projects
 
 Similar rules can be defined for ssh connections, kubernetes namespaces, ... - see the [examples/config.yaml](examples/config.yaml).
 
