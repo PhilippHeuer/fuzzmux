@@ -42,3 +42,11 @@ layouts:
           - inPath("k9s")
         commands:
           - command: exec k9s --logoless --headless --readonly --kubeconfig "${kubeConfig}" --namespace "${namespace}"
+  usql:
+    apps:
+      - name: usql
+        default: true
+        rules:
+          - inPath("usql")
+        commands:
+          - command: exec usql ${name}

@@ -173,8 +173,6 @@ func applyWindows(windows []gotmux.Window, add []config.App, baseIndex int, star
 
 // ListPanes finds a window by id
 func ListPanes(window gotmux.Window) ([]gotmux.Pane, error) {
-	log.Warn().Str("test", strconv.Itoa(window.Id)).Msg("yo")
-
 	return gotmux.ListPanes([]string{"-t", strconv.Itoa(window.Id)})
 }
 

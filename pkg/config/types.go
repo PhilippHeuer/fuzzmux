@@ -10,6 +10,9 @@ type Config struct {
 	// KubernetesProvider is the configuration for k8s connections
 	KubernetesProvider *KubernetesProviderConfig `yaml:"kubernetes"`
 
+	// USQLProvider is the configuration for usql connections
+	USQLProvider *USQLProviderConfig `yaml:"usql"`
+
 	// StaticProvider allows to define static options
 	StaticProvider *StaticProviderConfig `yaml:"static"`
 
@@ -84,6 +87,10 @@ type KubernetesCluster struct {
 
 	// KubeConfig is the absolute path to the kubeconfig file
 	KubeConfig string `yaml:"kubeconfig"`
+}
+
+type USQLProviderConfig struct {
+	Enabled bool `yaml:"enabled"`
 }
 
 type StaticProviderConfig struct {

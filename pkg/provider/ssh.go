@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -91,11 +92,15 @@ func (p SSHProvider) OptionsOrCache(maxAge float64) ([]Option, error) {
 }
 
 func (p SSHProvider) SelectOption(option *Option) error {
+	if option.StartDirectory == "" {
+		return nil
+	}
+
 	// create startDirectory
 	if _, err := os.Stat(option.StartDirectory); os.IsNotExist(err) {
 		err = os.MkdirAll(option.StartDirectory, 0755)
 		if err != nil {
-			return fmt.Errorf("failed to create start directory: %w", err)
+			return errors.Join(ErrFailedToCreateStartDirectory, err)
 		}
 	}
 

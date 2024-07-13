@@ -46,6 +46,9 @@ func GetProviders(config config.Config) []Provider {
 			Clusters: config.KubernetesProvider.Clusters,
 		})
 	}
+	if config.USQLProvider != nil && config.USQLProvider.Enabled {
+		providers = append(providers, USQLProvider{})
+	}
 	if config.StaticProvider != nil && config.StaticProvider.Enabled {
 		providers = append(providers, StaticProvider{
 			StaticOptions: config.StaticProvider.StaticOptions,
