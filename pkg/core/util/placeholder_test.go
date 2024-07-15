@@ -1,4 +1,4 @@
-package backend
+package util
 
 import (
 	"testing"
@@ -11,15 +11,14 @@ func TestExpandPlaceholders(t *testing.T) {
 		value   string
 		want    string
 	}{
-		{"echo ${name}", "name", "John", `echo "John"`},
-		{"echo !{name}", "name", "John", `echo John`},
-		{"echo ${name} and !{name}", "name", "John", `echo "John" and John`},
-		{"echo ${name}", "name", "John; rm -rf /", `echo "John; rm -rf /"`},
+		{`echo "{{name}}"`, "name", "Fuzz", `echo "Fuzz"`},
+		{`echo "{{name}}"`, "name", "Fuzz\"; rm -rf /tmp/test", `echo "Fuzz\"; rm -rf /tmp/test"`},
+		{`echo "{{!name}}"`, "name", "Fuzz\"; rm -rf /tmp/test", `echo "Fuzz"; rm -rf /tmp/test"`},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.command, func(t *testing.T) {
-			got := expandPlaceholders(tt.command, tt.key, tt.value)
+			got := ExpandPlaceholders(tt.command, tt.key, tt.value)
 			if got != tt.want {
 				t.Errorf("expandPlaceholders(%s, %s, %s) = %v, want %v", tt.command, tt.key, tt.value, got, tt.want)
 			}

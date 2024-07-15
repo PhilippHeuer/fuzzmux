@@ -80,18 +80,50 @@ func renderPreview(option *provider.Option) string {
 		}
 	}
 
-	// k8s, openshift
-	if option.Context["clusterName"] != "" {
-		builder.WriteString(fmt.Sprintf("\nK8S Cluster Name: %s\n", option.Context["clusterName"]))
-	}
-	if option.Context["clusterHost"] != "" {
-		builder.WriteString(fmt.Sprintf("K8S Cluster API: %s\n", option.Context["clusterHost"]))
-	}
-	if option.Context["clusterUser"] != "" {
-		builder.WriteString(fmt.Sprintf("K8S Cluster User: %s\n", option.Context["clusterUser"]))
-	}
-	if option.Context["clusterType"] != "" {
-		builder.WriteString(fmt.Sprintf("K8S Cluster Type: %s\n", option.Context["clusterType"]))
+	// TODO: custom option render logic should move into the option provider
+	switch option.ProviderName {
+	case "kubernetes":
+		builder.WriteString("\n")
+		if option.Context["clusterName"] != "" {
+			builder.WriteString(fmt.Sprintf("K8S Cluster Name: %s\n", option.Context["clusterName"]))
+		}
+		if option.Context["clusterHost"] != "" {
+			builder.WriteString(fmt.Sprintf("K8S Cluster API: %s\n", option.Context["clusterHost"]))
+		}
+		if option.Context["clusterUser"] != "" {
+			builder.WriteString(fmt.Sprintf("K8S Cluster User: %s\n", option.Context["clusterUser"]))
+		}
+		if option.Context["clusterType"] != "" {
+			builder.WriteString(fmt.Sprintf("K8S Cluster Type: %s\n", option.Context["clusterType"]))
+		}
+	case "usql":
+		builder.WriteString("\n")
+		if option.Context["name"] != "" {
+			builder.WriteString(fmt.Sprintf("Name: %s\n", option.Context["name"]))
+		}
+		if option.Context["hostname"] != "" {
+			builder.WriteString(fmt.Sprintf("DB Host: %s\n", option.Context["hostname"]))
+		}
+		if option.Context["port"] != "" {
+			builder.WriteString(fmt.Sprintf("DB Port: %s\n", option.Context["port"]))
+		}
+		if option.Context["username"] != "" {
+			builder.WriteString(fmt.Sprintf("DB Username: %s\n", option.Context["username"]))
+		}
+		if option.Context["instance"] != "" {
+			builder.WriteString(fmt.Sprintf("DB Instance/SID: %s\n", option.Context["instance"]))
+		}
+		if option.Context["database"] != "" {
+			builder.WriteString(fmt.Sprintf("DB Database: %s\n", option.Context["database"]))
+		}
+	default:
+		builder.WriteString("\n")
+		if len(option.Context) > 0 {
+			builder.WriteString("Context:\n")
+			for k, v := range option.Context {
+				builder.WriteString(fmt.Sprintf("  %s: %s\n", k, v))
+			}
+		}
 	}
 
 	// free-text description

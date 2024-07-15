@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/core/parser/usql"
 	"github.com/PhilippHeuer/fuzzmux/pkg/core/util"
@@ -41,12 +42,34 @@ func (p USQLProvider) Options() ([]Option, error) {
 		opt := Option{
 			ProviderName:   p.Name(),
 			Id:             "usql-" + key,
-			DisplayName:    fmt.Sprintf("%s @ %s:%d [%s]", conn.Username, conn.Hostname, conn.Port, conn.Database),
+			DisplayName:    fmt.Sprintf("%s @ %s:%d", conn.Username, conn.Hostname, conn.Port),
 			Name:           key,
 			StartDirectory: p.StartDirectory,
+			Context: map[string]string{
+				"name":     conn.Name,
+				"hostname": conn.Hostname,
+				"port":     fmt.Sprintf("%d", conn.Port),
+				"username": conn.Username,
+				"instance": conn.Instance,
+				"database": conn.Database,
+			},
 		}
+
+		// additional info (SID, instance, database, ...)
+		var additionalInfo []string
 		if conn.Instance != "" {
-			opt.DisplayName = fmt.Sprintf("%s @ %s:%d [%s:%s]", conn.Username, conn.Hostname, conn.Port, conn.Instance, conn.Database)
+			additionalInfo = append(additionalInfo, conn.Instance)
+		}
+		if conn.Database != "" {
+			additionalInfo = append(additionalInfo, conn.Database)
+		}
+		if len(additionalInfo) > 0 {
+			opt.DisplayName = fmt.Sprintf("%s @ %s:%d [%s]", conn.Username, conn.Hostname, conn.Port, strings.Join(additionalInfo, ":"))
+		}
+
+		// named connections
+		if conn.Name != "" {
+			opt.DisplayName = "[" + conn.Name + "] " + opt.DisplayName
 		}
 
 		options = append(options, opt)

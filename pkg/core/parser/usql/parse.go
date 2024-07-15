@@ -13,6 +13,7 @@ type Config struct {
 }
 
 type Connection struct {
+	Name     string `yaml:"name"` // non-standard option for a display name
 	Protocol string `yaml:"protocol"`
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
@@ -29,6 +30,7 @@ func (c *Connection) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	}
 
 	var aux struct {
+		Name     string `yaml:"name"` // non-standard option for a display name
 		Protocol string `yaml:"protocol"`
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
