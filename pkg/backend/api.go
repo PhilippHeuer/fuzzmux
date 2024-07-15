@@ -2,7 +2,6 @@ package backend
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
@@ -25,28 +24,6 @@ type Provider interface {
 	Check() bool
 	Order() int
 	Run(option *provider.Option, opts Opts) error
-}
-
-func expandCommand(option *provider.Option, command string) string {
-	command = expandPlaceholders(command, "name", option.Name)
-	command = expandPlaceholders(command, "displayName", option.DisplayName)
-	command = expandPlaceholders(command, "startDirectory", option.StartDirectory)
-	for k, v := range option.Context {
-		command = expandPlaceholders(command, k, v)
-	}
-
-	return command
-}
-
-func expandPlaceholders(command string, key string, value string) string {
-	command = strings.ReplaceAll(command, "$"+key, value)
-	command = strings.ReplaceAll(command, "${"+key+"}", value)
-	command = strings.ReplaceAll(command, "$"+strings.ToUpper(key), value)
-	command = strings.ReplaceAll(command, "${"+strings.ToUpper(key)+"}", value)
-	command = strings.ReplaceAll(command, "$"+strings.ToLower(key), value)
-	command = strings.ReplaceAll(command, "${"+strings.ToLower(key)+"}", value)
-
-	return command
 }
 
 func getTerminalCommand(term string, startDirectory string, script string) (string, error) {

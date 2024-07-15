@@ -30,7 +30,7 @@ func (p SWAY) Order() int {
 
 func (p SWAY) Run(option *provider.Option, opts Opts) error {
 	// resolve vars
-	startDirectory := os.ExpandEnv(option.StartDirectory)
+	startDirectory := option.ResolveStartDirectory(true)
 
 	// context
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
@@ -75,9 +75,9 @@ func (p SWAY) Run(option *provider.Option, opts Opts) error {
 		// start app
 		var cmd string
 		if app.GUI && len(app.Commands) == 1 {
-			cmd = expandCommand(option, app.Commands[0].Command)
+			cmd = option.ResolvePlaceholders(app.Commands[0].Command)
 		} else {
-			cmd, err = getTerminalCommand(os.Getenv("TERM"), startDirectory, expandCommand(option, script.String()))
+			cmd, err = getTerminalCommand(os.Getenv("TERM"), startDirectory, option.ResolvePlaceholders(script.String()))
 			if err != nil {
 				log.Fatal().Err(err).Str("name", app.Name).Msg("failed to prepare command to start app")
 			}

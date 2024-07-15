@@ -26,12 +26,12 @@ func (p Shell) Order() int {
 
 func (p Shell) Run(option *provider.Option, opts Opts) error {
 	// gather information
-	startDirectory := os.ExpandEnv(option.StartDirectory)
+	startDirectory := option.ResolveStartDirectory(true)
 	var commands []string
 	for _, w := range opts.Layout.Apps {
 		if w.Default && len(w.Commands) > 0 {
 			for _, c := range config.CommandsAsStringSlice(w.Commands) {
-				commands = append(commands, expandCommand(option, c))
+				commands = append(commands, option.ResolvePlaceholders(c))
 			}
 		}
 	}

@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,7 +16,8 @@ import (
 )
 
 type KubernetesProvider struct {
-	Clusters []config.KubernetesCluster
+	Clusters       []config.KubernetesCluster
+	StartDirectory string
 }
 
 func (p KubernetesProvider) Name() string {
@@ -37,7 +37,7 @@ func (p KubernetesProvider) Options() ([]Option, error) {
 			continue
 		}
 
-		opts, err := processKubernetesCluster(cluster)
+		opts, err := processKubernetesCluster(cluster, p.StartDirectory)
 		if err != nil {
 			return nil, err
 		}
@@ -67,22 +67,26 @@ func (p KubernetesProvider) OptionsOrCache(maxAge float64) ([]Option, error) {
 }
 
 func (p KubernetesProvider) SelectOption(option *Option) error {
-	if option.StartDirectory == "" {
-		return nil
-	}
-
-	// create startDirectory
-	if _, err := os.Stat(option.StartDirectory); os.IsNotExist(err) {
-		err = os.MkdirAll(option.StartDirectory, 0755)
-		if err != nil {
-			return errors.Join(ErrFailedToCreateStartDirectory, err)
-		}
+	err := option.CreateStartDirectoryIfMissing()
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func processKubernetesCluster(cluster config.KubernetesCluster) (options []Option, err error) {
+func NewKubernetesProvider(clusters []config.KubernetesCluster, startDirectory string) KubernetesProvider {
+	if startDirectory == "" {
+		startDirectory = "~/k8s/{{clusterName}}/{{namespace}}"
+	}
+
+	return KubernetesProvider{
+		Clusters:       clusters,
+		StartDirectory: startDirectory,
+	}
+}
+
+func processKubernetesCluster(cluster config.KubernetesCluster, startDirectory string) (options []Option, err error) {
 	clusterName := "default"
 	if cluster.Name != "" {
 		clusterName = cluster.Name
@@ -125,7 +129,7 @@ func processKubernetesCluster(cluster config.KubernetesCluster) (options []Optio
 			Id:             item.GetName(),
 			DisplayName:    displayName,
 			Name:           item.GetName(),
-			StartDirectory: filepath.Join(util.GetHomeDir(), "fuzzmux", "k8s", clusterName, item.GetName()),
+			StartDirectory: startDirectory,
 			Tags:           cluster.Tags,
 			Context: map[string]string{
 				"clusterName": clusterName,

@@ -72,9 +72,7 @@ func renderPreview(option *provider.Option) string {
 	var builder strings.Builder
 	builder.WriteString("# " + option.DisplayName + "\n\n")
 	builder.WriteString("Provider: " + option.ProviderName + "\n")
-	if option.StartDirectory != "" {
-		builder.WriteString("Directory: " + option.StartDirectory + "\n")
-	}
+	builder.WriteString("Directory: " + option.ResolveStartDirectory(true) + " [" + option.StartDirectory + "]\n")
 	if len(option.Tags) > 0 {
 		builder.WriteString("\nTags:\n")
 		for _, t := range option.Tags {

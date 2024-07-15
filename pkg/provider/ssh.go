@@ -1,21 +1,20 @@
 package provider
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/core/parser/sshconfig"
-	"github.com/PhilippHeuer/fuzzmux/pkg/core/util"
 	"github.com/rs/zerolog/log"
 )
 
 var SSHConfigDefaultPath = filepath.Join(os.Getenv("HOME"), ".ssh", "config")
 
 type SSHProvider struct {
-	ConfigPath string
+	ConfigPath     string
+	StartDirectory string
 }
 
 func (p SSHProvider) Name() string {
@@ -56,19 +55,22 @@ func (p SSHProvider) Options() ([]Option, error) {
 				}
 			}
 
-			// add to list
-			options = append(options, Option{
+			// option
+			opt := Option{
 				ProviderName:   p.Name(),
 				Id:             name,
 				DisplayName:    fmt.Sprintf("%s [%s%s]", name, user, hostname),
 				Name:           name,
-				StartDirectory: filepath.Join(util.GetHomeDir()),
+				StartDirectory: p.StartDirectory,
 				Tags:           tags,
 				Context: map[string]string{
 					"host": hostname,
 					"user": strings.TrimRight(user, "@"),
 				},
-			})
+			}
+
+			// add to list
+			options = append(options, opt)
 		}
 	}
 
@@ -95,27 +97,21 @@ func (p SSHProvider) OptionsOrCache(maxAge float64) ([]Option, error) {
 }
 
 func (p SSHProvider) SelectOption(option *Option) error {
-	if option.StartDirectory == "" {
-		return nil
-	}
-
-	// create startDirectory
-	if _, err := os.Stat(option.StartDirectory); os.IsNotExist(err) {
-		err = os.MkdirAll(option.StartDirectory, 0755)
-		if err != nil {
-			return errors.Join(ErrFailedToCreateStartDirectory, err)
-		}
+	err := option.CreateStartDirectoryIfMissing()
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func NewSSHProvider(configPath string) SSHProvider {
+func NewSSHProvider(configPath string, startDirectory string) SSHProvider {
 	if configPath == "" {
 		configPath = SSHConfigDefaultPath
 	}
 
 	return SSHProvider{
-		ConfigPath: configPath,
+		ConfigPath:     configPath,
+		StartDirectory: startDirectory,
 	}
 }

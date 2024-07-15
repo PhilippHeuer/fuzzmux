@@ -52,7 +52,7 @@ func (p TMUX) Run(option *provider.Option, opts Opts) error {
 	var defaultWindowId = tmuxBaseIndex
 
 	// resolve vars
-	startDirectory := os.ExpandEnv(option.StartDirectory)
+	startDirectory := option.ResolveStartDirectory(true)
 
 	// session lookup
 	session, err := FindSession(opts.SessionName)
@@ -115,7 +115,7 @@ func (p TMUX) Run(option *provider.Option, opts Opts) error {
 
 		for _, pane := range panes {
 			for _, command := range commands {
-				err = pane.RunCommand(expandCommand(option, command))
+				err = pane.RunCommand(option.ResolvePlaceholders(command))
 				if err != nil {
 					return fmt.Errorf("failed to run command: %w", err)
 				}

@@ -64,7 +64,11 @@ type SourceDirectory struct {
 type SSHProviderConfig struct {
 	Enabled bool `yaml:"enabled"`
 
+	// ConfigFile is used in case your ssh config is not in the default location
 	ConfigFile string `yaml:"file"`
+
+	// StartDirectory is used to define the current working directory, supports template variables
+	StartDirectory string `yaml:"start-directory"`
 
 	// Mode controls how sessions or windows are created for SSH connections
 	Mode SSHMode `yaml:"mode"`
@@ -75,6 +79,9 @@ type KubernetesProviderConfig struct {
 
 	// Clusters is a list of kubernetes clusters that should be scanned
 	Clusters []KubernetesCluster `yaml:"clusters"`
+
+	// StartDirectory is used to define the current working directory, supports template variables
+	StartDirectory string `yaml:"start-directory"`
 }
 
 type KubernetesCluster struct {
@@ -94,7 +101,11 @@ type KubernetesCluster struct {
 type USQLProviderConfig struct {
 	Enabled bool `yaml:"enabled"`
 
+	// ConfigFile is used in case your usql config is not in the default location
 	ConfigFile string `yaml:"file"`
+
+	// StartDirectory is used to define the current working directory, supports template variables
+	StartDirectory string `yaml:"start-directory"`
 }
 
 type StaticProviderConfig struct {

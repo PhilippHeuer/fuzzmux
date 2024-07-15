@@ -6,6 +6,7 @@ module github.com/PhilippHeuer/fuzzmux
 go 1.22.0
 
 require (
+	github.com/cidverse/cidverseutils/filesystem v0.1.0
 	github.com/cidverse/cidverseutils/zerologconfig v0.1.0
 	github.com/cidverse/go-rules v0.0.0-20231112122021-075e5e6f8abc
 	github.com/cidverse/repoanalyzer v0.1.1-0.20240510193438-abb053de8c14
@@ -28,7 +29,6 @@ require (
 	github.com/BurntSushi/xgbutil v0.0.0-20190907113008-ad855c713046 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/charlievieth/fastwalk v1.0.6 // indirect
-	github.com/cidverse/cidverseutils/filesystem v0.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.12.1 // indirect
 	github.com/gdamore/encoding v1.0.1 // indirect
@@ -60,7 +60,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/nsf/termbox-go v1.1.1 // indirect
-	github.com/openshift/api v0.0.0-20240711230052-40c9497c12f4 // indirect
+	github.com/openshift/api v0.0.0-20240715171821-e9f09d21bcb5 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

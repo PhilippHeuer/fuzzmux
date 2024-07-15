@@ -8,13 +8,13 @@ layouts:
       - name: ssh
         default: true
         commands:
-          - command: exec ssh ${name}
+          - command: exec ssh "{{name}}"
       - name: sshfs
         rules:
           - inPath("sshfs") && contains(TAGS, "sftp")
         commands:
-          - command: mkdir -p "~/mnt/ssh/${name}"
-          - command: sshfs -o default_permissions,idmap=user,noatime,follow_symlinks,_netdev,reconnect ${name}:/ ~/mnt/ssh/${name}
+          - command: mkdir -p "~/mnt/ssh/{{name}}"
+          - command: sshfs -o default_permissions,idmap=user,noatime,follow_symlinks,_netdev,reconnect {{name}}:/ ~/mnt/ssh/{{name}}
   project:
     apps:
       - name: sh
@@ -35,13 +35,14 @@ layouts:
       - name: kubectl
         default: true
         commands:
-          - command: export KUBECONFIG="${kubeConfig}"
-          - command: kubectl config set-context --current --namespace="${namespace}"
+          - command: export KUBECONFIG="{{kubeConfig}}"
+          - command: kubectl config set-context --current --namespace="{{namespace}}"
+          - command: exec bash
       - name: k9s
         rules:
           - inPath("k9s")
         commands:
-          - command: exec k9s --logoless --headless --readonly --kubeconfig "${kubeConfig}" --namespace "${namespace}"
+          - command: exec k9s --logoless --headless --readonly --kubeconfig "{{kubeConfig}}" --namespace "{{namespace}}"
   usql:
     apps:
       - name: usql
@@ -49,4 +50,4 @@ layouts:
         rules:
           - inPath("usql")
         commands:
-          - command: exec usql ${name}
+          - command: exec usql {{name}}

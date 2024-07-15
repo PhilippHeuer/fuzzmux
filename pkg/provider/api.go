@@ -3,9 +3,12 @@ package provider
 import (
 	"errors"
 	"fmt"
+	"os"
 	"slices"
+	"strings"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
+	"github.com/PhilippHeuer/fuzzmux/pkg/core/util"
 	"github.com/PhilippHeuer/fuzzmux/pkg/errtypes"
 	"github.com/cidverse/cidverseutils/filesystem"
 )
@@ -18,6 +21,54 @@ type Option struct {
 	StartDirectory string            `json:"start_directory"` // sets the initial working directory
 	Tags           []string          `json:"tags"`            // tags
 	Context        map[string]string `json:"context"`         // additional context information
+}
+
+func (o Option) ResolveStartDirectory(full bool) string {
+	startDirectory := o.StartDirectory
+	if startDirectory == "" {
+		startDirectory = "~"
+	}
+	startDirectory = util.ExpandPlaceholders(startDirectory, "name", o.Name)
+	startDirectory = util.ExpandPlaceholders(startDirectory, "displayName", o.DisplayName)
+	for k, v := range o.Context {
+		startDirectory = util.ExpandPlaceholders(startDirectory, k, v)
+	}
+
+	if full {
+		startDirectory = strings.Replace(startDirectory, "~", os.Getenv("HOME"), -1)
+	}
+
+	return startDirectory
+}
+
+func (o Option) CreateStartDirectoryIfMissing() error {
+	if o.StartDirectory == "" || o.StartDirectory == "~" {
+		return nil
+	}
+
+	dir := o.ResolveStartDirectory(true)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.MkdirAll(dir, 0755)
+		if err != nil {
+			return errors.Join(ErrFailedToCreateStartDirectory, err)
+		}
+	}
+
+	return nil
+}
+
+func (o Option) ResolvePlaceholders(input string) string {
+	input = os.ExpandEnv(input)
+
+	input = util.ExpandPlaceholders(input, "name", o.Name)
+	input = util.ExpandPlaceholders(input, "displayName", o.DisplayName)
+	input = util.ExpandPlaceholders(input, "startDirectory", o.ResolveStartDirectory(true))
+
+	for k, v := range o.Context {
+		input = util.ExpandPlaceholders(input, k, v)
+	}
+
+	return input
 }
 
 type Provider interface {
@@ -41,23 +92,21 @@ func GetProviders(config config.Config) []Provider {
 
 	// ssh
 	if config.SSHProvider != nil && config.SSHProvider.Enabled {
-		providers = append(providers, NewSSHProvider(config.SSHProvider.ConfigFile))
+		providers = append(providers, NewSSHProvider(config.SSHProvider.ConfigFile, config.SSHProvider.StartDirectory))
 	} else if config.SSHProvider == nil && filesystem.FileExists(SSHConfigDefaultPath) {
-		providers = append(providers, NewSSHProvider(""))
+		providers = append(providers, NewSSHProvider("", ""))
 	}
 
 	// k8s
 	if config.KubernetesProvider != nil && config.KubernetesProvider.Enabled {
-		providers = append(providers, KubernetesProvider{
-			Clusters: config.KubernetesProvider.Clusters,
-		})
+		providers = append(providers, NewKubernetesProvider(config.KubernetesProvider.Clusters, config.KubernetesProvider.StartDirectory))
 	}
 
 	// usql
 	if config.USQLProvider != nil && config.USQLProvider.Enabled {
-		providers = append(providers, NewUSQLProvider(config.USQLProvider.ConfigFile))
+		providers = append(providers, NewUSQLProvider(config.USQLProvider.ConfigFile, config.USQLProvider.StartDirectory))
 	} else if config.USQLProvider == nil && filesystem.FileExists(USQLConfigDefaultPath) {
-		providers = append(providers, NewUSQLProvider(""))
+		providers = append(providers, NewUSQLProvider("", ""))
 	}
 
 	// static

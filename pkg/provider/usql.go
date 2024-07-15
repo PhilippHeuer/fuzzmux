@@ -1,7 +1,6 @@
 package provider
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,7 +13,8 @@ import (
 var USQLConfigDefaultPath = filepath.Join(os.Getenv("HOME"), ".config", "usql", "config.yaml")
 
 type USQLProvider struct {
-	ConfigPath string
+	ConfigPath     string
+	StartDirectory string
 }
 
 func (p USQLProvider) Name() string {
@@ -43,7 +43,7 @@ func (p USQLProvider) Options() ([]Option, error) {
 			Id:             "usql-" + key,
 			DisplayName:    fmt.Sprintf("%s @ %s:%d [%s]", conn.Username, conn.Hostname, conn.Port, conn.Database),
 			Name:           key,
-			StartDirectory: "",
+			StartDirectory: p.StartDirectory,
 		}
 		if conn.Instance != "" {
 			opt.DisplayName = fmt.Sprintf("%s @ %s:%d [%s:%s]", conn.Username, conn.Hostname, conn.Port, conn.Instance, conn.Database)
@@ -75,27 +75,21 @@ func (p USQLProvider) OptionsOrCache(maxAge float64) ([]Option, error) {
 }
 
 func (p USQLProvider) SelectOption(option *Option) error {
-	if option.StartDirectory == "" {
-		return nil
-	}
-
-	// create startDirectory
-	if _, err := os.Stat(option.StartDirectory); os.IsNotExist(err) {
-		err = os.MkdirAll(option.StartDirectory, 0755)
-		if err != nil {
-			return errors.Join(ErrFailedToCreateStartDirectory, err)
-		}
+	err := option.CreateStartDirectoryIfMissing()
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func NewUSQLProvider(configPath string) USQLProvider {
+func NewUSQLProvider(configPath string, startDirectory string) USQLProvider {
 	if configPath == "" {
 		configPath = USQLConfigDefaultPath
 	}
 
 	return USQLProvider{
-		ConfigPath: configPath,
+		ConfigPath:     configPath,
+		StartDirectory: startDirectory,
 	}
 }
