@@ -7,12 +7,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/PhilippHeuer/fuzzmux/pkg/core/util"
+	"github.com/adrg/xdg"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 )
 
-var configDir = filepath.Join(util.GetAppDataDir(), "fuzzmux")
+var configDir = filepath.Join(xdg.ConfigHome, "fuzzmux")
 
 var defaultChecks = []string{".git", ".gitignore", ".hg", ".hgignore", ".svn", ".vscode", ".idea"}
 

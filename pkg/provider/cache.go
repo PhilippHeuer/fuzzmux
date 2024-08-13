@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/PhilippHeuer/fuzzmux/pkg/core/util"
+	"github.com/adrg/xdg"
 )
 
-var dataDir = filepath.Join(util.GetAppStateDir(), "fuzzmux")
+var dataDir = filepath.Join(xdg.StateHome, "fuzzmux")
 
 type OptionsCache struct {
 	ProviderName string

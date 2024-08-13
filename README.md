@@ -1,7 +1,7 @@
 # FuzzMux
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/PhilippHeuer/fuzzmux)](https://goreportcard.com/report/github.com/PhilippHeuer/fuzzmux)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/philippheuer/fuzzmux/badge)](https://securityscorecards.dev/viewer/?uri=github.com/philippheuer/fuzzmux)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/PhilippHeuer/fuzzmux/badge)](https://securityscorecards.dev/viewer/?uri=github.com/PhilippHeuer/fuzzmux)
 
 ## What is FuzzMux?
 
