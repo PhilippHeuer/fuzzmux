@@ -47,11 +47,14 @@ func (p SWAY) Run(option *provider.Option, opts Opts) error {
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to get focused workspace")
 	}
+	log.Debug().Int64("id", ws.ID).Msg("active workspace")
 
 	// kill all active windows in workspace
 	if opts.Layout.ClearWorkspace {
+		log.Debug().Msg("clearing current workspace")
 		for _, node := range ws.Nodes {
 			if node.Type == "con" {
+				log.Trace().Int64("id", node.ID).Msg("killing window by nodeId")
 				_, killErr := client.RunCommand(ctx, fmt.Sprintf("[con_id=%d] kill", node.ID))
 				if killErr != nil {
 					log.Warn().Err(killErr).Msg("failed to kill window")
@@ -62,6 +65,8 @@ func (p SWAY) Run(option *provider.Option, opts Opts) error {
 
 	// start apps
 	for _, app := range opts.Layout.Apps {
+		log.Debug().Str("name", app.Name).Msg("starting app")
+
 		// launch script
 		script := strings.Builder{}
 		for _, cmd := range app.Commands {
@@ -82,7 +87,9 @@ func (p SWAY) Run(option *provider.Option, opts Opts) error {
 				log.Fatal().Err(err).Str("name", app.Name).Msg("failed to prepare command to start app")
 			}
 		}
+		log.Trace().Str("name", app.Name).Str("cmd", cmd).Msg("started app")
 
+		// execute command
 		_, cmdErr := client.RunCommand(ctx, fmt.Sprintf("exec cd %q && %s", startDirectory, cmd))
 		if cmdErr != nil {
 			log.Fatal().Err(cmdErr).Str("name", app.Name).Msg("failed to start app")

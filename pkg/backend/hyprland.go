@@ -42,9 +42,12 @@ func (p Hyprland) Run(option *provider.Option, opts Opts) error {
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to get focused workspace")
 	}
+	log.Debug().Int("id", ws.Id).Msg("active workspace")
 
 	// kill all active windows in workspace
 	if opts.Layout.ClearWorkspace {
+		log.Debug().Msg("clearing current workspace")
+
 		clients, err := client.Clients()
 		if err != nil {
 			return err
@@ -52,6 +55,8 @@ func (p Hyprland) Run(option *provider.Option, opts Opts) error {
 
 		for _, c := range clients {
 			if c.Workspace.Id == ws.Id {
+				log.Trace().Int("pid", c.Pid).Int("workspace", c.Workspace.Id).Msg("killing process")
+
 				err := util.KillProcessByPID(c.Pid)
 				if err != nil {
 					return err
@@ -62,6 +67,8 @@ func (p Hyprland) Run(option *provider.Option, opts Opts) error {
 
 	// start apps
 	for _, app := range opts.Layout.Apps {
+		log.Debug().Str("name", app.Name).Msg("starting app")
+
 		// launch script
 		script := strings.Builder{}
 		for _, cmd := range app.Commands {
@@ -82,6 +89,7 @@ func (p Hyprland) Run(option *provider.Option, opts Opts) error {
 				log.Fatal().Err(err).Str("name", app.Name).Msg("failed to prepare command to start app")
 			}
 		}
+		log.Trace().Str("name", app.Name).Str("cmd", cmd).Msg("started app")
 
 		// execute command
 		cmdErr := hyprlandIPCCommand(client, fmt.Sprintf("exec cd %q && %s", startDirectory, cmd))
