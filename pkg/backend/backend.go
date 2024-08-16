@@ -3,6 +3,8 @@ package backend
 import (
 	"fmt"
 	"sort"
+
+	"github.com/rs/zerolog/log"
 )
 
 func ChooseBackend(backend string) (Provider, error) {
@@ -21,8 +23,10 @@ func ChooseBackend(backend string) (Provider, error) {
 	// select backend by calling check
 	for _, p := range providerBackends {
 		if backend == "" && p.Check() {
+			log.Debug().Str("backend", p.Name()).Msg("selected backend implementation")
 			return p, nil
 		} else if backend != "" && backend == p.Name() {
+			log.Debug().Str("backend", p.Name()).Msg("selected backend implementation")
 			return p, nil
 		}
 	}

@@ -36,6 +36,7 @@ func (p Hyprland) Run(option *provider.Option, opts Opts) error {
 	if client == nil {
 		return fmt.Errorf("failed to connect to hyprland ipc socket")
 	}
+	log.Debug().Msg("connected to hyprland ipc")
 
 	// active workspace
 	ws, err := client.ActiveWorkspace()
@@ -56,7 +57,6 @@ func (p Hyprland) Run(option *provider.Option, opts Opts) error {
 		for _, c := range clients {
 			if c.Workspace.Id == ws.Id {
 				log.Trace().Int("pid", c.Pid).Int("workspace", c.Workspace.Id).Msg("killing process")
-
 				err := util.KillProcessByPID(c.Pid)
 				if err != nil {
 					return err

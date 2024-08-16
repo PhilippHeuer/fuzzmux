@@ -41,6 +41,7 @@ func (p SWAY) Run(option *provider.Option, opts Opts) error {
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to connect to sway")
 	}
+	log.Debug().Msg("connected to sway ipc")
 
 	// get sway workspace
 	ws, err := currentSwayWorkspace(ctx, client)
