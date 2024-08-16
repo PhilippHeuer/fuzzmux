@@ -24,6 +24,7 @@ Similar rules can be defined for ssh connections, kubernetes namespaces, ... - s
 
 ## Supported Window Managers / Terminal Workspace Managers
 
+- hyprland
 - sway
 - i3
 - tmux

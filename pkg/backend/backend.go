@@ -9,6 +9,7 @@ func ChooseBackend(backend string) (Provider, error) {
 	// sort by order
 	var providerBackends = []Provider{
 		TMUX{},
+		Hyprland{},
 		SWAY{},
 		I3{},
 		Shell{},
