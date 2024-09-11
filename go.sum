@@ -10,8 +10,8 @@ github.com/antlr4-go/antlr/v4 v4.13.1 h1:SqQKkuVZ+zWkMMNkjy5FZe5mr5WURWnlpmOuzYW
 github.com/antlr4-go/antlr/v4 v4.13.1/go.mod h1:GKmUxMtwp6ZgGwZSva4eWPC5mS6vUAmOABFgjdkM7Nw=
 github.com/charlievieth/fastwalk v1.0.8 h1:uaoH6cAKSk73aK7aKXqs0+bL+J3Txzd3NGH8tRXgHko=
 github.com/charlievieth/fastwalk v1.0.8/go.mod h1:yGy1zbxog41ZVMcKA/i8ojXLFsuayX5VvwhQVoj9PBI=
-github.com/cidverse/cidverseutils/filesystem v0.1.0 h1:0WF4gBtThvRMWUsoGtK1MT5O6yE5Ql6H2x6RkMLQoc8=
-github.com/cidverse/cidverseutils/filesystem v0.1.0/go.mod h1:rw4oLD+q/7HCMkQUooxVz4He06ORyoAn2cXLFqpBinQ=
+github.com/cidverse/cidverseutils/filesystem v0.1.1 h1:xKGk+QhoywNKUp0artHkRPPOl+C3aa6wujkHhjTB6sI=
+github.com/cidverse/cidverseutils/filesystem v0.1.1/go.mod h1:cpAd2RNrNiBRtDJS8S/VRiTD88kU9pxV1i5aA+AqUso=
 github.com/cidverse/cidverseutils/zerologconfig v0.1.0 h1:iUJ9ANUCHH6IsM8MoeOv5Q8QvCd+iDl4X8QL/nfAdVw=
 github.com/cidverse/cidverseutils/zerologconfig v0.1.0/go.mod h1:X3mGXDU1BtdGk818+a0UL6vzhU9lLb8/oEslSnVQzuA=
 github.com/cidverse/go-rules v0.0.0-20231112122021-075e5e6f8abc h1:eVuHW4U9BoiqjIwWPATHRm6oiphVlm3Jn7QgHGgeVq8=

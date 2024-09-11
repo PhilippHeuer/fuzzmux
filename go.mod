@@ -7,7 +7,7 @@ go 1.22.0
 
 require (
 	github.com/adrg/xdg v0.5.0
-	github.com/cidverse/cidverseutils/filesystem v0.1.0
+	github.com/cidverse/cidverseutils/filesystem v0.1.1
 	github.com/cidverse/cidverseutils/zerologconfig v0.1.0
 	github.com/cidverse/go-rules v0.0.0-20231112122021-075e5e6f8abc
 	github.com/cidverse/repoanalyzer v0.1.1-0.20240510193438-abb053de8c14
