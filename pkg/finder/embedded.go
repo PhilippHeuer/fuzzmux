@@ -2,14 +2,14 @@ package finder
 
 import (
 	"fmt"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"strings"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
-	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
 	"github.com/ktr0731/go-fuzzyfinder"
 )
 
-func FuzzyFinderEmbedded(options []provider.Option, cfg config.FinderConfig) (provider.Option, error) {
+func FuzzyFinderEmbedded(options []recon.Option, cfg config.FinderConfig) (recon.Option, error) {
 	var fOptions = []fuzzyfinder.Option{
 		fuzzyfinder.WithCursorPosition(fuzzyfinder.CursorPositionBottom),
 	}
@@ -61,7 +61,7 @@ func FuzzyFinderEmbedded(options []provider.Option, cfg config.FinderConfig) (pr
 		fOptions...,
 	)
 	if err != nil {
-		return provider.Option{}, fmt.Errorf("failed to find option: %w", err)
+		return recon.Option{}, fmt.Errorf("failed to find option: %w", err)
 	}
 
 	return options[idx], nil

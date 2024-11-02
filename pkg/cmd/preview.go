@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/PhilippHeuer/fuzzmux/pkg/app"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"os"
 	"strings"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
-	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -28,12 +29,12 @@ func previewCmd() *cobra.Command {
 			if confErr != nil {
 				log.Fatal().Err(confErr).Msg("failed to load configuration")
 			}
-			providers := provider.GetProviders(conf)
-			var options []provider.Option
+			providers := app.ConfigToReconModules(conf)
+			var options []recon.Option
 			for _, p := range providers {
 				opts, err := p.OptionsOrCache(3600)
 				if err != nil {
-					log.Debug().Err(err).Str("provider", p.Name()).Msg("failed to get options")
+					log.Debug().Err(err).Str("recon", p.Name()).Msg("failed to get options")
 				}
 
 				options = append(options, opts...)
@@ -45,19 +46,19 @@ func previewCmd() *cobra.Command {
 			}
 
 			// query option from cache
-			option, err := provider.OptionById(options, optionId)
+			option, err := recon.OptionById(options, optionId)
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed to find option in cache")
 			}
 
 			// call select
-			selectedProvider, err := provider.GetProviderByName(providers, option.ProviderName)
+			selectedProvider, err := app.FindReconModuleByName(providers, option.ProviderName)
 			if err != nil {
-				log.Fatal().Err(err).Str("provider", option.ProviderName).Msg("failed to get provider of selected option")
+				log.Fatal().Err(err).Str("recon", option.ProviderName).Msg("failed to get recon of selected option")
 			}
 			err = selectedProvider.SelectOption(option)
 			if err != nil {
-				log.Fatal().Err(err).Str("provider", option.ProviderName).Msg("failed to run option select")
+				log.Fatal().Err(err).Str("recon", option.ProviderName).Msg("failed to run option select")
 			}
 
 			// print preview
@@ -68,7 +69,7 @@ func previewCmd() *cobra.Command {
 	return cmd
 }
 
-func renderPreview(option *provider.Option) string {
+func renderPreview(option *recon.Option) string {
 	var builder strings.Builder
 	builder.WriteString("# " + option.DisplayName + "\n\n")
 	builder.WriteString("Provider: " + option.ProviderName + "\n")
@@ -80,7 +81,7 @@ func renderPreview(option *provider.Option) string {
 		}
 	}
 
-	// TODO: custom option render logic should move into the option provider
+	// TODO: custom option render logic should move into the option recon
 	switch option.ProviderName {
 	case "kubernetes":
 		builder.WriteString("\n")

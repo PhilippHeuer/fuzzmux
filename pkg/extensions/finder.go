@@ -3,11 +3,10 @@ package extensions
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 )
 
-func OptionsForFinder(mode string, options []provider.Option) error {
+func OptionsForFinder(mode string, options []recon.Option) error {
 	if mode == "telescope" {
 		return telescopeOptions(options)
 	}
@@ -21,7 +20,7 @@ type TelescopeOption struct {
 	Value   string `json:"value"`
 }
 
-func telescopeOptions(options []provider.Option) error {
+func telescopeOptions(options []recon.Option) error {
 	var telescopeOptions []TelescopeOption
 
 	for _, option := range options {

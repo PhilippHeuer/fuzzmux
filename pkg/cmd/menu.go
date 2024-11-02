@@ -2,14 +2,16 @@ package cmd
 
 import (
 	"errors"
+	"github.com/PhilippHeuer/fuzzmux/pkg/app"
+	"github.com/PhilippHeuer/fuzzmux/pkg/launcher"
+	"github.com/PhilippHeuer/fuzzmux/pkg/layout"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/static"
 	"slices"
 
-	"github.com/PhilippHeuer/fuzzmux/pkg/backend"
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
-	"github.com/PhilippHeuer/fuzzmux/pkg/core/layout"
-	"github.com/PhilippHeuer/fuzzmux/pkg/errtypes"
 	"github.com/PhilippHeuer/fuzzmux/pkg/finder"
-	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
+	"github.com/PhilippHeuer/fuzzmux/pkg/types"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -27,16 +29,16 @@ func menuCmd() *cobra.Command {
 				log.Fatal().Err(err).Msg("failed to load configuration")
 			}
 
-			// select provider
+			// select recon
 			selected, err := providerMenuFuzzyFinder(conf, args)
 			if err != nil {
-				log.Fatal().Err(err).Msg("failed to get selected provider")
+				log.Fatal().Err(err).Msg("failed to get selected recon module")
 			}
-			log.Debug().Str("display-name", selected.DisplayName).Str("name", selected.Name).Str("directory", selected.StartDirectory).Interface("context", selected.Context).Msg("selected provider from menu")
+			log.Debug().Str("display-name", selected.DisplayName).Str("name", selected.Name).Str("directory", selected.StartDirectory).Interface("context", selected.Context).Msg("selected recon from menu")
 
-			// select provider options (static options by tag, providers by name)
+			// select recon options (static options by tag, providers by name)
 			if len(selected.Tags) > 0 {
-				selected, err = optionFuzzyFinder(conf, []string{provider.StaticProviderName}, RootFlags{
+				selected, err = optionFuzzyFinder(conf, []string{static.StaticProviderName}, RootFlags{
 					backend:  flags.backend,
 					template: flags.template,
 					showTags: []string{selected.Id},
@@ -70,14 +72,14 @@ func menuCmd() *cobra.Command {
 			}
 
 			// create session or window and attach
-			be, err := backend.ChooseBackend(flags.backend)
+			be, err := app.FindLauncher(flags.backend)
 			if err != nil {
-				log.Fatal().Err(err).Msg("no suitable backend found")
+				log.Fatal().Err(err).Msg("no suitable launcher found")
 			}
-			err = be.Run(&selected, backend.Opts{
+			err = be.Run(&selected, launcher.Opts{
 				SessionName: selected.Name,
 				Layout:      template,
-				AppendMode:  backend.CreateOrAttachSession,
+				AppendMode:  launcher.CreateOrAttachSession,
 			})
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed to modify tmux state")
@@ -85,28 +87,28 @@ func menuCmd() *cobra.Command {
 		},
 	}
 
-	cmd.PersistentFlags().StringVar(&flags.backend, "backend", "", "specify the backend to use, auto-detected if not set (valid: tmux, sway, i3)")
+	cmd.PersistentFlags().StringVar(&flags.backend, "launcher", "", "specify the launcher to use, auto-detected if not set (valid: tmux, sway, i3)")
 	cmd.PersistentFlags().StringVarP(&flags.template, "template", "t", "", "template to create the tmux session")
 
 	return cmd
 }
 
-func providerMenuFuzzyFinder(conf config.Config, filter []string) (provider.Option, error) {
+func providerMenuFuzzyFinder(conf config.Config, filter []string) (recon.Option, error) {
 	// collect options from providers
-	providers := provider.GetProviders(conf)
-	var options []provider.Option
+	providers := app.ConfigToReconModules(conf)
+	var options []recon.Option
 	for _, p := range providers {
-		options = append(options, provider.Option{
+		options = append(options, recon.Option{
 			ProviderName: p.Name(),
 			Id:           p.Name(),
 			DisplayName:  p.Name(),
 			Name:         p.Name(),
 		})
 
-		if p.Name() == provider.StaticProviderName {
+		if p.Name() == static.StaticProviderName {
 			opts, err := p.Options()
 			if err != nil {
-				return provider.Option{}, errors.Join(errtypes.ErrFailedToGetOptionsFromProvider, err)
+				return recon.Option{}, errors.Join(types.ErrFailedToGetOptionsFromProvider, err)
 			}
 
 			var addedProviderNames []string
@@ -117,7 +119,7 @@ func providerMenuFuzzyFinder(conf config.Config, filter []string) (provider.Opti
 
 				providerName := o.Tags[0]
 				if !slices.Contains(addedProviderNames, providerName) {
-					options = append(options, provider.Option{
+					options = append(options, recon.Option{
 						ProviderName: p.Name(),
 						Id:           providerName,
 						DisplayName:  providerName,
@@ -131,7 +133,7 @@ func providerMenuFuzzyFinder(conf config.Config, filter []string) (provider.Opti
 		}
 	}
 	if len(filter) > 0 {
-		var filteredOptions []provider.Option
+		var filteredOptions []recon.Option
 		for _, o := range options {
 			if slices.Contains(filter, o.ProviderName) || (len(o.Tags) > 0 && slices.Contains(filter, o.Tags[0])) {
 				filteredOptions = append(filteredOptions, o)
@@ -140,7 +142,7 @@ func providerMenuFuzzyFinder(conf config.Config, filter []string) (provider.Opti
 		options = filteredOptions
 	}
 	if len(options) == 0 {
-		return provider.Option{}, errtypes.ErrNoProvidersAvailable
+		return recon.Option{}, types.ErrNoProvidersAvailable
 	}
 
 	// fuzzy finder
@@ -150,7 +152,7 @@ func providerMenuFuzzyFinder(conf config.Config, filter []string) (provider.Opti
 		FZFDelimiter: conf.Finder.FZFDelimiter,
 	})
 	if err != nil {
-		return provider.Option{}, errors.Join(errtypes.ErrNoOptionSelected, err)
+		return recon.Option{}, errors.Join(types.ErrNoOptionSelected, err)
 	}
 
 	return selected, nil

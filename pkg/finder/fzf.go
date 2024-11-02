@@ -2,16 +2,16 @@ package finder
 
 import (
 	"fmt"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
-	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
 )
 
 // FuzzyFinderFZF uses fzf to find the selected option
-func FuzzyFinderFZF(options []provider.Option, cfg config.FinderConfig) (provider.Option, error) {
+func FuzzyFinderFZF(options []recon.Option, cfg config.FinderConfig) (recon.Option, error) {
 	// write options to file
 	var builder strings.Builder
 	for _, option := range options {
@@ -19,18 +19,18 @@ func FuzzyFinderFZF(options []provider.Option, cfg config.FinderConfig) (provide
 	}
 	optionFile, err := os.CreateTemp("/tmp", "tms-fzf")
 	if err != nil {
-		return provider.Option{}, fmt.Errorf("failed to create temp file for options: %w", err)
+		return recon.Option{}, fmt.Errorf("failed to create temp file for options: %w", err)
 	}
 	defer os.Remove(optionFile.Name())
 	_, err = optionFile.WriteString(builder.String())
 	if err != nil {
-		return provider.Option{}, fmt.Errorf("failed to write options to file: %w", err)
+		return recon.Option{}, fmt.Errorf("failed to write options to file: %w", err)
 	}
 
 	// get executable path
 	executablePath, err := os.Executable()
 	if err != nil {
-		return provider.Option{}, fmt.Errorf("failed to get executable path: %w", err)
+		return recon.Option{}, fmt.Errorf("failed to get executable path: %w", err)
 	}
 
 	// highlight
@@ -51,11 +51,11 @@ func FuzzyFinderFZF(options []provider.Option, cfg config.FinderConfig) (provide
 	// execute command
 	out, err := cmd.Output()
 	if err != nil {
-		return provider.Option{}, fmt.Errorf("failed to run fzf: %w", err)
+		return recon.Option{}, fmt.Errorf("failed to run fzf: %w", err)
 	}
 	optionId := strings.Split(string(out), cfg.FZFDelimiter)
 	if len(optionId) == 0 {
-		return provider.Option{}, fmt.Errorf("failed to parse fzf output")
+		return recon.Option{}, fmt.Errorf("failed to parse fzf output")
 	}
 
 	// find option
@@ -65,5 +65,5 @@ func FuzzyFinderFZF(options []provider.Option, cfg config.FinderConfig) (provide
 		}
 	}
 
-	return provider.Option{}, fmt.Errorf("failed to find option")
+	return recon.Option{}, fmt.Errorf("failed to find option")
 }

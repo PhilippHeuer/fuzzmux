@@ -37,7 +37,7 @@ func ResolvedConfig() (Config, error) {
 		config.Finder.FZFDelimiter = "\x1F"
 	}
 
-	// ssh provider
+	// ssh module
 	if config.SSHProvider == nil {
 		config.SSHProvider = &SSHProviderConfig{Enabled: false}
 
@@ -46,7 +46,7 @@ func ResolvedConfig() (Config, error) {
 		config.SSHProvider.Mode = SSHWindowMode
 	}
 
-	// project provider
+	// project module
 	if config.ProjectProvider == nil || len(config.ProjectProvider.SourceDirectories) == 0 {
 		config.ProjectProvider = &ProjectProviderConfig{Enabled: false}
 	}
@@ -135,7 +135,7 @@ func CommandsAsStringSlice(commands []Command) []string {
 }
 
 func MergeConfig(a Config, b Config) Config {
-	// overwrite providers
+	// overwrite modules
 	if b.SSHProvider != nil {
 		a.SSHProvider = b.SSHProvider
 	}

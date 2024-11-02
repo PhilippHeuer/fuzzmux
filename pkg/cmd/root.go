@@ -2,16 +2,17 @@ package cmd
 
 import (
 	"errors"
+	"github.com/PhilippHeuer/fuzzmux/pkg/app"
+	"github.com/PhilippHeuer/fuzzmux/pkg/launcher"
+	"github.com/PhilippHeuer/fuzzmux/pkg/layout"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"os"
 	"strings"
 
-	"github.com/PhilippHeuer/fuzzmux/pkg/backend"
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
-	"github.com/PhilippHeuer/fuzzmux/pkg/core/layout"
-	"github.com/PhilippHeuer/fuzzmux/pkg/errtypes"
 	"github.com/PhilippHeuer/fuzzmux/pkg/extensions"
 	"github.com/PhilippHeuer/fuzzmux/pkg/finder"
-	"github.com/PhilippHeuer/fuzzmux/pkg/provider"
+	"github.com/PhilippHeuer/fuzzmux/pkg/types"
 	"github.com/cidverse/cidverseutils/zerologconfig"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -64,14 +65,14 @@ func rootCmd() *cobra.Command {
 			}
 
 			// create session or window and attach
-			be, err := backend.ChooseBackend(flags.backend)
+			be, err := app.FindLauncher(flags.backend)
 			if err != nil {
-				log.Fatal().Err(err).Msg("no suitable backend found")
+				log.Fatal().Err(err).Msg("no suitable launcher found")
 			}
-			err = be.Run(&selected, backend.Opts{
+			err = be.Run(&selected, launcher.Opts{
 				SessionName: selected.Name,
 				Layout:      template,
-				AppendMode:  backend.CreateOrAttachSession,
+				AppendMode:  launcher.CreateOrAttachSession,
 			})
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed to modify tmux state")
@@ -83,7 +84,7 @@ func rootCmd() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&cfg.LogFormat, "log-format", "color", "log format - allowed: "+strings.Join(zerologconfig.ValidLogFormats, ","))
 	cmd.PersistentFlags().BoolVar(&cfg.LogCaller, "log-caller", false, "include caller in log functions")
 
-	cmd.PersistentFlags().StringVar(&flags.backend, "backend", "", "specify the backend to use, auto-detected if not set (valid: tmux, hyprland, sway, i3)")
+	cmd.PersistentFlags().StringVar(&flags.backend, "launcher", "", "specify the launcher to use, auto-detected if not set (valid: tmux, hyprland, sway, i3)")
 	cmd.PersistentFlags().StringVarP(&flags.template, "template", "t", "", "template to create the tmux session")
 	cmd.PersistentFlags().StringVar(&flags.mode, "mode", "", "return data in custom format to use an external fuzzy finder (valid: telescope)")
 	cmd.PersistentFlags().StringVar(&flags.selected, "select", "", "skips the finder and directly selects the given id")
@@ -105,36 +106,36 @@ func Execute() error {
 	return rootCmd().Execute()
 }
 
-func optionFuzzyFinder(conf config.Config, args []string, flags RootFlags) (provider.Option, error) {
+func optionFuzzyFinder(conf config.Config, args []string, flags RootFlags) (recon.Option, error) {
 	// collect options from providers
-	providers := provider.GetProviders(conf)
-	var options []provider.Option
-	options, errs := provider.CollectOptions(providers, args, flags.maxCacheAge)
+	providers := app.ConfigToReconModules(conf)
+	var options []recon.Option
+	options, errs := app.CollectOptions(providers, args, flags.maxCacheAge)
 	if len(options) == 0 && len(errs) > 0 {
-		return provider.Option{}, errors.Join(errtypes.ErrFailedToGetOptionsFromProvider, errors.Join(errs...))
+		return recon.Option{}, errors.Join(types.ErrFailedToGetOptionsFromProvider, errors.Join(errs...))
 	} else if len(errs) > 0 {
-		log.Warn().Errs("errors", errs).Msg("at least one provider failed to collect options")
+		log.Warn().Errs("errors", errs).Msg("at least one recon failed to collect options")
 	}
-	options = provider.FilterOptions(options, flags.showTags, flags.hideTags)
+	options = app.FilterOptions(options, flags.showTags, flags.hideTags)
 	if len(options) == 0 {
-		return provider.Option{}, errtypes.ErrNoOptionsAvailable
+		return recon.Option{}, types.ErrNoOptionsAvailable
 	}
 
 	// custom output mode for external finder
 	if flags.mode != "" {
 		err := extensions.OptionsForFinder(flags.mode, options)
 		if err != nil {
-			return provider.Option{}, errors.Join(errtypes.ErrFailedToRenderOptions, err)
+			return recon.Option{}, errors.Join(types.ErrFailedToRenderOptions, err)
 		}
 		os.Exit(0) // exit after rendering options for external tools, TODO: move this somewhere else
 	}
 
 	// fuzzy finder or direct selection
-	var selected provider.Option
+	var selected recon.Option
 	if flags.selected == "" {
 		s, err := finder.FuzzyFinder(options, *conf.Finder)
 		if err != nil {
-			return provider.Option{}, errors.Join(errtypes.ErrNoOptionSelected, err)
+			return recon.Option{}, errors.Join(types.ErrNoOptionSelected, err)
 		}
 		selected = s
 	} else {
@@ -148,13 +149,13 @@ func optionFuzzyFinder(conf config.Config, args []string, flags RootFlags) (prov
 	log.Debug().Str("display-name", selected.DisplayName).Str("name", selected.Name).Str("directory", selected.StartDirectory).Interface("context", selected.Context).Msg("selected item")
 
 	// call select
-	selectedProvider, err := provider.GetProviderByName(providers, selected.ProviderName)
+	selectedProvider, err := app.FindReconModuleByName(providers, selected.ProviderName)
 	if err != nil {
-		log.Fatal().Err(err).Str("provider", selected.ProviderName).Msg("failed to get provider of selected item")
+		log.Fatal().Err(err).Str("recon", selected.ProviderName).Msg("failed to get recon of selected item")
 	}
 	err = selectedProvider.SelectOption(&selected)
 	if err != nil {
-		log.Fatal().Err(err).Str("provider", selected.ProviderName).Msg("failed to run select")
+		log.Fatal().Err(err).Str("recon", selected.ProviderName).Msg("failed to run select")
 	}
 
 	return selected, nil

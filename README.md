@@ -20,7 +20,8 @@ Similar rules can be defined for ssh connections, kubernetes namespaces, ... - s
 
 - projects (with depth and customizable checks for git, svn, hg, ...)
 - ssh config (parses `~/.ssh/config`)
-- kubernetes
+- kubernetes clusters (including openshift)
+- usql connections (parses `~/.config/usql/config.yml`)
 
 ## Supported Window Managers / Terminal Workspace Managers
 
@@ -138,7 +139,7 @@ Specific setup steps, if required.
 
 - [junegunn/fzf](https://github.com/junegunn/fzf) - A command-line fuzzy finder
 - [ktr0731/go-fuzzyfinder](https://github.com/ktr0731/go-fuzzyfinder) - A fuzzy finder for Go
-- [cidverse/repoanalyzer](https://github.com/cidverse/repoanalyzer) - Analyze your repositories to get insights about the languages, build systems, and more for your rules.
+- [cidverse/repoanalyzer](https://github.com/cidverse/repoanalyzer) - Scans your repositories to get insights about the languages, build systems, and more for your rules
 
 ## Contributing
 
