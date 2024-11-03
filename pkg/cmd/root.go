@@ -94,6 +94,7 @@ func rootCmd() *cobra.Command {
 
 	cmd.AddCommand(menuCmd())
 	cmd.AddCommand(previewCmd())
+	cmd.AddCommand(exportCmd())
 	cmd.AddCommand(versionCmd())
 	cmd.AddCommand(killCmd())
 	cmd.AddCommand(killAllCmd())
