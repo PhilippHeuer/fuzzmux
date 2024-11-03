@@ -106,6 +106,13 @@ func (p USQLProvider) SelectOption(option *recon.Option) error {
 	return nil
 }
 
+func (p USQLProvider) Columns() []recon.Column {
+	return append(recon.DefaultColumns(),
+		recon.Column{Key: "host", Name: "Host"},
+		recon.Column{Key: "user", Name: "User"},
+	)
+}
+
 func NewUSQLProvider(configPath string, startDirectory string) USQLProvider {
 	if configPath == "" {
 		configPath = USQLConfigDefaultPath

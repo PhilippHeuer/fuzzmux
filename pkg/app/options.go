@@ -8,15 +8,11 @@ import (
 )
 
 // CollectOptions collects the options from the providers, optionally filtered by name
-func CollectOptions(modules []recon.Module, byName []string, maxCacheAge int) ([]recon.Option, []error) {
+func CollectOptions(modules []recon.Module, maxCacheAge int) ([]recon.Option, []error) {
 	var options []recon.Option
 	var errs []error
 
 	for _, m := range modules {
-		if len(byName) > 0 && !slices.Contains(byName, m.Name()) {
-			continue
-		}
-
 		opts, err := m.OptionsOrCache(float64(maxCacheAge))
 		if err != nil {
 			errs = append(errs, errors.Join(types.ErrFailedToGetOptionsFromProvider, err))

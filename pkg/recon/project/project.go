@@ -77,6 +77,12 @@ func (p ProjectProvider) SelectOption(option *recon.Option) error {
 	return nil
 }
 
+func (p ProjectProvider) Columns() []recon.Column {
+	return append(recon.DefaultColumns(),
+		recon.Column{Key: "directory", Name: "Directory"},
+	)
+}
+
 func renderProjectDisplayName(project Project, displayFormat config.ProjectDisplayFormat) string {
 	output := project.Name
 	if displayFormat == config.AbsolutePath {

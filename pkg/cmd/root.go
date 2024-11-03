@@ -108,16 +108,11 @@ func Execute() error {
 }
 
 func optionFuzzyFinder(conf config.Config, args []string, flags RootFlags) (recon.Option, error) {
-	// collect options from providers
-	providers := app.ConfigToReconModules(conf)
-	var options []recon.Option
-	options, errs := app.CollectOptions(providers, args, flags.maxCacheAge)
-	if len(options) == 0 && len(errs) > 0 {
-		return recon.Option{}, errors.Join(types.ErrFailedToGetOptionsFromProvider, errors.Join(errs...))
-	} else if len(errs) > 0 {
-		log.Warn().Errs("errors", errs).Msg("at least one recon failed to collect options")
+	// collect options
+	modules, options := app.GatherReconOptions(conf, args, flags.showTags, flags.hideTags, flags.maxCacheAge)
+	if len(options) == 0 {
+		log.Fatal().Msg("no options found")
 	}
-	options = app.FilterOptions(options, flags.showTags, flags.hideTags)
 	if len(options) == 0 {
 		return recon.Option{}, types.ErrNoOptionsAvailable
 	}
@@ -150,7 +145,7 @@ func optionFuzzyFinder(conf config.Config, args []string, flags RootFlags) (reco
 	log.Debug().Str("display-name", selected.DisplayName).Str("name", selected.Name).Str("directory", selected.StartDirectory).Interface("context", selected.Context).Msg("selected item")
 
 	// call select
-	selectedProvider, err := app.FindReconModuleByName(providers, selected.ProviderName)
+	selectedProvider, err := app.FindReconModuleByName(modules, selected.ProviderName)
 	if err != nil {
 		log.Fatal().Err(err).Str("recon", selected.ProviderName).Msg("failed to get recon of selected item")
 	}

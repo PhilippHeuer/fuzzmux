@@ -62,3 +62,7 @@ func (p StaticProvider) SelectOption(option *recon.Option) error {
 
 	return nil
 }
+
+func (p StaticProvider) Columns() []recon.Column {
+	return recon.DefaultColumns()
+}

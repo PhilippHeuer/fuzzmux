@@ -67,9 +67,25 @@ func (o Option) ResolvePlaceholders(input string) string {
 	return input
 }
 
+type Column struct {
+	Key    string
+	Name   string
+	Hidden bool
+}
+
 type Module interface {
 	Name() string                                    // Name returns the name of the recon
 	Options() ([]Option, error)                      // Options returns the options
 	OptionsOrCache(maxAge float64) ([]Option, error) // OptionsOrCache returns the options from cache or calls Options
 	SelectOption(options *Option) error              // Select can be used to run actions / enrich the context before opening the session
+	Columns() []Column                               // Columns returns the columns for a tabular view
+}
+
+func DefaultColumns() []Column {
+	return []Column{
+		{Key: "module", Name: "Module"},
+		{Key: "id", Name: "ID", Hidden: true},
+		{Key: "name", Name: "Name", Hidden: true},
+		{Key: "display_name", Name: "Display Name"},
+	}
 }

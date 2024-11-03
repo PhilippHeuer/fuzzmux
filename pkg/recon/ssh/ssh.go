@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var SSHConfigDefaultPath = filepath.Join(os.Getenv("HOME"), ".ssh", "config")
+var DefaultPath = filepath.Join(os.Getenv("HOME"), ".ssh", "config")
 
 type SSHProvider struct {
 	ConfigPath     string
@@ -105,9 +105,16 @@ func (p SSHProvider) SelectOption(option *recon.Option) error {
 	return nil
 }
 
+func (p SSHProvider) Columns() []recon.Column {
+	return append(recon.DefaultColumns(),
+		recon.Column{Key: "host", Name: "Host"},
+		recon.Column{Key: "user", Name: "User"},
+	)
+}
+
 func NewSSHProvider(configPath string, startDirectory string) SSHProvider {
 	if configPath == "" {
-		configPath = SSHConfigDefaultPath
+		configPath = DefaultPath
 	}
 
 	return SSHProvider{

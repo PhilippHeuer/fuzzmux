@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/app"
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
-	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
+	"github.com/PhilippHeuer/fuzzmux/pkg/export"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"os"
@@ -28,18 +28,14 @@ func exportCmd() *cobra.Command {
 			}
 
 			// collect options
-			providers := app.ConfigToReconModules(conf)
-			var options []recon.Option
-			options, errs := app.CollectOptions(providers, moduleNames, flags.maxCacheAge)
-			if len(options) == 0 && len(errs) > 0 {
-				log.Fatal().Errs("errors", errs).Msg("failed to collect options")
-			} else if len(errs) > 0 {
-				log.Warn().Errs("errors", errs).Msg("at least one recon failed to collect options")
-			}
-			options = app.FilterOptions(options, flags.showTags, flags.hideTags)
+			modules, options := app.GatherReconOptions(conf, moduleNames, flags.showTags, flags.hideTags, flags.maxCacheAge)
 			if len(options) == 0 {
 				log.Fatal().Msg("no options found")
 			}
+
+			// generate table
+			var columns = export.GenerateColumns(modules, outputColumns)
+			header, rows := export.GenerateOptionTable(options, columns)
 
 			// export options
 			writer := cmd.OutOrStdout()
@@ -56,11 +52,14 @@ func exportCmd() *cobra.Command {
 				writer = file
 			}
 			if outputFormat == "tsv" {
-				app.RenderOptionsAsTSV(options, outputColumns, writer)
+				export.RenderAsTSV(header, rows, writer)
 			} else if outputFormat == "csv" {
-				app.RenderOptionsAsCSV(options, outputColumns, writer)
+				err = export.RenderAsCSV(header, rows, writer)
+				if err != nil {
+					log.Fatal().Err(err).Msg("failed to generate CSV")
+				}
 			} else if outputFormat == "json" {
-				app.RenderOptionsAsJson(options, outputColumns, writer)
+				export.RenderAsJSON(rows, writer)
 			} else {
 				log.Fatal().Str("format", outputFormat).Msg("invalid format")
 			}

@@ -76,6 +76,10 @@ func (p KubernetesProvider) SelectOption(option *recon.Option) error {
 	return nil
 }
 
+func (p KubernetesProvider) Columns() []recon.Column {
+	return recon.DefaultColumns()
+}
+
 func NewKubernetesProvider(clusters []config.KubernetesCluster, startDirectory string) KubernetesProvider {
 	if startDirectory == "" {
 		startDirectory = "~/k8s/{{clusterName}}/{{namespace}}"
