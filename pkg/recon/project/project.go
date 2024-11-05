@@ -9,21 +9,21 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type ProjectProvider struct {
-	Checks            []string
-	SourceDirectories []config.SourceDirectory
-	DisplayFormat     config.ProjectDisplayFormat
+var defaultChecks = []string{".git", ".gitignore", ".hg", ".hgignore", ".svn", ".vscode", ".idea"}
+
+type Module struct {
+	Config config.ProjectModuleConfig
 }
 
-func (p ProjectProvider) Name() string {
+func (p Module) Name() string {
 	return "project"
 }
 
-func (p ProjectProvider) Options() ([]recon.Option, error) {
+func (p Module) Options() ([]recon.Option, error) {
 	var options []recon.Option
 
 	// search for projects
-	projects, err := SearchProjectDirectories(p.SourceDirectories, p.Checks)
+	projects, err := SearchProjectDirectories(p.Config.SourceDirectories, p.Config.Checks)
 	if err != nil {
 		return options, fmt.Errorf("failed to scan for projects: %w", err)
 	}
@@ -32,7 +32,7 @@ func (p ProjectProvider) Options() ([]recon.Option, error) {
 		options = append(options, recon.Option{
 			ProviderName:   p.Name(),
 			Id:             project.Path,
-			DisplayName:    renderProjectDisplayName(project, p.DisplayFormat),
+			DisplayName:    renderProjectDisplayName(project, p.Config.DisplayFormat),
 			Name:           project.Name,
 			StartDirectory: project.Path,
 			Tags:           project.Tags,
@@ -42,7 +42,7 @@ func (p ProjectProvider) Options() ([]recon.Option, error) {
 	return options, nil
 }
 
-func (p ProjectProvider) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
+func (p Module) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
 	options, err := recon.LoadOptions(p.Name(), maxAge)
 	if err == nil {
 		return options, nil
@@ -61,7 +61,7 @@ func (p ProjectProvider) OptionsOrCache(maxAge float64) ([]recon.Option, error) 
 	return options, nil
 }
 
-func (p ProjectProvider) SelectOption(option *recon.Option) error {
+func (p Module) SelectOption(option *recon.Option) error {
 	// run repo analyzer
 	modules := analyzer.ScanDirectory(option.StartDirectory)
 	for _, m := range modules {
@@ -77,10 +77,20 @@ func (p ProjectProvider) SelectOption(option *recon.Option) error {
 	return nil
 }
 
-func (p ProjectProvider) Columns() []recon.Column {
+func (p Module) Columns() []recon.Column {
 	return append(recon.DefaultColumns(),
 		recon.Column{Key: "directory", Name: "Directory"},
 	)
+}
+
+func NewModule(config config.ProjectModuleConfig) Module {
+	if config.Checks == nil || len(config.Checks) == 0 {
+		config.Checks = defaultChecks
+	}
+
+	return Module{
+		Config: config,
+	}
 }
 
 func renderProjectDisplayName(project Project, displayFormat config.ProjectDisplayFormat) string {

@@ -8,18 +8,18 @@ import (
 
 const StaticProviderName = "static"
 
-type StaticProvider struct {
-	StaticOptions []config.StaticOption
+type Module struct {
+	Config config.StaticModuleConfig
 }
 
-func (p StaticProvider) Name() string {
+func (p Module) Name() string {
 	return StaticProviderName
 }
 
-func (p StaticProvider) Options() ([]recon.Option, error) {
+func (p Module) Options() ([]recon.Option, error) {
 	var options []recon.Option
 
-	for _, staticOption := range p.StaticOptions {
+	for _, staticOption := range p.Config.StaticOptions {
 		op := recon.Option{
 			ProviderName:   p.Name(),
 			Id:             staticOption.Id,
@@ -45,7 +45,7 @@ func (p StaticProvider) Options() ([]recon.Option, error) {
 	return options, nil
 }
 
-func (p StaticProvider) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
+func (p Module) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
 	options, err := p.Options()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get options: %w", err)
@@ -54,7 +54,7 @@ func (p StaticProvider) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
 	return options, nil
 }
 
-func (p StaticProvider) SelectOption(option *recon.Option) error {
+func (p Module) SelectOption(option *recon.Option) error {
 	if option.Context["preview"] != "" {
 		fmt.Print(option.Context["preview"])
 		return nil
@@ -63,6 +63,12 @@ func (p StaticProvider) SelectOption(option *recon.Option) error {
 	return nil
 }
 
-func (p StaticProvider) Columns() []recon.Column {
+func (p Module) Columns() []recon.Column {
 	return recon.DefaultColumns()
+}
+
+func NewModule(config config.StaticModuleConfig) Module {
+	return Module{
+		Config: config,
+	}
 }

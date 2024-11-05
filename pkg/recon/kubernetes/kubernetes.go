@@ -16,19 +16,18 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-type KubernetesProvider struct {
-	Clusters       []config.KubernetesCluster
-	StartDirectory string
+type Module struct {
+	Config config.KubernetesModuleConfig
 }
 
-func (p KubernetesProvider) Name() string {
+func (p Module) Name() string {
 	return "kubernetes"
 }
 
-func (p KubernetesProvider) Options() ([]recon.Option, error) {
+func (p Module) Options() ([]recon.Option, error) {
 	var options []recon.Option
 
-	for _, cluster := range p.Clusters {
+	for _, cluster := range p.Config.Clusters {
 		if cluster.OpenShift {
 			opts, err := processOpenShiftCluster(cluster)
 			if err != nil {
@@ -38,7 +37,7 @@ func (p KubernetesProvider) Options() ([]recon.Option, error) {
 			continue
 		}
 
-		opts, err := processKubernetesCluster(cluster, p.StartDirectory)
+		opts, err := processKubernetesCluster(cluster, p.Config.StartDirectory)
 		if err != nil {
 			return nil, err
 		}
@@ -48,7 +47,7 @@ func (p KubernetesProvider) Options() ([]recon.Option, error) {
 	return options, nil
 }
 
-func (p KubernetesProvider) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
+func (p Module) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
 	options, err := recon.LoadOptions(p.Name(), 0)
 	if err == nil {
 		return options, nil
@@ -67,7 +66,7 @@ func (p KubernetesProvider) OptionsOrCache(maxAge float64) ([]recon.Option, erro
 	return options, nil
 }
 
-func (p KubernetesProvider) SelectOption(option *recon.Option) error {
+func (p Module) SelectOption(option *recon.Option) error {
 	err := option.CreateStartDirectoryIfMissing()
 	if err != nil {
 		return err
@@ -76,18 +75,17 @@ func (p KubernetesProvider) SelectOption(option *recon.Option) error {
 	return nil
 }
 
-func (p KubernetesProvider) Columns() []recon.Column {
+func (p Module) Columns() []recon.Column {
 	return recon.DefaultColumns()
 }
 
-func NewKubernetesProvider(clusters []config.KubernetesCluster, startDirectory string) KubernetesProvider {
-	if startDirectory == "" {
-		startDirectory = "~/k8s/{{clusterName}}/{{namespace}}"
+func NewModule(config config.KubernetesModuleConfig) Module {
+	if config.StartDirectory == "" {
+		config.StartDirectory = "~/k8s/{{clusterName}}/{{namespace}}"
 	}
 
-	return KubernetesProvider{
-		Clusters:       clusters,
-		StartDirectory: startDirectory,
+	return Module{
+		Config: config,
 	}
 }
 

@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"fmt"
+	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"os"
 	"path/filepath"
@@ -12,20 +13,19 @@ import (
 
 var DefaultPath = filepath.Join(os.Getenv("HOME"), ".ssh", "config")
 
-type SSHProvider struct {
-	ConfigPath     string
-	StartDirectory string
+type Module struct {
+	Config config.SSHModuleConfig
 }
 
-func (p SSHProvider) Name() string {
+func (p Module) Name() string {
 	return "ssh"
 }
 
-func (p SSHProvider) Options() ([]recon.Option, error) {
+func (p Module) Options() ([]recon.Option, error) {
 	var options []recon.Option
 
 	// parse ssh config
-	sshConfig, err := ParseFile(p.ConfigPath)
+	sshConfig, err := ParseFile(p.Config.ConfigFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ssh config: %w", err)
 	}
@@ -61,7 +61,7 @@ func (p SSHProvider) Options() ([]recon.Option, error) {
 				Id:             name,
 				DisplayName:    fmt.Sprintf("%s [%s%s]", name, user, hostname),
 				Name:           name,
-				StartDirectory: p.StartDirectory,
+				StartDirectory: p.Config.StartDirectory,
 				Tags:           tags,
 				Context: map[string]string{
 					"host": hostname,
@@ -77,7 +77,7 @@ func (p SSHProvider) Options() ([]recon.Option, error) {
 	return options, nil
 }
 
-func (p SSHProvider) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
+func (p Module) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
 	options, err := recon.LoadOptions(p.Name(), maxAge)
 	if err == nil {
 		return options, nil
@@ -96,7 +96,7 @@ func (p SSHProvider) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
 	return options, nil
 }
 
-func (p SSHProvider) SelectOption(option *recon.Option) error {
+func (p Module) SelectOption(option *recon.Option) error {
 	err := option.CreateStartDirectoryIfMissing()
 	if err != nil {
 		return err
@@ -105,20 +105,19 @@ func (p SSHProvider) SelectOption(option *recon.Option) error {
 	return nil
 }
 
-func (p SSHProvider) Columns() []recon.Column {
+func (p Module) Columns() []recon.Column {
 	return append(recon.DefaultColumns(),
 		recon.Column{Key: "host", Name: "Host"},
 		recon.Column{Key: "user", Name: "User"},
 	)
 }
 
-func NewSSHProvider(configPath string, startDirectory string) SSHProvider {
-	if configPath == "" {
-		configPath = DefaultPath
+func NewModule(config config.SSHModuleConfig) Module {
+	if config.ConfigFile == "" {
+		config.ConfigFile = DefaultPath
 	}
 
-	return SSHProvider{
-		ConfigPath:     configPath,
-		StartDirectory: startDirectory,
+	return Module{
+		Config: config,
 	}
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/kevinburke/ssh_config"
 )
 
-// ParseFile parses a ssh config file
+// ParseFile parses an ssh config file
 // NOTE: This manually resolves Include statements due to limitations in the ssh_config library
 func ParseFile(path string) (*ssh_config.Config, error) {
 	// read file

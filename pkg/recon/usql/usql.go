@@ -2,6 +2,7 @@ package usql
 
 import (
 	"fmt"
+	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"os"
@@ -13,20 +14,19 @@ import (
 
 var USQLConfigDefaultPath = filepath.Join(os.Getenv("HOME"), ".config", "usql", "config.yaml")
 
-type USQLProvider struct {
-	ConfigPath     string
-	StartDirectory string
+type Module struct {
+	Config config.USQLModuleConfig
 }
 
-func (p USQLProvider) Name() string {
+func (p Module) Name() string {
 	return "usql"
 }
 
-func (p USQLProvider) Options() ([]recon.Option, error) {
+func (p Module) Options() ([]recon.Option, error) {
 	var options []recon.Option
 
 	// parse config
-	conf, err := ParseFile(p.ConfigPath)
+	conf, err := ParseFile(p.Config.ConfigFile)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse usql config: %w", err)
 	}
@@ -44,7 +44,7 @@ func (p USQLProvider) Options() ([]recon.Option, error) {
 			Id:             "usql-" + key,
 			DisplayName:    fmt.Sprintf("%s @ %s:%d", conn.Username, conn.Hostname, conn.Port),
 			Name:           key,
-			StartDirectory: p.StartDirectory,
+			StartDirectory: p.Config.StartDirectory,
 			Context: map[string]string{
 				"name":     conn.Name,
 				"hostname": conn.Hostname,
@@ -78,7 +78,7 @@ func (p USQLProvider) Options() ([]recon.Option, error) {
 	return options, nil
 }
 
-func (p USQLProvider) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
+func (p Module) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
 	options, err := recon.LoadOptions(p.Name(), maxAge)
 	if err == nil {
 		return options, nil
@@ -97,7 +97,7 @@ func (p USQLProvider) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
 	return options, nil
 }
 
-func (p USQLProvider) SelectOption(option *recon.Option) error {
+func (p Module) SelectOption(option *recon.Option) error {
 	err := option.CreateStartDirectoryIfMissing()
 	if err != nil {
 		return err
@@ -106,20 +106,19 @@ func (p USQLProvider) SelectOption(option *recon.Option) error {
 	return nil
 }
 
-func (p USQLProvider) Columns() []recon.Column {
+func (p Module) Columns() []recon.Column {
 	return append(recon.DefaultColumns(),
 		recon.Column{Key: "host", Name: "Host"},
 		recon.Column{Key: "user", Name: "User"},
 	)
 }
 
-func NewUSQLProvider(configPath string, startDirectory string) USQLProvider {
-	if configPath == "" {
-		configPath = USQLConfigDefaultPath
+func NewModule(config config.USQLModuleConfig) Module {
+	if config.ConfigFile == "" {
+		config.ConfigFile = USQLConfigDefaultPath
 	}
 
-	return USQLProvider{
-		ConfigPath:     configPath,
-		StartDirectory: startDirectory,
+	return Module{
+		Config: config,
 	}
 }

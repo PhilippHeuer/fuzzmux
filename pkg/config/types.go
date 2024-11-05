@@ -1,28 +1,5 @@
 package config
 
-type Config struct {
-	// ProjectProvider is the configuration for projects
-	ProjectProvider *ProjectProviderConfig `yaml:"project"`
-
-	// SSHProvider is the configuration for ssh connections
-	SSHProvider *SSHProviderConfig `yaml:"ssh"`
-
-	// KubernetesProvider is the configuration for k8s connections
-	KubernetesProvider *KubernetesProviderConfig `yaml:"kubernetes"`
-
-	// USQLProvider is the configuration for usql connections
-	USQLProvider *USQLProviderConfig `yaml:"usql"`
-
-	// StaticProvider allows to define static options
-	StaticProvider *StaticProviderConfig `yaml:"static"`
-
-	// Layouts is a map of tmux layouts
-	Layouts map[string]Layout `yaml:"layouts"`
-
-	// Finder
-	Finder *FinderConfig `yaml:"finder"`
-}
-
 type FinderConfig struct {
 	// Executable is the fuzzy finder, e.g. "fzf" or "embedded"
 	Executable string `yaml:"executable"`
@@ -34,9 +11,7 @@ type FinderConfig struct {
 	FZFDelimiter string `yaml:"fzf-delimiter"`
 }
 
-type ProjectProviderConfig struct {
-	Enabled bool `yaml:"enabled"`
-
+type ProjectModuleConfig struct {
 	// Sources is a list of source directories that should be scanned
 	SourceDirectories []SourceDirectory `yaml:"directories"`
 
@@ -61,9 +36,7 @@ type SourceDirectory struct {
 	Tags []string `yaml:"tags"`
 }
 
-type SSHProviderConfig struct {
-	Enabled bool `yaml:"enabled"`
-
+type SSHModuleConfig struct {
 	// ConfigFile is used in case your ssh config is not in the default location
 	ConfigFile string `yaml:"file"`
 
@@ -74,9 +47,7 @@ type SSHProviderConfig struct {
 	Mode SSHMode `yaml:"mode"`
 }
 
-type KubernetesProviderConfig struct {
-	Enabled bool `yaml:"enabled"`
-
+type KubernetesModuleConfig struct {
 	// Clusters is a list of kubernetes clusters that should be scanned
 	Clusters []KubernetesCluster `yaml:"clusters"`
 
@@ -98,9 +69,7 @@ type KubernetesCluster struct {
 	KubeConfig string `yaml:"kubeconfig"`
 }
 
-type USQLProviderConfig struct {
-	Enabled bool `yaml:"enabled"`
-
+type USQLModuleConfig struct {
 	// ConfigFile is used in case your usql config is not in the default location
 	ConfigFile string `yaml:"file"`
 
@@ -108,9 +77,7 @@ type USQLProviderConfig struct {
 	StartDirectory string `yaml:"start-directory"`
 }
 
-type StaticProviderConfig struct {
-	Enabled bool `yaml:"enabled"`
-
+type StaticModuleConfig struct {
 	// Options is a list of static options
 	StaticOptions []StaticOption `yaml:"options"`
 }

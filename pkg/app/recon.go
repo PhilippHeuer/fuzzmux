@@ -11,51 +11,32 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/static"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/usql"
 	"github.com/PhilippHeuer/fuzzmux/pkg/types"
-	"github.com/cidverse/cidverseutils/filesystem"
 	"github.com/rs/zerolog/log"
 	"slices"
 )
 
 // ConfigToReconModules initializes the recon modules based on the provided config
-func ConfigToReconModules(config config.Config) []recon.Module {
-	var providers []recon.Module
+func ConfigToReconModules(conf config.Config) []recon.Module {
+	var modules []recon.Module
 
-	// projects
-	if config.ProjectProvider != nil && config.ProjectProvider.Enabled {
-		providers = append(providers, project.ProjectProvider{
-			SourceDirectories: config.ProjectProvider.SourceDirectories,
-			Checks:            config.ProjectProvider.Checks,
-			DisplayFormat:     config.ProjectProvider.DisplayFormat,
-		})
+	for _, m := range conf.Modules {
+		switch cfg := m.(type) {
+		case *config.ProjectModuleConfig:
+			modules = append(modules, project.NewModule(*cfg))
+		case *config.SSHModuleConfig:
+			modules = append(modules, ssh.NewModule(*cfg))
+		case *config.KubernetesModuleConfig:
+			modules = append(modules, kubernetes.NewModule(*cfg))
+		case *config.USQLModuleConfig:
+			modules = append(modules, usql.NewModule(*cfg))
+		case *config.StaticModuleConfig:
+			modules = append(modules, static.NewModule(*cfg))
+		default:
+			log.Error().Interface("module", m).Msg("unrecognized module type")
+		}
 	}
 
-	// ssh
-	if config.SSHProvider != nil && config.SSHProvider.Enabled {
-		providers = append(providers, ssh.NewSSHProvider(config.SSHProvider.ConfigFile, config.SSHProvider.StartDirectory))
-	} else if config.SSHProvider == nil && filesystem.FileExists(ssh.DefaultPath) {
-		providers = append(providers, ssh.NewSSHProvider("", ""))
-	}
-
-	// k8s
-	if config.KubernetesProvider != nil && config.KubernetesProvider.Enabled {
-		providers = append(providers, kubernetes.NewKubernetesProvider(config.KubernetesProvider.Clusters, config.KubernetesProvider.StartDirectory))
-	}
-
-	// usql
-	if config.USQLProvider != nil && config.USQLProvider.Enabled {
-		providers = append(providers, usql.NewUSQLProvider(config.USQLProvider.ConfigFile, config.USQLProvider.StartDirectory))
-	} else if config.USQLProvider == nil && filesystem.FileExists(usql.USQLConfigDefaultPath) {
-		providers = append(providers, usql.NewUSQLProvider("", ""))
-	}
-
-	// static
-	if config.StaticProvider != nil && config.StaticProvider.Enabled {
-		providers = append(providers, static.StaticProvider{
-			StaticOptions: config.StaticProvider.StaticOptions,
-		})
-	}
-
-	return providers
+	return modules
 }
 
 // FindReconModuleByName finds a recon module in the list by name
