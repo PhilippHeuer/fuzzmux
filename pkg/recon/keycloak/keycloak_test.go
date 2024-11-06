@@ -28,6 +28,10 @@ func init() {
 }
 
 func TestSearchUsers(t *testing.T) {
+	if os.Getenv("DOCKER_HOST") == "" {
+		t.Skip("skipping test")
+	}
+
 	ctx := context.Background()
 	keycloakServer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: keycloakMockRequest,

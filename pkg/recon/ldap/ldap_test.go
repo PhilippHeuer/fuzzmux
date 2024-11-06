@@ -28,6 +28,10 @@ func init() {
 }
 
 func TestSearchUsers(t *testing.T) {
+	if os.Getenv("DOCKER_HOST") == "" {
+		t.Skip("skipping test")
+	}
+
 	ctx := context.Background()
 	ldapServer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: ldapMockRequest,
@@ -57,6 +61,10 @@ func TestSearchUsers(t *testing.T) {
 }
 
 func TestSearchGroups(t *testing.T) {
+	if os.Getenv("DOCKER_HOST") == "" {
+		t.Skip("skipping test")
+	}
+
 	ctx := context.Background()
 	ldapServer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: ldapMockRequest,
