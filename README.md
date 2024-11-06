@@ -24,6 +24,7 @@ Similar rules can be defined for ssh connections, kubernetes namespaces, ... - s
 - usql connections (parses `~/.config/usql/config.yml`)
 - ldap (query users and groups)
 - keycloak (query users, groups and clients)
+- backstage (query catalog)
 
 ## Supported Window Managers / Terminal Workspace Managers
 

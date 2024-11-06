@@ -145,6 +145,17 @@ const (
 	KeycloakGroup  KeycloakContent = "group"
 )
 
+type BackstageModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
+	// Host is the Backstage hostname or IP address
+	Host string `yaml:"host"`
+
+	// Query is a list of content types that should be queried
+	Query []string `yaml:"query"`
+}
+
 type StaticOption struct {
 	// Id is a unique identifier for the option
 	Id string `yaml:"id"`

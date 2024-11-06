@@ -3,12 +3,15 @@ module github.com/PhilippHeuer/fuzzmux
 //go:platform linux/amd64
 //go:platform darwin/amd64
 
-go 1.22.0
+go 1.23
+
+toolchain go1.23.2
 
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/adrg/xdg v0.5.3
 	github.com/cidverse/cidverseutils/zerologconfig v0.1.0
+	github.com/cidverse/go-ptr v0.0.0-20240331160646-489e694bebbf
 	github.com/cidverse/go-rules v0.0.0-20231112122021-075e5e6f8abc
 	github.com/cidverse/repoanalyzer v0.1.1-0.20240510193438-abb053de8c14
 	github.com/go-ldap/ldap/v3 v3.4.8
@@ -21,6 +24,7 @@ require (
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
+	github.com/tdabasinskas/go-backstage/v2 v2.5.1
 	github.com/testcontainers/testcontainers-go v0.34.0
 	go.i3wm.org/i3/v4 v4.21.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -40,7 +44,6 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/charlievieth/fastwalk v1.0.9 // indirect
 	github.com/cidverse/cidverseutils/filesystem v0.1.1 // indirect
-	github.com/cidverse/go-ptr v0.0.0-20240331160646-489e694bebbf // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/cpuguy83/dockercfg v0.3.2 // indirect
