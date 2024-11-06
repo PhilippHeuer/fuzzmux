@@ -6,6 +6,7 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/kubernetes"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/ldap"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/project"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/ssh"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/static"
@@ -31,6 +32,8 @@ func ConfigToReconModules(conf config.Config) []recon.Module {
 			modules = append(modules, usql.NewModule(*cfg))
 		case *config.StaticModuleConfig:
 			modules = append(modules, static.NewModule(*cfg))
+		case *config.LDAPModuleConfig:
+			modules = append(modules, ldap.NewModule(*cfg))
 		default:
 			log.Error().Interface("module", m).Msg("unrecognized module type")
 		}

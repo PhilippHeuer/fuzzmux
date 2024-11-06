@@ -53,12 +53,14 @@ func (c *Config) UnmarshalYAML(value *yaml.Node) error {
 			module = &USQLModuleConfig{}
 		case "static":
 			module = &StaticModuleConfig{}
+		case "ldap":
+			module = &LDAPModuleConfig{}
 		default:
-			return fmt.Errorf("unknown module type '%s' for key %s", typeInfo.Type, key)
+			return fmt.Errorf("unknown module type '%s' for key %d", typeInfo.Type, key)
 		}
 
 		if err := moduleNode.Decode(module); err != nil {
-			return fmt.Errorf("failed to decode module for key %s: %w", key, err)
+			return fmt.Errorf("failed to decode module for key %d: %w", key, err)
 		}
 
 		c.Modules = append(c.Modules, module)

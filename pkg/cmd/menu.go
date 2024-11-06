@@ -6,7 +6,6 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/launcher"
 	"github.com/PhilippHeuer/fuzzmux/pkg/layout"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
-	"github.com/PhilippHeuer/fuzzmux/pkg/recon/static"
 	"slices"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
@@ -38,7 +37,7 @@ func menuCmd() *cobra.Command {
 
 			// select recon options (static options by tag, providers by name)
 			if len(selected.Tags) > 0 {
-				selected, err = optionFuzzyFinder(conf, []string{static.StaticProviderName}, RootFlags{
+				selected, err = optionFuzzyFinder(conf, []string{"static"}, RootFlags{
 					backend:  flags.backend,
 					template: flags.template,
 					showTags: []string{selected.Id},
@@ -105,7 +104,7 @@ func providerMenuFuzzyFinder(conf config.Config, filter []string) (recon.Option,
 			Name:         p.Name(),
 		})
 
-		if p.Name() == static.StaticProviderName {
+		if p.Name() == "static" {
 			opts, err := p.Options()
 			if err != nil {
 				return recon.Option{}, errors.Join(types.ErrFailedToGetOptionsFromProvider, err)

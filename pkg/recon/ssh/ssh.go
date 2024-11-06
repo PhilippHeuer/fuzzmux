@@ -11,6 +11,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const moduleName = "ssh"
+
 var DefaultPath = filepath.Join(os.Getenv("HOME"), ".ssh", "config")
 
 type Module struct {
@@ -18,7 +20,14 @@ type Module struct {
 }
 
 func (p Module) Name() string {
-	return "ssh"
+	if p.Config.Name != "" {
+		return p.Config.Name
+	}
+	return moduleName
+}
+
+func (p Module) Type() string {
+	return moduleName
 }
 
 func (p Module) Options() ([]recon.Option, error) {
@@ -58,6 +67,7 @@ func (p Module) Options() ([]recon.Option, error) {
 			// option
 			opt := recon.Option{
 				ProviderName:   p.Name(),
+				ProviderType:   p.Type(),
 				Id:             name,
 				DisplayName:    fmt.Sprintf("%s [%s%s]", name, user, hostname),
 				Name:           name,

@@ -12,6 +12,9 @@ type FinderConfig struct {
 }
 
 type ProjectModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
 	// Sources is a list of source directories that should be scanned
 	SourceDirectories []SourceDirectory `yaml:"directories"`
 
@@ -37,6 +40,9 @@ type SourceDirectory struct {
 }
 
 type SSHModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
 	// ConfigFile is used in case your ssh config is not in the default location
 	ConfigFile string `yaml:"file"`
 
@@ -48,6 +54,9 @@ type SSHModuleConfig struct {
 }
 
 type KubernetesModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
 	// Clusters is a list of kubernetes clusters that should be scanned
 	Clusters []KubernetesCluster `yaml:"clusters"`
 
@@ -70,6 +79,9 @@ type KubernetesCluster struct {
 }
 
 type USQLModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
 	// ConfigFile is used in case your usql config is not in the default location
 	ConfigFile string `yaml:"file"`
 
@@ -78,8 +90,31 @@ type USQLModuleConfig struct {
 }
 
 type StaticModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
 	// Options is a list of static options
 	StaticOptions []StaticOption `yaml:"options"`
+}
+
+type LDAPModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
+	// Host is the LDAP server hostname or IP address
+	Host string `yaml:"host"`
+
+	// BaseDistinguishedName (DN) for LDAP base search (e.g., "dc=example,dc=com")
+	BaseDistinguishedName string `yaml:"base-dn"`
+
+	// BindDistinguishedName (DN) used for LDAP binding (e.g., "cn=admin,dc=example,dc=com")
+	BindDistinguishedName string `yaml:"bind-dn"`
+
+	// Password for LDAP bind user
+	BindPassword string `yaml:"bind-password"`
+
+	// Filter is the LDAP search filter (e.g., "(&(objectClass=organizationalPerson))")
+	Filter string `yaml:"filter"`
 }
 
 type StaticOption struct {

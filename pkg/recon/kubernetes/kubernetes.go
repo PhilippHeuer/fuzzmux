@@ -3,25 +3,32 @@ package kubernetes
 import (
 	"context"
 	"fmt"
+	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
-	"os"
-	"path/filepath"
-
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	projectsv1 "github.com/openshift/client-go/project/clientset/versioned/typed/project/v1"
 	"github.com/rs/zerolog/log"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"os"
 )
+
+const moduleName = "kubernetes"
 
 type Module struct {
 	Config config.KubernetesModuleConfig
 }
 
 func (p Module) Name() string {
-	return "kubernetes"
+	if p.Config.Name != "" {
+		return p.Config.Name
+	}
+	return moduleName
+}
+
+func (p Module) Type() string {
+	return moduleName
 }
 
 func (p Module) Options() ([]recon.Option, error) {
@@ -29,7 +36,7 @@ func (p Module) Options() ([]recon.Option, error) {
 
 	for _, cluster := range p.Config.Clusters {
 		if cluster.OpenShift {
-			opts, err := processOpenShiftCluster(cluster)
+			opts, err := processOpenShiftCluster(cluster, p.Name(), p.Type(), p.Config.StartDirectory)
 			if err != nil {
 				return nil, err
 			}
@@ -37,7 +44,7 @@ func (p Module) Options() ([]recon.Option, error) {
 			continue
 		}
 
-		opts, err := processKubernetesCluster(cluster, p.Config.StartDirectory)
+		opts, err := processKubernetesCluster(cluster, p.Name(), p.Type(), p.Config.StartDirectory)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +96,7 @@ func NewModule(config config.KubernetesModuleConfig) Module {
 	}
 }
 
-func processKubernetesCluster(cluster config.KubernetesCluster, startDirectory string) (options []recon.Option, err error) {
+func processKubernetesCluster(cluster config.KubernetesCluster, moduleName string, moduleType string, startDirectory string) (options []recon.Option, err error) {
 	clusterName := "default"
 	if cluster.Name != "" {
 		clusterName = cluster.Name
@@ -128,7 +135,8 @@ func processKubernetesCluster(cluster config.KubernetesCluster, startDirectory s
 
 		// add option
 		options = append(options, recon.Option{
-			ProviderName:   "kubernetes",
+			ProviderName:   moduleName,
+			ProviderType:   moduleType,
 			Id:             item.GetName(),
 			DisplayName:    displayName,
 			Name:           item.GetName(),
@@ -148,7 +156,7 @@ func processKubernetesCluster(cluster config.KubernetesCluster, startDirectory s
 	return options, nil
 }
 
-func processOpenShiftCluster(cluster config.KubernetesCluster) (options []recon.Option, err error) {
+func processOpenShiftCluster(cluster config.KubernetesCluster, moduleName string, moduleType string, startDirectory string) (options []recon.Option, err error) {
 	clusterName := "default"
 	if cluster.Name != "" {
 		clusterName = cluster.Name
@@ -193,11 +201,12 @@ func processOpenShiftCluster(cluster config.KubernetesCluster) (options []recon.
 
 		// add option
 		options = append(options, recon.Option{
-			ProviderName:   "kubernetes",
+			ProviderName:   moduleName,
+			ProviderType:   moduleType,
 			Id:             item.GetName(),
 			DisplayName:    displayName,
 			Name:           item.GetName(),
-			StartDirectory: filepath.Join(util.GetHomeDir(), "fuzzmux", "k8s", clusterName, item.GetName()),
+			StartDirectory: startDirectory,
 			Tags:           cluster.Tags,
 			Context: map[string]string{
 				"clusterName": clusterName,

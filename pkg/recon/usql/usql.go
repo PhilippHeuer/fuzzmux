@@ -12,6 +12,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const moduleName = "usql"
+
 var USQLConfigDefaultPath = filepath.Join(os.Getenv("HOME"), ".config", "usql", "config.yaml")
 
 type Module struct {
@@ -19,7 +21,14 @@ type Module struct {
 }
 
 func (p Module) Name() string {
-	return "usql"
+	if p.Config.Name != "" {
+		return p.Config.Name
+	}
+	return moduleName
+}
+
+func (p Module) Type() string {
+	return moduleName
 }
 
 func (p Module) Options() ([]recon.Option, error) {
@@ -41,6 +50,7 @@ func (p Module) Options() ([]recon.Option, error) {
 		// add to list
 		opt := recon.Option{
 			ProviderName:   p.Name(),
+			ProviderType:   p.Type(),
 			Id:             "usql-" + key,
 			DisplayName:    fmt.Sprintf("%s @ %s:%d", conn.Username, conn.Hostname, conn.Port),
 			Name:           key,

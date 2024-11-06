@@ -10,13 +10,15 @@ import (
 )
 
 type Option struct {
-	ProviderName   string            `json:"provider_name"`   // recon name
+	ProviderName   string            `json:"provider_name"`   // module name
+	ProviderType   string            `json:"provider_type"`   // module type
 	Id             string            `json:"id"`              // unique id
 	DisplayName    string            `json:"display_name"`    // display name for the fuzzy finder
 	Name           string            `json:"name"`            // name
 	StartDirectory string            `json:"start_directory"` // sets the initial working directory
 	Tags           []string          `json:"tags"`            // tags
 	Context        map[string]string `json:"context"`         // additional context information
+	ModuleContext  map[string]string `json:"module_context"`  // internal context information, not exposed to the user
 }
 
 func (o Option) ResolveStartDirectory(full bool) string {
@@ -56,10 +58,17 @@ func (o Option) CreateStartDirectoryIfMissing() error {
 func (o Option) ResolvePlaceholders(input string) string {
 	input = os.ExpandEnv(input)
 
+	input = util.ExpandPlaceholders(input, "id", o.Id)
 	input = util.ExpandPlaceholders(input, "name", o.Name)
 	input = util.ExpandPlaceholders(input, "displayName", o.DisplayName)
 	input = util.ExpandPlaceholders(input, "startDirectory", o.ResolveStartDirectory(true))
 
+	// module context
+	for k, v := range o.ModuleContext {
+		input = util.ExpandPlaceholders(input, k, v)
+	}
+
+	// context
 	for k, v := range o.Context {
 		input = util.ExpandPlaceholders(input, k, v)
 	}
@@ -74,7 +83,8 @@ type Column struct {
 }
 
 type Module interface {
-	Name() string                                    // Name returns the name of the recon
+	Name() string                                    // Name returns the name of the module
+	Type() string                                    // Type returns the type of the module
 	Options() ([]Option, error)                      // Options returns the options
 	OptionsOrCache(maxAge float64) ([]Option, error) // OptionsOrCache returns the options from cache or calls Options
 	SelectOption(options *Option) error              // Select can be used to run actions / enrich the context before opening the session

@@ -6,14 +6,21 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 )
 
-const StaticProviderName = "static"
+const moduleName = "static"
 
 type Module struct {
 	Config config.StaticModuleConfig
 }
 
 func (p Module) Name() string {
-	return StaticProviderName
+	if p.Config.Name != "" {
+		return p.Config.Name
+	}
+	return moduleName
+}
+
+func (p Module) Type() string {
+	return moduleName
 }
 
 func (p Module) Options() ([]recon.Option, error) {
@@ -22,6 +29,7 @@ func (p Module) Options() ([]recon.Option, error) {
 	for _, staticOption := range p.Config.StaticOptions {
 		op := recon.Option{
 			ProviderName:   p.Name(),
+			ProviderType:   p.Type(),
 			Id:             staticOption.Id,
 			DisplayName:    staticOption.DisplayName,
 			Name:           staticOption.Name,

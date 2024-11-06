@@ -9,6 +9,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const moduleName = "project"
+
 var defaultChecks = []string{".git", ".gitignore", ".hg", ".hgignore", ".svn", ".vscode", ".idea"}
 
 type Module struct {
@@ -16,7 +18,14 @@ type Module struct {
 }
 
 func (p Module) Name() string {
-	return "project"
+	if p.Config.Name != "" {
+		return p.Config.Name
+	}
+	return moduleName
+}
+
+func (p Module) Type() string {
+	return moduleName
 }
 
 func (p Module) Options() ([]recon.Option, error) {
@@ -31,6 +40,7 @@ func (p Module) Options() ([]recon.Option, error) {
 	for _, project := range projects {
 		options = append(options, recon.Option{
 			ProviderName:   p.Name(),
+			ProviderType:   p.Type(),
 			Id:             project.Path,
 			DisplayName:    renderProjectDisplayName(project, p.Config.DisplayFormat),
 			Name:           project.Name,

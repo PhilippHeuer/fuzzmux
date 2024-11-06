@@ -51,3 +51,10 @@ layouts:
           - inPath("usql")
         commands:
           - command: exec usql {{name}}
+  ldap:
+    apps:
+      - name: ldap
+        default: true
+        commands:
+          - command: ldapsearch -H {{ldapHost}} -D {{ldapBindDN}} -w "{{ldapBindPassword}}" -b "{{id}}"
+          - command: exec bash
