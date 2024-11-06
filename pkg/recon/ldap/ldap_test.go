@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/testcontainers/testcontainers-go"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -22,13 +23,19 @@ var ldapMockRequest = testcontainers.ContainerRequest{
 	},
 }
 
+func init() {
+	_ = os.Setenv("TESTCONTAINERS_RYUK_DISABLED", "true")
+}
+
 func TestSearchUsers(t *testing.T) {
 	ctx := context.Background()
 	ldapServer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: ldapMockRequest,
 		Started:          true,
+		Reuse:            false,
 	})
 	require.NoError(t, err)
+	defer testcontainers.CleanupContainer(t, ldapServer)
 	ldapEndpoint, err := ldapServer.Endpoint(ctx, "")
 	require.NoError(t, err)
 
@@ -47,10 +54,6 @@ func TestSearchUsers(t *testing.T) {
 	require.NotEmpty(t, options)
 	require.Equal(t, "Admin User1", options[0].Name)
 	require.Equal(t, "uid=adminuser1,ou=people,dc=example,dc=com", options[0].Id)
-
-	// cleanup
-	testcontainers.CleanupContainer(t, ldapServer)
-	require.NoError(t, err)
 }
 
 func TestSearchGroups(t *testing.T) {
@@ -58,8 +61,10 @@ func TestSearchGroups(t *testing.T) {
 	ldapServer, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: ldapMockRequest,
 		Started:          true,
+		Reuse:            false,
 	})
 	require.NoError(t, err)
+	defer testcontainers.CleanupContainer(t, ldapServer)
 	ldapEndpoint, err := ldapServer.Endpoint(ctx, "")
 	require.NoError(t, err)
 
@@ -80,8 +85,4 @@ func TestSearchGroups(t *testing.T) {
 	require.Equal(t, "cn=admins,ou=groups,dc=example,dc=com", options[0].Id)
 	require.Equal(t, "developers", options[1].Name)
 	require.Equal(t, "cn=developers,ou=groups,dc=example,dc=com", options[1].Id)
-
-	// cleanup
-	testcontainers.CleanupContainer(t, ldapServer)
-	require.NoError(t, err)
 }

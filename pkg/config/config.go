@@ -55,6 +55,8 @@ func (c *Config) UnmarshalYAML(value *yaml.Node) error {
 			module = &StaticModuleConfig{}
 		case "ldap":
 			module = &LDAPModuleConfig{}
+		case "keycloak":
+			module = &KeycloakModuleConfig{}
 		default:
 			return fmt.Errorf("unknown module type '%s' for key %d", typeInfo.Type, key)
 		}

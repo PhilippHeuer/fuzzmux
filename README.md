@@ -22,6 +22,8 @@ Similar rules can be defined for ssh connections, kubernetes namespaces, ... - s
 - ssh config (parses `~/.ssh/config`)
 - kubernetes clusters (including openshift)
 - usql connections (parses `~/.config/usql/config.yml`)
+- ldap (query users and groups)
+- keycloak (query users, groups and clients)
 
 ## Supported Window Managers / Terminal Workspace Managers
 

@@ -117,6 +117,34 @@ type LDAPModuleConfig struct {
 	Filter string `yaml:"filter"`
 }
 
+type KeycloakModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
+	// Host is the Keycloak server hostname or IP address
+	Host string `yaml:"host"`
+
+	// RealmName is the Keycloak realm name
+	RealmName string `yaml:"realm"`
+
+	// Username is the Keycloak admin username
+	Username string `yaml:"username"`
+
+	// Password is the Keycloak admin password
+	Password string `yaml:"password"`
+
+	// Query is a list of content types that should be queried
+	Query []KeycloakContent `yaml:"query"`
+}
+
+type KeycloakContent string
+
+const (
+	KeycloakUser   KeycloakContent = "user"
+	KeycloakClient KeycloakContent = "client"
+	KeycloakGroup  KeycloakContent = "group"
+)
+
 type StaticOption struct {
 	// Id is a unique identifier for the option
 	Id string `yaml:"id"`

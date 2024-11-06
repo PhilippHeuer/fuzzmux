@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/keycloak"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/kubernetes"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/ldap"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/project"
@@ -34,6 +35,8 @@ func ConfigToReconModules(conf config.Config) []recon.Module {
 			modules = append(modules, static.NewModule(*cfg))
 		case *config.LDAPModuleConfig:
 			modules = append(modules, ldap.NewModule(*cfg))
+		case *config.KeycloakModuleConfig:
+			modules = append(modules, keycloak.NewModule(*cfg))
 		default:
 			log.Error().Interface("module", m).Msg("unrecognized module type")
 		}

@@ -6,6 +6,7 @@ module github.com/PhilippHeuer/fuzzmux
 go 1.22.0
 
 require (
+	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/adrg/xdg v0.5.3
 	github.com/cidverse/cidverseutils/zerologconfig v0.1.0
 	github.com/cidverse/go-rules v0.0.0-20231112122021-075e5e6f8abc
@@ -39,6 +40,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/charlievieth/fastwalk v1.0.9 // indirect
 	github.com/cidverse/cidverseutils/filesystem v0.1.1 // indirect
+	github.com/cidverse/go-ptr v0.0.0-20240331160646-489e694bebbf // indirect
 	github.com/containerd/log v0.1.0 // indirect
 	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/cpuguy83/dockercfg v0.3.2 // indirect
@@ -59,7 +61,9 @@ require (
 	github.com/go-openapi/jsonpointer v0.21.0 // indirect
 	github.com/go-openapi/jsonreference v0.21.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
+	github.com/go-resty/resty/v2 v2.7.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
+	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/cel-go v0.21.0 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
@@ -96,12 +100,14 @@ require (
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/openshift/api v0.0.0-20240816151955-65532e7f773e // indirect
+	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06 // indirect
+	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/shirou/gopsutil/v3 v3.24.5 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
