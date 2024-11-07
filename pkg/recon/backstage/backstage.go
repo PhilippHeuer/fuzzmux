@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
-	"github.com/rs/zerolog/log"
 	"github.com/tdabasinskas/go-backstage/v2/backstage"
 	"slices"
 	"strings"
@@ -51,6 +50,27 @@ func (p Module) Options() ([]recon.Option, error) {
 		entityType := getStringValue(entity.Spec, "type")
 
 		if slices.Contains(p.Config.Query, entityType) || len(p.Config.Query) == 0 {
+			data := map[string]interface{}{
+				"metadata.name":        entity.Metadata.Name,
+				"metadata.namespace":   entity.Metadata.Namespace,
+				"metadata.description": entity.Metadata.Description,
+				"consumedBy":           entityRelationToString(entity.Relations, "apiConsumedBy"),
+				"dependsOn":            entityRelationToString(entity.Relations, "dependsOn"),
+				"ownedBy":              entityRelationToString(entity.Relations, "ownedBy"),
+				"partOf":               entityRelationToString(entity.Relations, "partOf"),
+			}
+			for key, value := range entity.Spec {
+				data["spec."+key] = value
+			}
+			for key, value := range entity.Metadata.Labels {
+				data["metadata.labels."+key] = value
+			}
+			for key, value := range entity.Metadata.Annotations {
+				data["metadata.annotations."+key] = value
+			}
+			attributes := recon.AttributeMapping(data, p.Config.AttributeMapping)
+			attributes["web"] = fmt.Sprintf("%s/catalog/%s/%s/%s", p.Config.Host, entity.Metadata.Namespace, strings.ToLower(entity.Kind), entity.Metadata.Name)
+
 			result = append(result, recon.Option{
 				ProviderName: p.Name(),
 				ProviderType: p.Type(),
@@ -58,15 +78,7 @@ func (p Module) Options() ([]recon.Option, error) {
 				DisplayName:  fmt.Sprintf("%s [%s]", entity.Metadata.Name, getStringValue(entity.Spec, "type")),
 				Name:         entity.Metadata.Name,
 				Tags:         []string{"backstage", entityType},
-				Context: map[string]string{
-					"web":        fmt.Sprintf("%s/catalog/%s/%s/%s", p.Config.Host, entity.Metadata.Namespace, strings.ToLower(entity.Kind), entity.Metadata.Name),
-					"owner":      getStringValue(entity.Spec, "owner"),
-					"lifecycle":  getStringValue(entity.Spec, "lifecycle"),
-					"consumedBy": entityRelationToString(entity.Relations, "apiConsumedBy"),
-					"dependsOn":  entityRelationToString(entity.Relations, "dependsOn"),
-					"ownedBy":    entityRelationToString(entity.Relations, "ownedBy"),
-					"partOf":     entityRelationToString(entity.Relations, "partOf"),
-				},
+				Context:      attributes,
 			})
 		}
 	}
@@ -75,22 +87,7 @@ func (p Module) Options() ([]recon.Option, error) {
 }
 
 func (p Module) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
-	options, err := recon.LoadOptions(p.Name(), maxAge)
-	if err == nil {
-		return options, nil
-	}
-
-	options, err = p.Options()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get options: %w", err)
-	}
-
-	err = recon.SaveOptions(p.Name(), options)
-	if err != nil {
-		log.Warn().Err(err).Msg("failed to save options to cache")
-	}
-
-	return options, nil
+	return recon.OptionsOrCache(p, maxAge)
 }
 
 func (p Module) SelectOption(option *recon.Option) error {

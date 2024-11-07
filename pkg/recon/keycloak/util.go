@@ -3,18 +3,42 @@ package keycloak
 import (
 	"fmt"
 	"strings"
-	"time"
 )
 
-// FormatTimestampToISO takes a pointer to an int64 timestamp (in milliseconds) and returns a formatted ISO 8601 date string.
-// If the timestamp is nil, it returns an empty string.
-func timestampToISO(timestamp *int64) string {
-	if timestamp == nil {
-		return ""
+func attributesToMap(attr *map[string]string, additionalAttributes map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+
+	if attr != nil {
+		for key, value := range *attr {
+			result[key] = value
+		}
 	}
 
-	seconds := *timestamp / 1000
-	return time.Unix(seconds, 0).UTC().Format(time.RFC3339)
+	for key, value := range additionalAttributes {
+		result[key] = value
+	}
+
+	return result
+}
+
+func attributeSlicesToMap(attr *map[string][]string, additionalAttributes map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+
+	if attr != nil {
+		for key, values := range *attr {
+			if len(values) == 1 {
+				result[key] = values[0]
+			} else {
+				result[key] = values
+			}
+		}
+	}
+
+	for key, value := range additionalAttributes {
+		result[key] = value
+	}
+
+	return result
 }
 
 func clientRolesToString(clientRoles map[string][]string) string {

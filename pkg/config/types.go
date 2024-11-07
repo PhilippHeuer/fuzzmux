@@ -113,6 +113,9 @@ type LDAPModuleConfig struct {
 	// Password for LDAP bind user
 	BindPassword string `yaml:"bind-password"`
 
+	// AttributeMapping is a list of field mappings used to map LDAP fields to context fields
+	AttributeMapping []FieldMapping `yaml:"attribute-mapping"`
+
 	// Filter is the LDAP search filter (e.g., "(&(objectClass=organizationalPerson))")
 	Filter string `yaml:"filter"`
 }
@@ -133,6 +136,9 @@ type KeycloakModuleConfig struct {
 	// Password is the Keycloak admin password
 	Password string `yaml:"password"`
 
+	// AttributeMapping is a list of field mappings used to map additional keycloak attributes to context fields
+	AttributeMapping []FieldMapping `yaml:"attribute-mapping"`
+
 	// Query is a list of content types that should be queried
 	Query []KeycloakContent `yaml:"query"`
 }
@@ -151,6 +157,9 @@ type BackstageModuleConfig struct {
 
 	// Host is the Backstage hostname or IP address
 	Host string `yaml:"host"`
+
+	// AttributeMapping is a list of field mappings used to map additional attributes to context fields
+	AttributeMapping []FieldMapping `yaml:"attribute-mapping"`
 
 	// Query is a list of content types that should be queried
 	Query []string `yaml:"query"`
@@ -180,6 +189,17 @@ type StaticOption struct {
 
 	// Preview to render in the preview window
 	Preview string `yaml:"preview"`
+}
+
+type FieldMapping struct {
+	// Source is the source field name
+	Source string `yaml:"source"`
+
+	// Format optionally specifies a format of the source field, e.g. "unixtsmillis", "ldaptime", ...
+	Format string `yaml:"format"`
+
+	// Target is the target field name
+	Target string `yaml:"target"`
 }
 
 type Layout struct {

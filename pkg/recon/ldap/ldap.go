@@ -39,6 +39,7 @@ func (p Module) Options() ([]recon.Option, error) {
 
 	// bind
 	if p.Config.BindDistinguishedName != "" {
+		log.Debug().Str("bindDN", p.Config.BindDistinguishedName).Msg("binding to ldap")
 		err = l.Bind(p.Config.BindDistinguishedName, p.Config.BindPassword)
 		if err != nil {
 			return nil, fmt.Errorf("failed to bind to ldap: %w", err)
@@ -61,14 +62,9 @@ func (p Module) Options() ([]recon.Option, error) {
 
 	// add to result
 	for _, entry := range sr.Entries {
-		var context = make(map[string]string)
-		for _, a := range entry.Attributes {
-			if a.Name == "userPassword" {
-				continue
-			}
-
-			context[a.Name] = strings.Join(a.Values, ", ")
-		}
+		log.Trace().Str("dn", entry.DN).Interface("attributes", entry.Attributes).Msg("found entry")
+		entryAttributes := attributesToMap(entry.Attributes)
+		context := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
 
 		result = append(result, recon.Option{
 			ProviderName:   p.Name(),
@@ -91,22 +87,7 @@ func (p Module) Options() ([]recon.Option, error) {
 }
 
 func (p Module) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
-	options, err := recon.LoadOptions(p.Name(), maxAge)
-	if err == nil {
-		return options, nil
-	}
-
-	options, err = p.Options()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get options: %w", err)
-	}
-
-	err = recon.SaveOptions(p.Name(), options)
-	if err != nil {
-		log.Warn().Err(err).Msg("failed to save options to cache")
-	}
-
-	return options, nil
+	return recon.OptionsOrCache(p, maxAge)
 }
 
 func (p Module) SelectOption(option *recon.Option) error {
@@ -132,4 +113,12 @@ func NewModule(config config.LDAPModuleConfig) Module {
 	return Module{
 		Config: config,
 	}
+}
+
+func attributesToMap(attr []*ldap.EntryAttribute) map[string]interface{} {
+	result := make(map[string]interface{}, len(attr))
+	for _, a := range attr {
+		result[a.Name] = strings.Join(a.Values, ",")
+	}
+	return result
 }

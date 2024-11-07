@@ -6,7 +6,6 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"github.com/cidverse/repoanalyzer/analyzer"
-	"github.com/rs/zerolog/log"
 )
 
 const moduleName = "project"
@@ -53,22 +52,7 @@ func (p Module) Options() ([]recon.Option, error) {
 }
 
 func (p Module) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
-	options, err := recon.LoadOptions(p.Name(), maxAge)
-	if err == nil {
-		return options, nil
-	}
-
-	options, err = p.Options()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get options: %w", err)
-	}
-
-	err = recon.SaveOptions(p.Name(), options)
-	if err != nil {
-		log.Warn().Err(err).Msg("failed to save options to cache")
-	}
-
-	return options, nil
+	return recon.OptionsOrCache(p, maxAge)
 }
 
 func (p Module) SelectOption(option *recon.Option) error {

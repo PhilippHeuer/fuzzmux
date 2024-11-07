@@ -3,6 +3,7 @@ package recon
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/rs/zerolog/log"
 	"os"
 	"path/filepath"
 	"time"
@@ -69,4 +70,23 @@ func OptionById(options []Option, id string) (*Option, error) {
 	}
 
 	return &Option{}, fmt.Errorf("option with id '%s' not found", id)
+}
+
+func OptionsOrCache(p Module, maxAge float64) ([]Option, error) {
+	options, err := LoadOptions(p.Name(), maxAge)
+	if err == nil {
+		return options, nil
+	}
+
+	options, err = p.Options()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get options: %w", err)
+	}
+
+	err = SaveOptions(p.Name(), options)
+	if err != nil {
+		log.Warn().Err(err).Msg("failed to save options to cache")
+	}
+
+	return options, nil
 }

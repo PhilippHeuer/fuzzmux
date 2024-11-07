@@ -6,10 +6,10 @@ import (
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
+	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"github.com/cidverse/go-ptr"
 	"github.com/rs/zerolog/log"
 	"slices"
-	"strings"
 )
 
 const moduleName = "keycloak"
@@ -56,6 +56,18 @@ func (p Module) Options() ([]recon.Option, error) {
 				return nil, fmt.Errorf("failed to get clients: %w", err)
 			}
 			for _, cl := range allClients {
+				entryAttributes := attributesToMap(cl.Attributes, map[string]interface{}{
+					"enabled":      ptr.Value(cl.Enabled),
+					"clientId":     ptr.Value(cl.ClientID),
+					"rootUrl":      ptr.Value(cl.RootURL),
+					"protocol":     ptr.Value(cl.Protocol),
+					"publicClient": ptr.Value(cl.PublicClient),
+					"description":  ptr.Value(cl.Description),
+				})
+				attributes := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
+				attributes["web"] = fmt.Sprintf("%s/admin/%s/console/#/%s/clients/%s/settings", p.Config.Host, ptr.Value(realm.Realm), ptr.Value(realm.Realm), ptr.Value(cl.ID))
+				attributes["type"] = "client"
+
 				result = append(result, recon.Option{
 					ProviderName: p.Name(),
 					ProviderType: p.Type(),
@@ -63,13 +75,7 @@ func (p Module) Options() ([]recon.Option, error) {
 					DisplayName:  fmt.Sprintf("%s [%s] @ %s", ptr.Value(cl.ClientID), "client", ptr.Value(realm.Realm)),
 					Name:         ptr.Value(cl.ClientID),
 					Tags:         []string{"keycloak", "client"},
-					Context: map[string]string{
-						"web":      fmt.Sprintf("%s/admin/%s/console/#/%s/clients/%s/settings", p.Config.Host, ptr.Value(realm.Realm), ptr.Value(realm.Realm), ptr.Value(cl.ID)),
-						"type":     "client",
-						"enabled":  fmt.Sprintf("%v", ptr.Value(cl.Enabled)),
-						"protocol": ptr.Value(cl.Protocol),
-						"rootUrl":  ptr.Value(cl.RootURL),
-					},
+					Context:      attributes,
 				})
 			}
 		}
@@ -80,6 +86,20 @@ func (p Module) Options() ([]recon.Option, error) {
 				return nil, fmt.Errorf("failed to get users: %w", err)
 			}
 			for _, user := range users {
+				entryAttributes := attributeSlicesToMap(user.Attributes, map[string]interface{}{
+					"enabled":     ptr.Value(user.Enabled),
+					"email":       ptr.Value(user.Email),
+					"firstname":   ptr.Value(user.FirstName),
+					"lastname":    ptr.Value(user.LastName),
+					"groups":      user.Groups,
+					"realmRoles":  user.RealmRoles,
+					"clientRoles": clientRolesToString(ptr.Value(user.ClientRoles)),
+					"createdAt":   util.ConvertMilliUnixTimestampToRFC3339(user.CreatedTimestamp),
+				})
+				attributes := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
+				attributes["web"] = fmt.Sprintf("%s/admin/%s/console/#/%s/users/%s", p.Config.Host, ptr.Value(realm.Realm), ptr.Value(realm.Realm), ptr.Value(user.ID))
+				attributes["type"] = "user"
+
 				result = append(result, recon.Option{
 					ProviderName: p.Name(),
 					ProviderType: p.Type(),
@@ -87,28 +107,22 @@ func (p Module) Options() ([]recon.Option, error) {
 					DisplayName:  fmt.Sprintf("%s [%s] @ %s", ptr.Value(user.Username), "user", ptr.Value(realm.Realm)),
 					Name:         ptr.Value(user.Username),
 					Tags:         []string{"keycloak", "user"},
-					Context: map[string]string{
-						"web":          fmt.Sprintf("%s/admin/%s/console/#/%s/users/%s", p.Config.Host, ptr.Value(realm.Realm), ptr.Value(realm.Realm), ptr.Value(user.ID)),
-						"type":         "user",
-						"enabled":      fmt.Sprintf("%v", ptr.Value(user.Enabled)),
-						"email":        ptr.Value(user.Email),
-						"firstname":    ptr.Value(user.FirstName),
-						"lastname":     ptr.Value(user.LastName),
-						"groups":       strings.Join(ptr.Value(user.Groups), ", "),
-						"realm-roles":  strings.Join(ptr.Value(user.RealmRoles), ", "),
-						"client-roles": clientRolesToString(ptr.Value(user.ClientRoles)),
-						"createdAt":    timestampToISO(user.CreatedTimestamp),
-					},
+					Context:      attributes,
 				})
 			}
 		}
 		// groups
 		if slices.Contains(p.Config.Query, config.KeycloakGroup) {
-			groups, err := client.GetGroups(ctx, token.AccessToken, ptr.Value(realm.Realm), gocloak.GetGroupsParams{})
+			groups, err := client.GetGroups(ctx, token.AccessToken, ptr.Value(realm.Realm), gocloak.GetGroupsParams{BriefRepresentation: ptr.False()})
 			if err != nil {
 				return nil, fmt.Errorf("failed to get groups: %w", err)
 			}
 			for _, group := range groups {
+				entryAttributes := attributeSlicesToMap(group.Attributes, map[string]interface{}{})
+				attributes := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
+				attributes["web"] = fmt.Sprintf("%s/admin/%s/console/#/%s/groups/%s/settings", p.Config.Host, ptr.Value(realm.Realm), ptr.Value(realm.Realm), ptr.Value(group.ID))
+				attributes["type"] = "group"
+
 				result = append(result, recon.Option{
 					ProviderName: p.Name(),
 					ProviderType: p.Type(),
@@ -116,10 +130,7 @@ func (p Module) Options() ([]recon.Option, error) {
 					DisplayName:  fmt.Sprintf("%s [%s] @ %s", ptr.Value(group.Name), "group", ptr.Value(realm.Realm)),
 					Name:         ptr.Value(group.Name),
 					Tags:         []string{"keycloak", "group"},
-					Context: map[string]string{
-						"web":  fmt.Sprintf("%s/admin/%s/console/#/%s/groups/%s/settings", p.Config.Host, ptr.Value(realm.Realm), ptr.Value(realm.Realm), ptr.Value(group.ID)),
-						"type": "group",
-					},
+					Context:      attributes,
 				})
 			}
 		}
@@ -129,22 +140,7 @@ func (p Module) Options() ([]recon.Option, error) {
 }
 
 func (p Module) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
-	options, err := recon.LoadOptions(p.Name(), maxAge)
-	if err == nil {
-		return options, nil
-	}
-
-	options, err = p.Options()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get options: %w", err)
-	}
-
-	err = recon.SaveOptions(p.Name(), options)
-	if err != nil {
-		log.Warn().Err(err).Msg("failed to save options to cache")
-	}
-
-	return options, nil
+	return recon.OptionsOrCache(p, maxAge)
 }
 
 func (p Module) SelectOption(option *recon.Option) error {
