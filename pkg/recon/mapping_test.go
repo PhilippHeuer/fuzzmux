@@ -1,7 +1,7 @@
 package recon
 
 import (
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
+	"github.com/PhilippHeuer/fuzzmux/pkg/types"
 	"reflect"
 	"testing"
 )
@@ -10,7 +10,7 @@ func TestContextMapping(t *testing.T) {
 	tests := []struct {
 		name          string
 		attributes    map[string]interface{}
-		mappingConfig []config.FieldMapping
+		mappingConfig []types.FieldMapping
 		expected      map[string]string
 	}{
 		{
@@ -18,7 +18,7 @@ func TestContextMapping(t *testing.T) {
 			attributes: map[string]interface{}{
 				"created": "20050917134246.0Z",
 			},
-			mappingConfig: []config.FieldMapping{
+			mappingConfig: []types.FieldMapping{
 				{Source: "created", Target: "createdAt", Format: "ldaptime"},
 			},
 			expected: map[string]string{
@@ -30,7 +30,7 @@ func TestContextMapping(t *testing.T) {
 			attributes: map[string]interface{}{
 				"modified": int64(1638316800000),
 			},
-			mappingConfig: []config.FieldMapping{
+			mappingConfig: []types.FieldMapping{
 				{Source: "modified", Target: "updatedAt", Format: "unixmillis"},
 			},
 			expected: map[string]string{
@@ -42,7 +42,7 @@ func TestContextMapping(t *testing.T) {
 			attributes: map[string]interface{}{
 				"tags": []string{"tag1", "tag2"},
 			},
-			mappingConfig: []config.FieldMapping{
+			mappingConfig: []types.FieldMapping{
 				{Source: "tags", Target: "tagList"},
 			},
 			expected: map[string]string{
@@ -54,7 +54,7 @@ func TestContextMapping(t *testing.T) {
 			attributes: map[string]interface{}{
 				"unsupported": 12345, // Unsupported type for ldaptime
 			},
-			mappingConfig: []config.FieldMapping{
+			mappingConfig: []types.FieldMapping{
 				{Source: "unsupported", Target: "unsupportedTime", Format: "ldaptime"},
 			},
 			expected: map[string]string{},
@@ -64,7 +64,7 @@ func TestContextMapping(t *testing.T) {
 			attributes: map[string]interface{}{
 				"created": "20050917134246.0Z",
 			},
-			mappingConfig: []config.FieldMapping{
+			mappingConfig: []types.FieldMapping{
 				{Source: "", Target: "emptySource"},     // Missing source
 				{Source: "created", Target: ""},         // Missing target
 				{Source: "created", Target: "emptyMap"}, // Correct mapping to test alongside empty cases

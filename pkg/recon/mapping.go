@@ -2,13 +2,14 @@ package recon
 
 import (
 	"fmt"
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
+	"github.com/PhilippHeuer/fuzzmux/pkg/types"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"github.com/rs/zerolog/log"
 	"strings"
+	"time"
 )
 
-func AttributeMapping(attributes map[string]interface{}, contextMapping []config.FieldMapping) map[string]string {
+func AttributeMapping(attributes map[string]interface{}, contextMapping []types.FieldMapping) map[string]string {
 	context := make(map[string]string)
 
 	for _, mapping := range contextMapping {
@@ -46,6 +47,12 @@ func formatAttributeValue(value interface{}, format, source string) (string, err
 	case *int64:
 		if v != nil {
 			return formatInt64(*v, format)
+		}
+	case time.Time:
+		return v.Format(time.RFC3339), nil
+	case *time.Time:
+		if v != nil {
+			return v.Format(time.RFC3339), nil
 		}
 	}
 	return "", fmt.Errorf("unsupported type for source %s with format %s", source, format)

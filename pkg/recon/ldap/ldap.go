@@ -2,8 +2,8 @@ package ldap
 
 import (
 	"fmt"
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
+	"github.com/PhilippHeuer/fuzzmux/pkg/types"
 	"github.com/go-ldap/ldap/v3"
 	"github.com/rs/zerolog/log"
 	"strings"
@@ -12,7 +12,30 @@ import (
 const moduleName = "ldap"
 
 type Module struct {
-	Config config.LDAPModuleConfig
+	Config ModuleConfig
+}
+
+type ModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
+	// Host is the LDAP server hostname or IP address
+	Host string `yaml:"host"`
+
+	// BaseDistinguishedName (DN) for LDAP base search (e.g., "dc=example,dc=com")
+	BaseDistinguishedName string `yaml:"base-dn"`
+
+	// BindDistinguishedName (DN) used for LDAP binding (e.g., "cn=admin,dc=example,dc=com")
+	BindDistinguishedName string `yaml:"bind-dn"`
+
+	// Password for LDAP bind user
+	BindPassword string `yaml:"bind-password"`
+
+	// AttributeMapping is a list of field mappings used to map LDAP fields to context fields
+	AttributeMapping []types.FieldMapping `yaml:"attribute-mapping"`
+
+	// Filter is the LDAP search filter (e.g., "(&(objectClass=organizationalPerson))")
+	Filter string `yaml:"filter"`
 }
 
 func (p Module) Name() string {
@@ -105,7 +128,7 @@ func (p Module) Columns() []recon.Column {
 	)
 }
 
-func NewModule(config config.LDAPModuleConfig) Module {
+func NewModule(config ModuleConfig) Module {
 	if config.Filter == "" {
 		config.Filter = "(|(objectClass=*))"
 	}

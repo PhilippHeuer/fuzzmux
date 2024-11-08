@@ -6,6 +6,7 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/backstage"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/jira"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/keycloak"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/kubernetes"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/ldap"
@@ -24,22 +25,24 @@ func ConfigToReconModules(conf config.Config) []recon.Module {
 
 	for _, m := range conf.Modules {
 		switch cfg := m.(type) {
-		case *config.ProjectModuleConfig:
-			modules = append(modules, project.NewModule(*cfg))
-		case *config.SSHModuleConfig:
-			modules = append(modules, ssh.NewModule(*cfg))
-		case *config.KubernetesModuleConfig:
-			modules = append(modules, kubernetes.NewModule(*cfg))
-		case *config.USQLModuleConfig:
-			modules = append(modules, usql.NewModule(*cfg))
-		case *config.StaticModuleConfig:
+		case *static.ModuleConfig:
 			modules = append(modules, static.NewModule(*cfg))
-		case *config.LDAPModuleConfig:
+		case *project.ModuleConfig:
+			modules = append(modules, project.NewModule(*cfg))
+		case *ssh.ModuleConfig:
+			modules = append(modules, ssh.NewModule(*cfg))
+		case *kubernetes.ModuleConfig:
+			modules = append(modules, kubernetes.NewModule(*cfg))
+		case *usql.ModuleConfig:
+			modules = append(modules, usql.NewModule(*cfg))
+		case *ldap.ModuleConfig:
 			modules = append(modules, ldap.NewModule(*cfg))
-		case *config.KeycloakModuleConfig:
+		case *keycloak.ModuleConfig:
 			modules = append(modules, keycloak.NewModule(*cfg))
-		case *config.BackstageModuleConfig:
+		case *backstage.ModuleConfig:
 			modules = append(modules, backstage.NewModule(*cfg))
+		case *jira.ModuleConfig:
+			modules = append(modules, jira.NewModule(*cfg))
 		default:
 			log.Error().Interface("module", m).Msg("unrecognized module type")
 		}

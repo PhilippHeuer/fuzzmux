@@ -2,6 +2,15 @@ package config
 
 import (
 	"fmt"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/backstage"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/jira"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/keycloak"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/kubernetes"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/ldap"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/project"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/ssh"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/static"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/usql"
 	"gopkg.in/yaml.v3"
 )
 
@@ -43,22 +52,24 @@ func (c *Config) UnmarshalYAML(value *yaml.Node) error {
 
 		var module ModuleConfig
 		switch typeInfo.Type {
-		case "project":
-			module = &ProjectModuleConfig{}
-		case "ssh":
-			module = &SSHModuleConfig{}
-		case "kubernetes":
-			module = &KubernetesModuleConfig{}
-		case "usql":
-			module = &USQLModuleConfig{}
 		case "static":
-			module = &StaticModuleConfig{}
+			module = &static.ModuleConfig{}
+		case "project":
+			module = &project.ModuleConfig{}
+		case "ssh":
+			module = &ssh.ModuleConfig{}
+		case "kubernetes":
+			module = &kubernetes.ModuleConfig{}
+		case "usql":
+			module = &usql.ModuleConfig{}
 		case "ldap":
-			module = &LDAPModuleConfig{}
+			module = &ldap.ModuleConfig{}
 		case "keycloak":
-			module = &KeycloakModuleConfig{}
+			module = &keycloak.ModuleConfig{}
 		case "backstage":
-			module = &BackstageModuleConfig{}
+			module = &backstage.ModuleConfig{}
+		case "jira":
+			module = &jira.ModuleConfig{}
 		default:
 			return fmt.Errorf("unknown module type '%s' for key %d", typeInfo.Type, key)
 		}

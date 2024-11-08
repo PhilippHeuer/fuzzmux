@@ -2,14 +2,47 @@ package static
 
 import (
 	"fmt"
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 )
 
 const moduleName = "static"
 
 type Module struct {
-	Config config.StaticModuleConfig
+	Config ModuleConfig
+}
+
+type ModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
+	// Options is a list of static options
+	StaticOptions []StaticOption `yaml:"options"`
+}
+
+type StaticOption struct {
+	// Id is a unique identifier for the option
+	Id string `yaml:"id"`
+
+	// DisplayName is the name that should be displayed in the fuzzy finder
+	DisplayName string `yaml:"display-name"`
+
+	// Name is the name of the option
+	Name string `yaml:"name"`
+
+	// StartDirectory is the initial working directory
+	StartDirectory string `yaml:"start-directory"`
+
+	// Tags can be used to filter options
+	Tags []string `yaml:"tags"`
+
+	// Context
+	Context map[string]string `yaml:"context"`
+
+	// Layout can be used to override the default layout used by the option (e.g. ssh/project)
+	Layout string `yaml:"layout"`
+
+	// Preview to render in the preview window
+	Preview string `yaml:"preview"`
 }
 
 func (p Module) Name() string {
@@ -75,7 +108,7 @@ func (p Module) Columns() []recon.Column {
 	return recon.DefaultColumns()
 }
 
-func NewModule(config config.StaticModuleConfig) Module {
+func NewModule(config ModuleConfig) Module {
 	return Module{
 		Config: config,
 	}

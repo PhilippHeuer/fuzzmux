@@ -2,7 +2,6 @@ package project
 
 import (
 	"fmt"
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"github.com/cidverse/repoanalyzer/analyzer"
@@ -13,8 +12,44 @@ const moduleName = "project"
 var defaultChecks = []string{".git", ".gitignore", ".hg", ".hgignore", ".svn", ".vscode", ".idea"}
 
 type Module struct {
-	Config config.ProjectModuleConfig
+	Config ModuleConfig
 }
+
+type ModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
+	// Sources is a list of source directories that should be scanned
+	SourceDirectories []SourceDirectory `yaml:"directories"`
+
+	// Checks is a list of files or directories that should be checked, e.g. ".git", ".gitignore"
+	Checks []string `yaml:"checks"`
+
+	// DisplayFormat is the format that should be used to display the project name
+	DisplayFormat ProjectDisplayFormat `yaml:"display-format"`
+}
+
+type SourceDirectory struct {
+	// Directory is the absolute path to the source directory
+	Directory string `yaml:"path"`
+
+	// Depth is the maximum depth of subdirectories that should be scanned
+	Depth int `yaml:"depth"`
+
+	// Exclude is a list of directories that should be excluded from the scan
+	Exclude []string `yaml:"exclude"`
+
+	// Tags can be used to filter directories
+	Tags []string `yaml:"tags"`
+}
+
+type ProjectDisplayFormat string
+
+const (
+	AbsolutePath ProjectDisplayFormat = "absolute"
+	RelativePath ProjectDisplayFormat = "relative"
+	BaseName     ProjectDisplayFormat = "base"
+)
 
 func (p Module) Name() string {
 	if p.Config.Name != "" {
@@ -77,7 +112,7 @@ func (p Module) Columns() []recon.Column {
 	)
 }
 
-func NewModule(config config.ProjectModuleConfig) Module {
+func NewModule(config ModuleConfig) Module {
 	if config.Checks == nil || len(config.Checks) == 0 {
 		config.Checks = defaultChecks
 	}
@@ -87,11 +122,11 @@ func NewModule(config config.ProjectModuleConfig) Module {
 	}
 }
 
-func renderProjectDisplayName(project Project, displayFormat config.ProjectDisplayFormat) string {
+func renderProjectDisplayName(project Project, displayFormat ProjectDisplayFormat) string {
 	output := project.Name
-	if displayFormat == config.AbsolutePath {
+	if displayFormat == AbsolutePath {
 		output = project.Path
-	} else if displayFormat == config.RelativePath {
+	} else if displayFormat == RelativePath {
 		output = project.RelativePath
 	}
 

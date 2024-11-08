@@ -2,7 +2,6 @@ package usql
 
 import (
 	"fmt"
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"os"
@@ -17,7 +16,18 @@ const moduleName = "usql"
 var USQLConfigDefaultPath = filepath.Join(os.Getenv("HOME"), ".config", "usql", "config.yaml")
 
 type Module struct {
-	Config config.USQLModuleConfig
+	Config ModuleConfig
+}
+
+type ModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
+	// ConfigFile is used in case your usql config is not in the default location
+	ConfigFile string `yaml:"file"`
+
+	// StartDirectory is used to define the current working directory, supports template variables
+	StartDirectory string `yaml:"start-directory"`
 }
 
 func (p Module) Name() string {
@@ -108,7 +118,7 @@ func (p Module) Columns() []recon.Column {
 	)
 }
 
-func NewModule(config config.USQLModuleConfig) Module {
+func NewModule(config ModuleConfig) Module {
 	if config.ConfigFile == "" {
 		config.ConfigFile = USQLConfigDefaultPath
 	}

@@ -2,7 +2,6 @@ package keycloak
 
 import (
 	"context"
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/testcontainers/testcontainers-go"
 	"os"
 	"testing"
@@ -44,12 +43,12 @@ func TestSearchUsers(t *testing.T) {
 	require.NoError(t, err)
 
 	// query
-	keycloakModule := NewModule(config.KeycloakModuleConfig{
+	keycloakModule := NewModule(ModuleConfig{
 		Host:      "http://" + ldapEndpoint,
 		RealmName: "master",
 		Username:  "admin",
 		Password:  "secret",
-		Query:     []config.KeycloakContent{config.KeycloakUser},
+		Query:     []KeycloakContent{KeycloakUser},
 	})
 	options, err := keycloakModule.Options()
 	require.NoError(t, err)

@@ -3,9 +3,11 @@ package backstage
 import (
 	"context"
 	"fmt"
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
+	"github.com/PhilippHeuer/fuzzmux/pkg/types"
 	"github.com/tdabasinskas/go-backstage/v2/backstage"
+	"golang.org/x/oauth2"
+	"net/http"
 	"slices"
 	"strings"
 )
@@ -13,7 +15,24 @@ import (
 const moduleName = "backstage"
 
 type Module struct {
-	Config config.BackstageModuleConfig
+	Config ModuleConfig
+}
+
+type ModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
+	// Host is the Backstage hostname or IP address
+	Host string `yaml:"host"`
+
+	// BearerToken is the token used to authenticate against the Backstage API (see https://backstage.io/docs/auth/service-to-service-auth/#static-tokens)
+	BearerToken string `yaml:"bearer-token,omitempty"`
+
+	// AttributeMapping is a list of field mappings used to map additional attributes to context fields
+	AttributeMapping []types.FieldMapping `yaml:"attribute-mapping"`
+
+	// Query is a list of content types that should be queried
+	Query []string `yaml:"query"`
 }
 
 func (p Module) Name() string {
@@ -30,8 +49,17 @@ func (p Module) Type() string {
 func (p Module) Options() ([]recon.Option, error) {
 	var result []recon.Option
 
+	// httpClient
+	var httpClient *http.Client
+	if p.Config.BearerToken != "" {
+		httpClient = oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(&oauth2.Token{
+			AccessToken: p.Config.BearerToken,
+			TokenType:   "Bearer",
+		}))
+	}
+
 	// connect
-	client, err := backstage.NewClient(p.Config.Host, "default", nil)
+	client, err := backstage.NewClient(p.Config.Host, "default", httpClient)
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to backstage: %w", err)
 	}
@@ -103,7 +131,7 @@ func (p Module) Columns() []recon.Column {
 	return append(recon.DefaultColumns())
 }
 
-func NewModule(config config.BackstageModuleConfig) Module {
+func NewModule(config ModuleConfig) Module {
 	return Module{
 		Config: config,
 	}

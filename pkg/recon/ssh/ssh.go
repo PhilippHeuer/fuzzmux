@@ -2,7 +2,6 @@ package ssh
 
 import (
 	"fmt"
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"os"
 	"path/filepath"
@@ -14,8 +13,29 @@ const moduleName = "ssh"
 var DefaultPath = filepath.Join(os.Getenv("HOME"), ".ssh", "config")
 
 type Module struct {
-	Config config.SSHModuleConfig
+	Config ModuleConfig
 }
+
+type ModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
+	// ConfigFile is used in case your ssh config is not in the default location
+	ConfigFile string `yaml:"file"`
+
+	// StartDirectory is used to define the current working directory, supports template variables
+	StartDirectory string `yaml:"start-directory"`
+
+	// Mode controls how sessions or windows are created for SSH connections
+	Mode SSHMode `yaml:"mode"`
+}
+
+type SSHMode string
+
+const (
+	SSHSessionMode SSHMode = "session"
+	SSHWindowMode  SSHMode = "window"
+)
 
 func (p Module) Name() string {
 	if p.Config.Name != "" {
@@ -105,7 +125,7 @@ func (p Module) Columns() []recon.Column {
 	)
 }
 
-func NewModule(config config.SSHModuleConfig) Module {
+func NewModule(config ModuleConfig) Module {
 	if config.ConfigFile == "" {
 		config.ConfigFile = DefaultPath
 	}

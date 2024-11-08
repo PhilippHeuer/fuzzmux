@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/Nerzal/gocloak/v13"
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
+	"github.com/PhilippHeuer/fuzzmux/pkg/types"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"github.com/cidverse/go-ptr"
 	"github.com/rs/zerolog/log"
@@ -15,8 +15,39 @@ import (
 const moduleName = "keycloak"
 
 type Module struct {
-	Config config.KeycloakModuleConfig
+	Config ModuleConfig
 }
+
+type ModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
+	// Host is the Keycloak server hostname or IP address
+	Host string `yaml:"host"`
+
+	// RealmName is the Keycloak realm name
+	RealmName string `yaml:"realm"`
+
+	// Username is the Keycloak admin username
+	Username string `yaml:"username"`
+
+	// Password is the Keycloak admin password
+	Password string `yaml:"password"`
+
+	// AttributeMapping is a list of field mappings used to map additional keycloak attributes to context fields
+	AttributeMapping []types.FieldMapping `yaml:"attribute-mapping"`
+
+	// Query is a list of content types that should be queried
+	Query []KeycloakContent `yaml:"query"`
+}
+
+type KeycloakContent string
+
+const (
+	KeycloakUser   KeycloakContent = "user"
+	KeycloakClient KeycloakContent = "client"
+	KeycloakGroup  KeycloakContent = "group"
+)
 
 func (p Module) Name() string {
 	if p.Config.Name != "" {
@@ -50,7 +81,7 @@ func (p Module) Options() ([]recon.Option, error) {
 	// query content
 	for _, realm := range realms {
 		// clients
-		if slices.Contains(p.Config.Query, config.KeycloakClient) {
+		if slices.Contains(p.Config.Query, KeycloakClient) {
 			allClients, err := client.GetClients(ctx, token.AccessToken, ptr.Value(realm.Realm), gocloak.GetClientsParams{})
 			if err != nil {
 				return nil, fmt.Errorf("failed to get clients: %w", err)
@@ -80,7 +111,7 @@ func (p Module) Options() ([]recon.Option, error) {
 			}
 		}
 		// users
-		if slices.Contains(p.Config.Query, config.KeycloakUser) {
+		if slices.Contains(p.Config.Query, KeycloakUser) {
 			users, err := client.GetUsers(ctx, token.AccessToken, ptr.Value(realm.Realm), gocloak.GetUsersParams{BriefRepresentation: ptr.False()})
 			if err != nil {
 				return nil, fmt.Errorf("failed to get users: %w", err)
@@ -112,7 +143,7 @@ func (p Module) Options() ([]recon.Option, error) {
 			}
 		}
 		// groups
-		if slices.Contains(p.Config.Query, config.KeycloakGroup) {
+		if slices.Contains(p.Config.Query, KeycloakGroup) {
 			groups, err := client.GetGroups(ctx, token.AccessToken, ptr.Value(realm.Realm), gocloak.GetGroupsParams{BriefRepresentation: ptr.False()})
 			if err != nil {
 				return nil, fmt.Errorf("failed to get groups: %w", err)
@@ -158,7 +189,7 @@ func (p Module) Columns() []recon.Column {
 	)
 }
 
-func NewModule(config config.KeycloakModuleConfig) Module {
+func NewModule(config ModuleConfig) Module {
 	return Module{
 		Config: config,
 	}

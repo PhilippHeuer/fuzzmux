@@ -9,7 +9,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/rs/zerolog/log"
 )
 
@@ -25,7 +24,7 @@ type ScanResult struct {
 	Error    error
 }
 
-func SearchProjectDirectories(sources []config.SourceDirectory, checks []string) ([]Project, error) {
+func SearchProjectDirectories(sources []SourceDirectory, checks []string) ([]Project, error) {
 	log.Debug().Interface("directories", sources).Msg("searching for project directories")
 	var (
 		wg      sync.WaitGroup
@@ -36,7 +35,7 @@ func SearchProjectDirectories(sources []config.SourceDirectory, checks []string)
 		source.Directory = util.ResolvePath(source.Directory)
 
 		wg.Add(1)
-		go func(source config.SourceDirectory) {
+		go func(source SourceDirectory) {
 			defer wg.Done()
 
 			projects, err := searchInDirectory(source, checks)
@@ -60,7 +59,7 @@ func SearchProjectDirectories(sources []config.SourceDirectory, checks []string)
 	return projects, nil
 }
 
-func searchInDirectory(source config.SourceDirectory, checks []string) ([]Project, error) {
+func searchInDirectory(source SourceDirectory, checks []string) ([]Project, error) {
 	var projects []Project
 
 	// Compile regex patterns for exclusion

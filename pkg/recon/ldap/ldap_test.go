@@ -2,7 +2,6 @@ package ldap
 
 import (
 	"context"
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/testcontainers/testcontainers-go"
 	"os"
 	"testing"
@@ -44,7 +43,7 @@ func TestSearchUsers(t *testing.T) {
 	require.NoError(t, err)
 
 	// query
-	ldapModule := NewModule(config.LDAPModuleConfig{
+	ldapModule := NewModule(ModuleConfig{
 		Host:                  "ldap://" + ldapEndpoint,
 		BaseDistinguishedName: "dc=example,dc=com",
 		BindDistinguishedName: "cn=admin,dc=example,dc=com",
@@ -77,7 +76,7 @@ func TestSearchGroups(t *testing.T) {
 	require.NoError(t, err)
 
 	// query
-	ldapModule := NewModule(config.LDAPModuleConfig{
+	ldapModule := NewModule(ModuleConfig{
 		Host:                  "ldap://" + ldapEndpoint,
 		BaseDistinguishedName: "dc=example,dc=com",
 		BindDistinguishedName: "cn=admin,dc=example,dc=com",

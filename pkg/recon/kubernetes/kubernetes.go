@@ -3,7 +3,6 @@ package kubernetes
 import (
 	"context"
 	"fmt"
-	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	projectsv1 "github.com/openshift/client-go/project/clientset/versioned/typed/project/v1"
@@ -17,7 +16,32 @@ import (
 const moduleName = "kubernetes"
 
 type Module struct {
-	Config config.KubernetesModuleConfig
+	Config ModuleConfig
+}
+
+type ModuleConfig struct {
+	// Name is used to override the default module name
+	Name string `yaml:"name,omitempty"`
+
+	// Clusters is a list of kubernetes clusters that should be scanned
+	Clusters []KubernetesCluster `yaml:"clusters"`
+
+	// StartDirectory is used to define the current working directory, supports template variables
+	StartDirectory string `yaml:"start-directory"`
+}
+
+type KubernetesCluster struct {
+	// Name of the cluster
+	Name string `yaml:"name"`
+
+	// Tags that apply to the cluster
+	Tags []string `yaml:"tags"`
+
+	// OpenShift indicates if this is an OpenShift cluster (default: false)
+	OpenShift bool `yaml:"openshift"`
+
+	// KubeConfig is the absolute path to the kubeconfig file
+	KubeConfig string `yaml:"kubeconfig"`
 }
 
 func (p Module) Name() string {
@@ -86,7 +110,7 @@ func (p Module) Columns() []recon.Column {
 	return recon.DefaultColumns()
 }
 
-func NewModule(config config.KubernetesModuleConfig) Module {
+func NewModule(config ModuleConfig) Module {
 	if config.StartDirectory == "" {
 		config.StartDirectory = "~/k8s/{{clusterName}}/{{namespace}}"
 	}
@@ -96,7 +120,7 @@ func NewModule(config config.KubernetesModuleConfig) Module {
 	}
 }
 
-func processKubernetesCluster(cluster config.KubernetesCluster, moduleName string, moduleType string, startDirectory string) (options []recon.Option, err error) {
+func processKubernetesCluster(cluster KubernetesCluster, moduleName string, moduleType string, startDirectory string) (options []recon.Option, err error) {
 	clusterName := "default"
 	if cluster.Name != "" {
 		clusterName = cluster.Name
@@ -156,7 +180,7 @@ func processKubernetesCluster(cluster config.KubernetesCluster, moduleName strin
 	return options, nil
 }
 
-func processOpenShiftCluster(cluster config.KubernetesCluster, moduleName string, moduleType string, startDirectory string) (options []recon.Option, err error) {
+func processOpenShiftCluster(cluster KubernetesCluster, moduleName string, moduleType string, startDirectory string) (options []recon.Option, err error) {
 	clusterName := "default"
 	if cluster.Name != "" {
 		clusterName = cluster.Name

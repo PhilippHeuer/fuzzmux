@@ -58,3 +58,11 @@ layouts:
         commands:
           - command: ldapsearch -H {{ldapHost}} -D {{ldapBindDN}} -w "{{ldapBindPassword}}" -b "{{id}}"
           - command: exec bash
+  jira:
+    apps:
+      - name: jira-cli
+        default: true
+        rules:
+          - inPath("jira")
+        commands:
+          - command: exec jira issue view {{name}}
