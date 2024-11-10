@@ -14,9 +14,12 @@ func GetLayout(conf config.Config, selected *recon.Option, templateName string, 
 	// context
 	ruleContext := map[string]interface{}{
 		"PROVIDER_NAME":   selected.ProviderName,
+		"PROVIDER_TYPE":   selected.ProviderType,
 		"ID":              selected.Id,
 		"NAME":            selected.Name,
 		"DISPLAY_NAME":    selected.DisplayName,
+		"DESCRIPTION":     selected.Description,
+		"WEB":             selected.Web,
 		"START_DIRECTORY": selected.StartDirectory,
 		"CONTEXT":         selected.Context,
 		"TAGS":            selected.Tags,

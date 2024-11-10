@@ -2,6 +2,7 @@ package recon
 
 import (
 	"errors"
+	"fmt"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"os"
 	"strings"
@@ -76,6 +77,79 @@ func (o Option) ResolvePlaceholders(input string) string {
 	}
 
 	return input
+}
+
+func (o Option) RenderPreview() string {
+	var builder strings.Builder
+	builder.WriteString("# " + o.DisplayName + "\n\n")
+	builder.WriteString(fmt.Sprintf("Provider: %s [TYPE: %s]\n", o.ProviderName, o.ProviderType))
+	builder.WriteString("Directory: " + o.ResolveStartDirectory(true) + " [" + o.StartDirectory + "]\n")
+	if len(o.Tags) > 0 {
+		builder.WriteString("\nTags:\n")
+		for _, t := range o.Tags {
+			builder.WriteString("- " + t + "\n")
+		}
+	}
+
+	// TODO: custom option render logic should move into the option recon
+	switch o.ProviderName {
+	case "kubernetes":
+		builder.WriteString("\n")
+		if o.Context["clusterName"] != "" {
+			builder.WriteString(fmt.Sprintf("K8S Cluster Name: %s\n", o.Context["clusterName"]))
+		}
+		if o.Context["clusterHost"] != "" {
+			builder.WriteString(fmt.Sprintf("K8S Cluster API: %s\n", o.Context["clusterHost"]))
+		}
+		if o.Context["clusterUser"] != "" {
+			builder.WriteString(fmt.Sprintf("K8S Cluster User: %s\n", o.Context["clusterUser"]))
+		}
+		if o.Context["clusterType"] != "" {
+			builder.WriteString(fmt.Sprintf("K8S Cluster Type: %s\n", o.Context["clusterType"]))
+		}
+	case "usql":
+		builder.WriteString("\n")
+		if o.Context["name"] != "" {
+			builder.WriteString(fmt.Sprintf("Name: %s\n", o.Context["name"]))
+		}
+		if o.Context["hostname"] != "" {
+			builder.WriteString(fmt.Sprintf("DB Host: %s\n", o.Context["hostname"]))
+		}
+		if o.Context["port"] != "" {
+			builder.WriteString(fmt.Sprintf("DB Port: %s\n", o.Context["port"]))
+		}
+		if o.Context["username"] != "" {
+			builder.WriteString(fmt.Sprintf("DB Username: %s\n", o.Context["username"]))
+		}
+		if o.Context["instance"] != "" {
+			builder.WriteString(fmt.Sprintf("DB Instance/SID: %s\n", o.Context["instance"]))
+		}
+		if o.Context["database"] != "" {
+			builder.WriteString(fmt.Sprintf("DB Database: %s\n", o.Context["database"]))
+		}
+	default:
+		builder.WriteString("\n")
+		if len(o.Context) > 0 {
+			builder.WriteString("Context:\n")
+			for k, v := range o.Context {
+				builder.WriteString(fmt.Sprintf("  %s: %s\n", k, v))
+			}
+		}
+	}
+
+	// web url
+	if o.Web != "" {
+		builder.WriteString("\nURL: " + o.Web + "\n")
+	}
+
+	// free-text description (with fallback to context)
+	if o.Description != "" {
+		builder.WriteString("\n\n" + o.Description + "\n")
+	} else if o.Context["description"] != "" {
+		builder.WriteString("\n\n" + o.Context["description"] + "\n")
+	}
+
+	return builder.String()
 }
 
 type Column struct {

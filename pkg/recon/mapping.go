@@ -12,6 +12,20 @@ import (
 func AttributeMapping(attributes map[string]interface{}, contextMapping []types.FieldMapping) map[string]string {
 	context := make(map[string]string)
 
+	// map all attributes, if no mapping is defined
+	if contextMapping == nil || len(contextMapping) == 0 {
+		for key, value := range attributes {
+			valueStr, err := formatAttributeValue(value, "", key)
+			if err != nil {
+				log.Warn().Str("source", key).Msg(err.Error())
+				continue
+			}
+			context[key] = valueStr
+		}
+
+		return context
+	}
+
 	for _, mapping := range contextMapping {
 		// require source and target
 		if mapping.Source == "" || mapping.Target == "" {

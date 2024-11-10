@@ -57,17 +57,34 @@ func (p Module) Options() ([]recon.Option, error) {
 		}
 
 		for _, job := range jobs {
+			jobPath := job.Name
+			if job.Group != "" {
+				jobPath = job.Group + "/" + job.Name
+			}
+
+			entryAttributes := map[string]interface{}{
+				"job.id":          job.ID,
+				"job.name":        job.Name,
+				"job.path":        jobPath,
+				"job.group":       job.Group,
+				"job.project":     job.Project,
+				"job.description": job.Description,
+				"job.enabled":     fmt.Sprintf("%t", job.Enabled),
+				"job.scheduled":   fmt.Sprintf("%t", job.Scheduled),
+			}
+			context := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
+
 			result = append(result, recon.Option{
 				ProviderName:   p.Name(),
 				ProviderType:   p.Type(),
 				Id:             job.ID,
-				DisplayName:    fmt.Sprintf("%s [%s] - %s", job.Name, job.Project, job.Description),
-				Name:           job.Name,
+				DisplayName:    fmt.Sprintf("%s [%s] - %s", jobPath, job.Project, job.Description),
+				Name:           jobPath,
 				Description:    job.Description,
 				Web:            job.Permalink,
 				StartDirectory: "~",
 				Tags:           []string{"rundeck", "job"},
-				Context:        map[string]string{},
+				Context:        context,
 				ModuleContext: map[string]string{
 					"rundeckHost":  p.Config.Host,
 					"rundeckToken": p.Config.AccessToken,
