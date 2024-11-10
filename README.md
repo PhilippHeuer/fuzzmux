@@ -18,13 +18,15 @@ Similar rules can be defined for ssh connections, kubernetes namespaces, ... - s
 
 ## Supported Providers
 
-- projects (with depth and customizable checks for git, svn, hg, ...)
-- ssh config (parses `~/.ssh/config`)
-- kubernetes clusters (including openshift)
-- usql connections (parses `~/.config/usql/config.yml`)
-- ldap (query users and groups)
-- keycloak (query users, groups and clients)
 - backstage (query catalog)
+- jira (query issues)
+- keycloak (query users, groups and clients)
+- kubernetes clusters (including openshift)
+- ldap (query users and groups)
+- projects (with depth and customizable checks for git, svn, hg, ...)
+- rundeck (query jobs)
+- ssh config (parses `~/.ssh/config`)
+- usql connections (parses `~/.config/usql/config.yml`)
 
 ## Supported Window Managers / Terminal Workspace Managers
 
@@ -54,35 +56,157 @@ curl -o ~/.local/bin/tmx -L https://github.com/PhilippHeuer/fuzzmux/releases/lat
 | `tmx project -t editor` | Start a layout for a project with a custom layout (bash, nvim, ...) |
 | `tmx menu`              | Interactive menu to choose a provider, and then an option           |
 
-## Configure your Providers
+## Configure Modules
+
+### Backstage
+
+The `backstage` module can query components in the catalog.
 
 ```yaml
-# yaml-language-server: $schema=https://raw.githubusercontent.com/PhilippHeuer/fuzzmux/main/configschema/v1.json
+modules:
+  - type: backstage
+    host: https://demo.backstage.io
+    bearer-token: secret # optional, see https://backstage.io/docs/auth/service-to-service-auth/#static-tokens
+    attribute-mapping:
+      - source: metadata.name
+        target: name
+    query:
+      - service 
+      - openapi
+      - user
+      - website
+      - team
+      - department
+```
 
-# project directories
-project:
-  enabled: true
-  display-format: rel
-  directories:
-    - path: ~/projects/Golang
-      depth: 1
-    - path: ~/projects/Rust
-      depth: 1
-    - path: ~/projects/Java
-      depth: 1
+### JIRA
 
-# ssh connections
-ssh:
-  enabled: true
+The `jira` module can query issues from JIRA.
 
-# kubernetes clusters
-kubernetes:
-  enabled: true
-  clusters:
-    - name: cluser-1
-      tags:
-        - production
-      kubeconfig: ~/.kube/cluster-1.config
+```yaml
+modules:
+  - type: jira
+    host: https://issues.apache.org/jira/
+    bearer-token: secret # your personal access token
+    jql: project = AMQ # optional filter, see https://support.atlassian.com/jira-software-cloud/docs/jql-fields/
+    attribute-mapper:
+      - source: project
+        target: project
+      - source: summary
+        target: summary
+      - source: type
+        target: type
+      - source: status
+        target: status
+      - source: priority
+        target: priority
+      - source: assignee
+        target: assignee
+      - source: reporter
+        target: reporter
+```
+
+### Keycloak
+
+The `keycloak` module can query users, groups and clients across all realms the user has access to.
+
+```yaml
+modules:
+  - type: keycloak
+    host: http://localhost:8080
+    realm: master
+    username: admin
+    password: secret
+    query:
+      - user
+      - client
+      - group
+```
+
+### Kubernetes
+
+The `kubernetes` module supports multiple clusters and can query namespaces.
+
+```yaml
+modules:
+  - type: kubernetes
+    clusters:
+      - name: cluster01
+        tags:
+          - production
+        kubeconfig: ~/.kube/cluster.config
+```
+
+### LDAP
+
+The `ldap` module can query users and groups from LDAP or Active Directory.
+
+```yaml
+modules:
+  - name: ldap-users
+    type: ldap
+    host: ldap://127.0.0.1:389
+    base-dn: "dc=company,dc=com"
+    bind-dn: "cn=admin,dc=company,dc=com"
+    bind-password: "secret"
+    filter: (&(objectClass=organizationalPerson))
+  - name: ldap-groups
+    type: ldap
+    host: ldap://127.0.0.1:389
+    base-dn: "dc=company,dc=com"
+    bind-dn: "cn=admin,dc=company,dc=com"
+    bind-password: "secret"
+    filter: (|(objectClass=group)(objectClass=posixGroup)(objectClass=groupOfNames))
+```
+
+### Project
+
+The `project` module can query projects from your local filesystem.
+
+```yaml
+modules:
+  - type: project
+    display-format: relative
+    directories:
+      - path: ~/projects/Golang
+        depth: 1
+      - path: ~/projects/Rust
+        depth: 1
+      - path: ~/projects/Java
+        depth: 1
+```
+
+### Rundeck
+
+The `rundeck` module can query jobs from the rundeck job scheduler.
+
+```yaml
+modules:
+  - type: rundeck
+    host: http://localhost:4440
+    token: your-personal-access-token
+    projects:
+      - test
+```
+
+### SSH
+
+The `ssh` module reads connections from the `~/.ssh/config` file.
+
+```yaml
+modules:
+  - type: ssh
+    start-directory: "~"
+```
+
+### USQL
+
+The `usql` module reads db connections from the `~/.config/usql/config.yml` file.
+
+```yaml
+modules:
+  - type: usql
+    start-directory: "~"
 ```
 
 ## Create your Layouts

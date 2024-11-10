@@ -12,22 +12,16 @@
     "finder": {
       "$ref": "#/definitions/finderConfig"
     },
-    "project": {
-      "$ref": "#/definitions/projectProviderConfig"
-    },
-    "ssh": {
-      "$ref": "#/definitions/sshProviderConfig"
-    },
-    "kubernetes": {
-      "$ref": "#/definitions/kubernetesProviderConfig"
-    },
-    "usql": {
-      "$ref": "#/definitions/usqlProviderConfig"
-    },
     "layouts": {
       "type": "object",
       "additionalProperties": {
         "$ref": "#/definitions/layout"
+      }
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/module"
       }
     }
   },
@@ -45,124 +39,6 @@
           "default": true
         }
       }
-    },
-    "projectProviderConfig": {
-      "type": "object",
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "directories": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/sourceDirectory"
-          }
-        },
-        "checks": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "display-format": {
-          "enum": ["absolute", "relative", "base"],
-          "default": "base"
-        }
-      },
-      "required": ["enabled", "directories"]
-    },
-    "sourceDirectory": {
-      "type": "object",
-      "properties": {
-        "path": {
-          "type": "string"
-        },
-        "depth": {
-          "type": "integer"
-        },
-        "exclude": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "tags": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": ["path"]
-    },
-    "sshProviderConfig": {
-      "type": "object",
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "file": {
-          "type": "string",
-          "description": "path to ssh config file, if not using the default (~/.ssh/config)"
-        },
-        "mode": {
-          "enum": ["session", "window"]
-        }
-      },
-      "required": ["enabled"]
-    },
-    "kubernetesProviderConfig": {
-      "type": "object",
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "clusters": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/kubernetesCluster"
-          }
-        }
-      },
-      "required": ["enabled", "clusters"]
-    },
-    "kubernetesCluster": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        },
-        "tags": {
-          "type": "array",
-          "description": "Tags to identify the cluster, can be used to filter results",
-          "items": {
-            "type": "string"
-          }
-        },
-        "openshift": {
-          "type": "boolean",
-          "description": "Whether the cluster is an OpenShift cluster",
-          "default": false
-        },
-        "kubeconfig": {
-          "type": "string",
-          "description": "The path to the kubeconfig file"
-        }
-      },
-      "required": ["name", "kubeconfig"]
-    },
-    "usqlProviderConfig": {
-      "type": "object",
-      "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
-        "file": {
-          "type": "string",
-          "description": "path to usql config file, if not using the default (~/.config/usql/config.yaml)"
-        }
-      },
-      "required": ["enabled"]
     },
     "layout": {
       "type": "object",
@@ -233,6 +109,212 @@
         }
       },
       "required": ["command"]
+    },
+    "module": {
+      "type": "object",
+      "properties": {
+        "name": {
+            "type": "string",
+            "description": "User-defined name of the module"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["backstage", "jira", "keycloak", "kubernetes", "ldap", "project", "rundeck", "ssh", "usql"]
+        }
+      },
+      "required": ["type"],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "backstage" }
+            }
+          },
+          "then": {
+            "properties": {
+            },
+            "required": []
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "jira" }
+            }
+          },
+          "then": {
+            "properties": {
+            },
+            "required": []
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "keycloak" }
+            }
+          },
+          "then": {
+            "properties": {
+            },
+            "required": []
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "kubernetes" }
+            }
+          },
+          "then": {
+            "properties": {
+              "clusters": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/kubernetesCluster"
+                }
+              }
+            },
+            "required": ["clusters"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "ldap" }
+            }
+          },
+          "then": {
+            "properties": {
+            },
+            "required": []
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "project" }
+            }
+          },
+          "then": {
+            "properties": {
+              "directories": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/sourceDirectory"
+                }
+              },
+              "checks": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "display-format": {
+                "enum": ["absolute", "relative", "base"],
+                "default": "base"
+              }
+            },
+            "required": ["directories"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "rundeck" }
+            }
+          },
+          "then": {
+            "properties": {
+            },
+            "required": []
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "ssh" }
+            }
+          },
+          "then": {
+            "properties": {
+              "file": {
+                "type": "string",
+                "description": "path to ssh config file, if not using the default (~/.ssh/config)"
+              },
+              "mode": {
+                "enum": ["session", "window"]
+              }
+            },
+            "required": []
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "usql" }
+            }
+          },
+          "then": {
+            "properties": {
+              "file": {
+                "type": "string",
+                "description": "path to usql config file, if not using the default (~/.config/usql/config.yaml)"
+              }
+            },
+            "required": []
+          }
+        }
+      ]
+    },
+    "kubernetesCluster": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Tags to identify the cluster, can be used to filter results",
+          "items": {
+            "type": "string"
+          }
+        },
+        "openshift": {
+          "type": "boolean",
+          "description": "Whether the cluster is an OpenShift cluster",
+          "default": false
+        },
+        "kubeconfig": {
+          "type": "string",
+          "description": "The path to the kubeconfig file"
+        }
+      },
+      "required": ["name", "kubeconfig"]
+    },
+    "sourceDirectory": {
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string"
+        },
+        "depth": {
+          "type": "integer"
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["path"]
     }
   }
 }
