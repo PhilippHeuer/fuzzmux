@@ -15,6 +15,8 @@ type Option struct {
 	Id             string            `json:"id"`              // unique id
 	DisplayName    string            `json:"display_name"`    // display name for the fuzzy finder
 	Name           string            `json:"name"`            // name
+	Description    string            `json:"description"`     // description
+	Web            string            `json:"web"`             // web url
 	StartDirectory string            `json:"start_directory"` // sets the initial working directory
 	Tags           []string          `json:"tags"`            // tags
 	Context        map[string]string `json:"context"`         // additional context information

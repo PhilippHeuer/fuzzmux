@@ -93,10 +93,8 @@ func (p Module) Options() ([]recon.Option, error) {
 					"rootUrl":      ptr.Value(cl.RootURL),
 					"protocol":     ptr.Value(cl.Protocol),
 					"publicClient": ptr.Value(cl.PublicClient),
-					"description":  ptr.Value(cl.Description),
 				})
 				attributes := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
-				attributes["web"] = fmt.Sprintf("%s/admin/%s/console/#/%s/clients/%s/settings", p.Config.Host, ptr.Value(realm.Realm), ptr.Value(realm.Realm), ptr.Value(cl.ID))
 				attributes["type"] = "client"
 
 				result = append(result, recon.Option{
@@ -105,6 +103,8 @@ func (p Module) Options() ([]recon.Option, error) {
 					Id:           ptr.Value(cl.ID),
 					DisplayName:  fmt.Sprintf("%s [%s] @ %s", ptr.Value(cl.ClientID), "client", ptr.Value(realm.Realm)),
 					Name:         ptr.Value(cl.ClientID),
+					Description:  ptr.Value(cl.Description),
+					Web:          fmt.Sprintf("%s/admin/%s/console/#/%s/clients/%s/settings", p.Config.Host, ptr.Value(realm.Realm), ptr.Value(realm.Realm), ptr.Value(cl.ID)),
 					Tags:         []string{"keycloak", "client"},
 					Context:      attributes,
 				})
@@ -128,7 +128,6 @@ func (p Module) Options() ([]recon.Option, error) {
 					"createdAt":   util.ConvertMilliUnixTimestampToRFC3339(user.CreatedTimestamp),
 				})
 				attributes := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
-				attributes["web"] = fmt.Sprintf("%s/admin/%s/console/#/%s/users/%s", p.Config.Host, ptr.Value(realm.Realm), ptr.Value(realm.Realm), ptr.Value(user.ID))
 				attributes["type"] = "user"
 
 				result = append(result, recon.Option{
@@ -137,6 +136,8 @@ func (p Module) Options() ([]recon.Option, error) {
 					Id:           ptr.Value(user.ID),
 					DisplayName:  fmt.Sprintf("%s [%s] @ %s", ptr.Value(user.Username), "user", ptr.Value(realm.Realm)),
 					Name:         ptr.Value(user.Username),
+					Description:  ptr.Value(user.FirstName) + " " + ptr.Value(user.LastName),
+					Web:          fmt.Sprintf("%s/admin/%s/console/#/%s/users/%s", p.Config.Host, ptr.Value(realm.Realm), ptr.Value(realm.Realm), ptr.Value(user.ID)),
 					Tags:         []string{"keycloak", "user"},
 					Context:      attributes,
 				})
@@ -151,7 +152,6 @@ func (p Module) Options() ([]recon.Option, error) {
 			for _, group := range groups {
 				entryAttributes := attributeSlicesToMap(group.Attributes, map[string]interface{}{})
 				attributes := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
-				attributes["web"] = fmt.Sprintf("%s/admin/%s/console/#/%s/groups/%s/settings", p.Config.Host, ptr.Value(realm.Realm), ptr.Value(realm.Realm), ptr.Value(group.ID))
 				attributes["type"] = "group"
 
 				result = append(result, recon.Option{
@@ -160,6 +160,7 @@ func (p Module) Options() ([]recon.Option, error) {
 					Id:           ptr.Value(group.ID),
 					DisplayName:  fmt.Sprintf("%s [%s] @ %s", ptr.Value(group.Name), "group", ptr.Value(realm.Realm)),
 					Name:         ptr.Value(group.Name),
+					Web:          fmt.Sprintf("%s/admin/%s/console/#/%s/groups/%s/settings", p.Config.Host, ptr.Value(realm.Realm), ptr.Value(realm.Realm), ptr.Value(group.ID)),
 					Tags:         []string{"keycloak", "group"},
 					Context:      attributes,
 				})

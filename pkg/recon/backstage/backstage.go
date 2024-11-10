@@ -97,7 +97,6 @@ func (p Module) Options() ([]recon.Option, error) {
 				data["metadata.annotations."+key] = value
 			}
 			attributes := recon.AttributeMapping(data, p.Config.AttributeMapping)
-			attributes["web"] = fmt.Sprintf("%s/catalog/%s/%s/%s", p.Config.Host, entity.Metadata.Namespace, strings.ToLower(entity.Kind), entity.Metadata.Name)
 
 			result = append(result, recon.Option{
 				ProviderName: p.Name(),
@@ -105,6 +104,8 @@ func (p Module) Options() ([]recon.Option, error) {
 				Id:           entity.Metadata.Name,
 				DisplayName:  fmt.Sprintf("%s [%s]", entity.Metadata.Name, getStringValue(entity.Spec, "type")),
 				Name:         entity.Metadata.Name,
+				Description:  entity.Metadata.Description,
+				Web:          fmt.Sprintf("%s/catalog/%s/%s/%s", p.Config.Host, entity.Metadata.Namespace, strings.ToLower(entity.Kind), entity.Metadata.Name),
 				Tags:         []string{"backstage", entityType},
 				Context:      attributes,
 			})

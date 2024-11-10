@@ -96,7 +96,6 @@ func (p Module) Options() ([]recon.Option, error) {
 			entryAttributes["sprint.endedAt"] = issue.Fields.Sprint.EndDate
 		}
 		attributes := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
-		attributes["web"] = fmt.Sprintf("%s/browse/%s", p.Config.Host, issue.Key)
 
 		options = append(options, recon.Option{
 			ProviderName:   p.Name(),
@@ -104,6 +103,8 @@ func (p Module) Options() ([]recon.Option, error) {
 			Id:             issue.Key,
 			DisplayName:    fmt.Sprintf("%s: %s", issue.Key, issue.Fields.Summary),
 			Name:           issue.Key,
+			Description:    issue.Fields.Summary,
+			Web:            fmt.Sprintf("%s/browse/%s", p.Config.Host, issue.Key),
 			StartDirectory: "~",
 			Tags:           []string{"jira"},
 			Context:        attributes,

@@ -63,11 +63,11 @@ func (p Module) Options() ([]recon.Option, error) {
 				Id:             job.ID,
 				DisplayName:    fmt.Sprintf("%s [%s] - %s", job.Name, job.Project, job.Description),
 				Name:           job.Name,
+				Description:    job.Description,
+				Web:            job.Permalink,
 				StartDirectory: "~",
 				Tags:           []string{"rundeck", "job"},
-				Context: map[string]string{
-					"web": job.Permalink,
-				},
+				Context:        map[string]string{},
 				ModuleContext: map[string]string{
 					"rundeckHost":  p.Config.Host,
 					"rundeckToken": p.Config.AccessToken,
