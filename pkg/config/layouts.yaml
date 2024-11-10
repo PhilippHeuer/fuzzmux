@@ -66,3 +66,13 @@ layouts:
           - inPath("jira")
         commands:
           - command: exec jira issue view {{name}}
+  rundeck:
+    apps:
+      - name: rundeck-cli
+        default: true
+        rules:
+          - inPath("rd")
+        commands:
+          - command: export RD_URL={{rundeckHost}}
+          - command: export RD_TOKEN={{rundeckToken}}
+          - command: exec bash

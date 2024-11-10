@@ -8,6 +8,7 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/kubernetes"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/ldap"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/project"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/rundeck"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/ssh"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/static"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/usql"
@@ -70,6 +71,8 @@ func (c *Config) UnmarshalYAML(value *yaml.Node) error {
 			module = &backstage.ModuleConfig{}
 		case "jira":
 			module = &jira.ModuleConfig{}
+		case "rundeck":
+			module = &rundeck.ModuleConfig{}
 		default:
 			return fmt.Errorf("unknown module type '%s' for key %d", typeInfo.Type, key)
 		}

@@ -11,6 +11,7 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/kubernetes"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/ldap"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/project"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/rundeck"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/ssh"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/static"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/usql"
@@ -43,6 +44,8 @@ func ConfigToReconModules(conf config.Config) []recon.Module {
 			modules = append(modules, backstage.NewModule(*cfg))
 		case *jira.ModuleConfig:
 			modules = append(modules, jira.NewModule(*cfg))
+		case *rundeck.ModuleConfig:
+			modules = append(modules, rundeck.NewModule(*cfg))
 		default:
 			log.Error().Interface("module", m).Msg("unrecognized module type")
 		}
