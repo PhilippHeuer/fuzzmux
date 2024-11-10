@@ -28,7 +28,7 @@ require (
 	github.com/tdabasinskas/go-backstage/v2 v2.5.1
 	github.com/testcontainers/testcontainers-go v0.34.0
 	go.i3wm.org/i3/v4 v4.21.0
-	golang.org/x/oauth2 v0.23.0
+	golang.org/x/oauth2 v0.24.0
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/apimachinery v0.31.1
 	k8s.io/client-go v0.31.1
