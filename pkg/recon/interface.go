@@ -24,7 +24,7 @@ type Option struct {
 	ModuleContext  map[string]string `json:"module_context"`  // internal context information, not exposed to the user
 }
 
-func (o Option) ResolveStartDirectory(full bool) string {
+func (o *Option) ResolveStartDirectory(full bool) string {
 	startDirectory := o.StartDirectory
 	if startDirectory == "" {
 		startDirectory = "~"
@@ -42,7 +42,7 @@ func (o Option) ResolveStartDirectory(full bool) string {
 	return startDirectory
 }
 
-func (o Option) CreateStartDirectoryIfMissing() error {
+func (o *Option) CreateStartDirectoryIfMissing() error {
 	if o.StartDirectory == "" || o.StartDirectory == "~" {
 		return nil
 	}
@@ -58,12 +58,14 @@ func (o Option) CreateStartDirectoryIfMissing() error {
 	return nil
 }
 
-func (o Option) ResolvePlaceholders(input string) string {
-	input = os.ExpandEnv(input)
-
+func (o *Option) ResolvePlaceholders(input string) string {
+	input = util.ExpandPlaceholders(input, "providerName", o.ProviderName)
+	input = util.ExpandPlaceholders(input, "providerType", o.ProviderType)
 	input = util.ExpandPlaceholders(input, "id", o.Id)
 	input = util.ExpandPlaceholders(input, "name", o.Name)
 	input = util.ExpandPlaceholders(input, "displayName", o.DisplayName)
+	input = util.ExpandPlaceholders(input, "description", o.Description)
+	input = util.ExpandPlaceholders(input, "web", o.Web)
 	input = util.ExpandPlaceholders(input, "startDirectory", o.ResolveStartDirectory(true))
 
 	// module context
@@ -76,10 +78,13 @@ func (o Option) ResolvePlaceholders(input string) string {
 		input = util.ExpandPlaceholders(input, k, v)
 	}
 
+	// environment variables
+	input = os.ExpandEnv(input)
+
 	return input
 }
 
-func (o Option) RenderPreview() string {
+func (o *Option) RenderPreview() string {
 	var builder strings.Builder
 	builder.WriteString("# " + o.DisplayName + "\n\n")
 	builder.WriteString(fmt.Sprintf("Provider: %s [TYPE: %s]\n", o.ProviderName, o.ProviderType))
@@ -150,6 +155,15 @@ func (o Option) RenderPreview() string {
 	}
 
 	return builder.String()
+}
+
+func (o *Option) ProcessUserTemplateStrings(displayNameTemplate string, startDirectoryTemplate string) {
+	if startDirectoryTemplate != "" {
+		o.StartDirectory = o.ResolvePlaceholders(startDirectoryTemplate)
+	}
+	if displayNameTemplate != "" {
+		o.DisplayName = o.ResolvePlaceholders(displayNameTemplate)
+	}
 }
 
 type Column struct {

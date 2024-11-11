@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const moduleName = "usql"
+const moduleType = "usql"
 
 var USQLConfigDefaultPath = filepath.Join(os.Getenv("HOME"), ".config", "usql", "config.yaml")
 
@@ -23,22 +23,25 @@ type ModuleConfig struct {
 	// Name is used to override the default module name
 	Name string `yaml:"name,omitempty"`
 
+	// DisplayName is a template string to render a custom display name
+	DisplayName string `yaml:"display-name"`
+
+	// StartDirectory is a template string that defines the start directory
+	StartDirectory string `yaml:"start-directory"`
+
 	// ConfigFile is used in case your usql config is not in the default location
 	ConfigFile string `yaml:"file"`
-
-	// StartDirectory is used to define the current working directory, supports template variables
-	StartDirectory string `yaml:"start-directory"`
 }
 
 func (p Module) Name() string {
 	if p.Config.Name != "" {
 		return p.Config.Name
 	}
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Type() string {
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Options() ([]recon.Option, error) {
@@ -92,6 +95,7 @@ func (p Module) Options() ([]recon.Option, error) {
 			opt.DisplayName = "[" + conn.Name + "] " + opt.DisplayName
 		}
 
+		opt.ProcessUserTemplateStrings(p.Config.DisplayName, p.Config.StartDirectory)
 		options = append(options, opt)
 	}
 

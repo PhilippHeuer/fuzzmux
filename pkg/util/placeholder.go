@@ -10,13 +10,14 @@ func ExpandPlaceholders(command string, key string, value string) string {
 		return command
 	}
 
-	// raw value
-	command = strings.ReplaceAll(command, "{{!"+key+"}}", value)
+	// prepare
+	rawPlaceholder := "{{!" + key + "}}"
+	quotedPlaceholder := "{{" + key + "}}"
+	trimmedQuotedValue := strconv.Quote(value)[1 : len(strconv.Quote(value))-1]
 
-	// quoted values
-	quotedValue := strconv.Quote(value)
-	trimmedQuotedValue := quotedValue[1 : len(quotedValue)-1]
-	command = strings.ReplaceAll(command, "{{"+key+"}}", trimmedQuotedValue)
+	// replace
+	command = strings.ReplaceAll(command, rawPlaceholder, value)
+	command = strings.ReplaceAll(command, quotedPlaceholder, trimmedQuotedValue)
 
 	return command
 }

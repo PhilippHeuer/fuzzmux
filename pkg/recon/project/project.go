@@ -7,7 +7,7 @@ import (
 	"github.com/cidverse/repoanalyzer/analyzer"
 )
 
-const moduleName = "project"
+const moduleType = "project"
 
 var defaultChecks = []string{".git", ".gitignore", ".hg", ".hgignore", ".svn", ".vscode", ".idea"}
 
@@ -18,6 +18,12 @@ type Module struct {
 type ModuleConfig struct {
 	// Name is used to override the default module name
 	Name string `yaml:"name,omitempty"`
+
+	// DisplayName is a template string to render a custom display name
+	DisplayName string `yaml:"display-name"`
+
+	// StartDirectory is a template string that defines the start directory
+	StartDirectory string `yaml:"start-directory"`
 
 	// Sources is a list of source directories that should be scanned
 	SourceDirectories []SourceDirectory `yaml:"directories"`
@@ -55,24 +61,24 @@ func (p Module) Name() string {
 	if p.Config.Name != "" {
 		return p.Config.Name
 	}
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Type() string {
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Options() ([]recon.Option, error) {
-	var options []recon.Option
+	var result []recon.Option
 
 	// search for projects
 	projects, err := SearchProjectDirectories(p.Config.SourceDirectories, p.Config.Checks)
 	if err != nil {
-		return options, fmt.Errorf("failed to scan for projects: %w", err)
+		return result, fmt.Errorf("failed to scan for projects: %w", err)
 	}
 
 	for _, project := range projects {
-		options = append(options, recon.Option{
+		opt := recon.Option{
 			ProviderName:   p.Name(),
 			ProviderType:   p.Type(),
 			Id:             project.Path,
@@ -80,10 +86,12 @@ func (p Module) Options() ([]recon.Option, error) {
 			Name:           project.Name,
 			StartDirectory: project.Path,
 			Tags:           project.Tags,
-		})
+		}
+		opt.ProcessUserTemplateStrings(p.Config.DisplayName, p.Config.StartDirectory)
+		result = append(result, opt)
 	}
 
-	return options, nil
+	return result, nil
 }
 
 func (p Module) OptionsOrCache(maxAge float64) ([]recon.Option, error) {

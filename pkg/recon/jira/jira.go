@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-const moduleName = "jira"
+const moduleType = "jira"
 
 type Module struct {
 	Config ModuleConfig
@@ -20,6 +20,12 @@ type Module struct {
 type ModuleConfig struct {
 	// Name is used to override the default module name
 	Name string `yaml:"name,omitempty"`
+
+	// DisplayName is a template string to render a custom display name
+	DisplayName string `yaml:"display-name"`
+
+	// StartDirectory is a template string that defines the start directory
+	StartDirectory string `yaml:"start-directory"`
 
 	// Host is the Backstage hostname or IP address
 	Host string `yaml:"host"`
@@ -38,15 +44,15 @@ func (p Module) Name() string {
 	if p.Config.Name != "" {
 		return p.Config.Name
 	}
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Type() string {
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Options() ([]recon.Option, error) {
-	var options []recon.Option
+	var result []recon.Option
 
 	// httpClient
 	var httpClient *http.Client
@@ -66,56 +72,69 @@ func (p Module) Options() ([]recon.Option, error) {
 	}
 
 	// query tickets
-	log.Debug().Str("jql", p.Config.Jql).Msg("querying jira issues")
-	issues, _, err := jiraClient.Issue.Search(p.Config.Jql, &jira.SearchOptions{})
-	if err != nil {
-		return nil, err
-	}
-	for _, issue := range issues {
-		entryAttributes := map[string]interface{}{
-			"project": issue.Fields.Project.Name,
-			"summary": issue.Fields.Summary,
-			"type":    issue.Fields.Type.Name,
-		}
-		if issue.Fields.Status != nil {
-			entryAttributes["status"] = issue.Fields.Status.Name
-		}
-		if issue.Fields.Priority != nil {
-			entryAttributes["priority"] = issue.Fields.Priority.Name
-		}
-		if issue.Fields.Assignee != nil {
-			entryAttributes["assignee"] = issue.Fields.Assignee.Name
-		}
-		if issue.Fields.Reporter != nil {
-			entryAttributes["reporter"] = issue.Fields.Reporter.Name
-		}
-		if issue.Fields.Sprint != nil {
-			entryAttributes["sprint.id"] = issue.Fields.Sprint.ID
-			entryAttributes["sprint.name"] = issue.Fields.Sprint.Name
-			entryAttributes["sprint.startedAt"] = issue.Fields.Sprint.StartDate
-			entryAttributes["sprint.endedAt"] = issue.Fields.Sprint.EndDate
-		}
-		attributes := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
+	startAt := 0
+	maxResults := 1000
 
-		options = append(options, recon.Option{
-			ProviderName:   p.Name(),
-			ProviderType:   p.Type(),
-			Id:             issue.Key,
-			DisplayName:    fmt.Sprintf("%s: %s", issue.Key, issue.Fields.Summary),
-			Name:           issue.Key,
-			Description:    issue.Fields.Summary,
-			Web:            fmt.Sprintf("%s/browse/%s", p.Config.Host, issue.Key),
-			StartDirectory: "~",
-			Tags:           []string{"jira"},
-			Context:        attributes,
-			ModuleContext: map[string]string{
-				"jiraServer":      p.Config.Host,
-				"jiraBearerToken": p.Config.BearerToken,
-			},
-		})
+	for {
+		log.Debug().Str("jql", p.Config.Jql).Int("startAt", startAt).Msg("querying Jira issues")
+		issues, _, err := jiraClient.Issue.Search(p.Config.Jql, &jira.SearchOptions{StartAt: startAt, MaxResults: maxResults})
+		if err != nil {
+			return nil, err
+		}
+		if len(issues) == 0 {
+			break
+		}
+
+		for _, issue := range issues {
+			entryAttributes := map[string]interface{}{
+				"project": issue.Fields.Project.Name,
+				"summary": issue.Fields.Summary,
+				"type":    issue.Fields.Type.Name,
+			}
+			if issue.Fields.Status != nil {
+				entryAttributes["status"] = issue.Fields.Status.Name
+			}
+			if issue.Fields.Priority != nil {
+				entryAttributes["priority"] = issue.Fields.Priority.Name
+			}
+			if issue.Fields.Assignee != nil {
+				entryAttributes["assignee"] = issue.Fields.Assignee.Name
+			}
+			if issue.Fields.Reporter != nil {
+				entryAttributes["reporter"] = issue.Fields.Reporter.Name
+			}
+			if issue.Fields.Sprint != nil {
+				entryAttributes["sprint.id"] = issue.Fields.Sprint.ID
+				entryAttributes["sprint.name"] = issue.Fields.Sprint.Name
+				entryAttributes["sprint.startedAt"] = issue.Fields.Sprint.StartDate
+				entryAttributes["sprint.endedAt"] = issue.Fields.Sprint.EndDate
+			}
+
+			attributes := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
+
+			opt := recon.Option{
+				ProviderName:   p.Name(),
+				ProviderType:   p.Type(),
+				Id:             issue.Key,
+				DisplayName:    fmt.Sprintf("%s: %s", issue.Key, issue.Fields.Summary),
+				Name:           issue.Key,
+				Description:    issue.Fields.Summary,
+				Web:            fmt.Sprintf("%s/browse/%s", p.Config.Host, issue.Key),
+				StartDirectory: "~",
+				Tags:           []string{"jira"},
+				Context:        attributes,
+				ModuleContext: map[string]string{
+					"jiraServer":      p.Config.Host,
+					"jiraBearerToken": p.Config.BearerToken,
+				},
+			}
+			opt.ProcessUserTemplateStrings(p.Config.DisplayName, p.Config.StartDirectory)
+			result = append(result, opt)
+		}
+		startAt += len(issues)
 	}
 
-	return options, nil
+	return result, nil
 }
 
 func (p Module) OptionsOrCache(maxAge float64) ([]recon.Option, error) {

@@ -12,7 +12,7 @@ import (
 	"strings"
 )
 
-const moduleName = "backstage"
+const moduleType = "backstage"
 
 type Module struct {
 	Config ModuleConfig
@@ -21,6 +21,12 @@ type Module struct {
 type ModuleConfig struct {
 	// Name is used to override the default module name
 	Name string `yaml:"name,omitempty"`
+
+	// DisplayName is a template string to render a custom display name
+	DisplayName string `yaml:"display-name"`
+
+	// StartDirectory is a template string that defines the start directory
+	StartDirectory string `yaml:"start-directory"`
 
 	// Host is the Backstage hostname or IP address
 	Host string `yaml:"host"`
@@ -39,11 +45,11 @@ func (p Module) Name() string {
 	if p.Config.Name != "" {
 		return p.Config.Name
 	}
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Type() string {
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Options() ([]recon.Option, error) {
@@ -76,9 +82,15 @@ func (p Module) Options() ([]recon.Option, error) {
 
 	for _, entity := range entities {
 		entityType := getStringValue(entity.Spec, "type")
+		queryId := strings.ToLower(entity.Kind)
+		if entityType != "" {
+			queryId = fmt.Sprintf("%s/%s", queryId, entityType)
+		}
 
-		if slices.Contains(p.Config.Query, entityType) || len(p.Config.Query) == 0 {
+		if slices.Contains(p.Config.Query, queryId) || len(p.Config.Query) == 0 {
 			data := map[string]interface{}{
+				"kind":                 entity.Kind,
+				"spec.type":            getStringValue(entity.Spec, "type"),
 				"metadata.name":        entity.Metadata.Name,
 				"metadata.namespace":   entity.Metadata.Namespace,
 				"metadata.description": entity.Metadata.Description,
@@ -88,7 +100,9 @@ func (p Module) Options() ([]recon.Option, error) {
 				"partOf":               entityRelationToString(entity.Relations, "partOf"),
 			}
 			for key, value := range entity.Spec {
-				data["spec."+key] = value
+				if str, ok := value.(string); ok { // TODO: handle nested objects
+					data["spec."+key] = str
+				}
 			}
 			for key, value := range entity.Metadata.Labels {
 				data["metadata.labels."+key] = value
@@ -98,17 +112,19 @@ func (p Module) Options() ([]recon.Option, error) {
 			}
 			attributes := recon.AttributeMapping(data, p.Config.AttributeMapping)
 
-			result = append(result, recon.Option{
+			opt := recon.Option{
 				ProviderName: p.Name(),
 				ProviderType: p.Type(),
 				Id:           entity.Metadata.Name,
-				DisplayName:  fmt.Sprintf("%s [%s]", entity.Metadata.Name, getStringValue(entity.Spec, "type")),
+				DisplayName:  fmt.Sprintf("%s [%s]", entity.Metadata.Name, queryId),
 				Name:         entity.Metadata.Name,
 				Description:  entity.Metadata.Description,
 				Web:          fmt.Sprintf("%s/catalog/%s/%s/%s", p.Config.Host, entity.Metadata.Namespace, strings.ToLower(entity.Kind), entity.Metadata.Name),
 				Tags:         []string{"backstage", entityType},
 				Context:      attributes,
-			})
+			}
+			opt.ProcessUserTemplateStrings(p.Config.DisplayName, p.Config.StartDirectory)
+			result = append(result, opt)
 		}
 	}
 

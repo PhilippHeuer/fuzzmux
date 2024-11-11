@@ -5,7 +5,7 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 )
 
-const moduleName = "static"
+const moduleType = "static"
 
 type Module struct {
 	Config ModuleConfig
@@ -49,11 +49,11 @@ func (p Module) Name() string {
 	if p.Config.Name != "" {
 		return p.Config.Name
 	}
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Type() string {
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Options() ([]recon.Option, error) {

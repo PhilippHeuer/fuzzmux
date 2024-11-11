@@ -20,7 +20,9 @@ func AttributeMapping(attributes map[string]interface{}, contextMapping []types.
 				log.Warn().Str("source", key).Msg(err.Error())
 				continue
 			}
-			context[key] = valueStr
+			if valueStr != "" {
+				context[key] = valueStr
+			}
 		}
 
 		return context
@@ -52,10 +54,35 @@ func AttributeMapping(attributes map[string]interface{}, contextMapping []types.
 
 func formatAttributeValue(value interface{}, format, source string) (string, error) {
 	switch v := value.(type) {
+	case bool:
+		return fmt.Sprintf("%t", v), nil
+	case *bool:
+		if v != nil {
+			return fmt.Sprintf("%t", *v), nil
+		}
+		return "false", nil
 	case string:
 		return formatString(v, format)
 	case []string:
 		return formatStringSlice(v, format)
+	case *[]string:
+		if v != nil {
+			return formatStringSlice(*v, format)
+		}
+		return "", nil
+	case int:
+		return fmt.Sprintf("%d", v), nil
+	case *int:
+		if v != nil {
+			return fmt.Sprintf("%d", *v), nil
+		}
+	case int32:
+		return fmt.Sprintf("%d", v), nil
+	case *int32:
+		if v != nil {
+			return fmt.Sprintf("%d", *v), nil
+		}
+		return "", nil
 	case int64:
 		return formatInt64(v, format)
 	case *int64:

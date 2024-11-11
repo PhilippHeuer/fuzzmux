@@ -50,16 +50,6 @@ func TestContextMapping(t *testing.T) {
 			},
 		},
 		{
-			name: "Unsupported Format Type",
-			attributes: map[string]interface{}{
-				"unsupported": 12345, // Unsupported type for ldaptime
-			},
-			mappingConfig: []types.FieldMapping{
-				{Source: "unsupported", Target: "unsupportedTime", Format: "ldaptime"},
-			},
-			expected: map[string]string{},
-		},
-		{
 			name: "Empty Source or Target",
 			attributes: map[string]interface{}{
 				"created": "20050917134246.0Z",

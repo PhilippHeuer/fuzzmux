@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const moduleName = "rundeck"
+const moduleType = "rundeck"
 
 type Module struct {
 	Config ModuleConfig
@@ -16,6 +16,12 @@ type Module struct {
 type ModuleConfig struct {
 	// Name is used to override the default module name
 	Name string `yaml:"name,omitempty"`
+
+	// DisplayName is a template string to render a custom display name
+	DisplayName string `yaml:"display-name"`
+
+	// StartDirectory is a template string that defines the start directory
+	StartDirectory string `yaml:"start-directory"`
 
 	// Host is the Backstage hostname or IP address
 	Host string `yaml:"host"`
@@ -34,11 +40,11 @@ func (p Module) Name() string {
 	if p.Config.Name != "" {
 		return p.Config.Name
 	}
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Type() string {
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Options() ([]recon.Option, error) {
@@ -69,12 +75,12 @@ func (p Module) Options() ([]recon.Option, error) {
 				"job.group":       job.Group,
 				"job.project":     job.Project,
 				"job.description": job.Description,
-				"job.enabled":     fmt.Sprintf("%t", job.Enabled),
-				"job.scheduled":   fmt.Sprintf("%t", job.Scheduled),
+				"job.enabled":     job.Enabled,
+				"job.scheduled":   job.Scheduled,
 			}
 			context := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
 
-			result = append(result, recon.Option{
+			opt := recon.Option{
 				ProviderName:   p.Name(),
 				ProviderType:   p.Type(),
 				Id:             job.ID,
@@ -89,7 +95,9 @@ func (p Module) Options() ([]recon.Option, error) {
 					"rundeckHost":  p.Config.Host,
 					"rundeckToken": p.Config.AccessToken,
 				},
-			})
+			}
+			opt.ProcessUserTemplateStrings(p.Config.DisplayName, p.Config.StartDirectory)
+			result = append(result, opt)
 		}
 	}
 

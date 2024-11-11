@@ -13,7 +13,8 @@ import (
 	"os"
 )
 
-const moduleName = "kubernetes"
+const moduleType = "kubernetes"
+const defaultStartDirectory = "~/k8s/{{clusterName}}/{{namespace}}"
 
 type Module struct {
 	Config ModuleConfig
@@ -23,11 +24,14 @@ type ModuleConfig struct {
 	// Name is used to override the default module name
 	Name string `yaml:"name,omitempty"`
 
+	// DisplayName is a template string to render a custom display name
+	DisplayName string `yaml:"display-name"`
+
+	// StartDirectory is a template string that defines the start directory
+	StartDirectory string `yaml:"start-directory"`
+
 	// Clusters is a list of kubernetes clusters that should be scanned
 	Clusters []KubernetesCluster `yaml:"clusters"`
-
-	// StartDirectory is used to define the current working directory, supports template variables
-	StartDirectory string `yaml:"start-directory"`
 }
 
 type KubernetesCluster struct {
@@ -48,11 +52,11 @@ func (p Module) Name() string {
 	if p.Config.Name != "" {
 		return p.Config.Name
 	}
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Type() string {
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Options() ([]recon.Option, error) {
@@ -60,7 +64,7 @@ func (p Module) Options() ([]recon.Option, error) {
 
 	for _, cluster := range p.Config.Clusters {
 		if cluster.OpenShift {
-			opts, err := processOpenShiftCluster(cluster, p.Name(), p.Type(), p.Config.StartDirectory)
+			opts, err := processOpenShiftCluster(cluster, p.Name(), p.Config)
 			if err != nil {
 				return nil, err
 			}
@@ -68,7 +72,7 @@ func (p Module) Options() ([]recon.Option, error) {
 			continue
 		}
 
-		opts, err := processKubernetesCluster(cluster, p.Name(), p.Type(), p.Config.StartDirectory)
+		opts, err := processKubernetesCluster(cluster, p.Name(), p.Config)
 		if err != nil {
 			return nil, err
 		}
@@ -111,16 +115,12 @@ func (p Module) Columns() []recon.Column {
 }
 
 func NewModule(config ModuleConfig) Module {
-	if config.StartDirectory == "" {
-		config.StartDirectory = "~/k8s/{{clusterName}}/{{namespace}}"
-	}
-
 	return Module{
 		Config: config,
 	}
 }
 
-func processKubernetesCluster(cluster KubernetesCluster, moduleName string, moduleType string, startDirectory string) (options []recon.Option, err error) {
+func processKubernetesCluster(cluster KubernetesCluster, moduleName string, moduleConf ModuleConfig) (result []recon.Option, err error) {
 	clusterName := "default"
 	if cluster.Name != "" {
 		clusterName = cluster.Name
@@ -158,13 +158,13 @@ func processKubernetesCluster(cluster KubernetesCluster, moduleName string, modu
 		}
 
 		// add option
-		options = append(options, recon.Option{
+		opt := recon.Option{
 			ProviderName:   moduleName,
 			ProviderType:   moduleType,
 			Id:             item.GetName(),
 			DisplayName:    displayName,
 			Name:           item.GetName(),
-			StartDirectory: startDirectory,
+			StartDirectory: defaultStartDirectory,
 			Tags:           cluster.Tags,
 			Context: map[string]string{
 				"clusterName": clusterName,
@@ -174,13 +174,15 @@ func processKubernetesCluster(cluster KubernetesCluster, moduleName string, modu
 				"kubeConfig":  configFile,
 				"namespace":   item.GetName(),
 			},
-		})
+		}
+		opt.ProcessUserTemplateStrings(moduleConf.DisplayName, moduleConf.StartDirectory)
+		result = append(result, opt)
 	}
 
-	return options, nil
+	return result, nil
 }
 
-func processOpenShiftCluster(cluster KubernetesCluster, moduleName string, moduleType string, startDirectory string) (options []recon.Option, err error) {
+func processOpenShiftCluster(cluster KubernetesCluster, moduleName string, moduleConf ModuleConfig) (result []recon.Option, err error) {
 	clusterName := "default"
 	if cluster.Name != "" {
 		clusterName = cluster.Name
@@ -224,13 +226,13 @@ func processOpenShiftCluster(cluster KubernetesCluster, moduleName string, modul
 		}
 
 		// add option
-		options = append(options, recon.Option{
+		opt := recon.Option{
 			ProviderName:   moduleName,
 			ProviderType:   moduleType,
 			Id:             item.GetName(),
 			DisplayName:    displayName,
 			Name:           item.GetName(),
-			StartDirectory: startDirectory,
+			StartDirectory: defaultStartDirectory,
 			Tags:           cluster.Tags,
 			Context: map[string]string{
 				"clusterName": clusterName,
@@ -241,8 +243,10 @@ func processOpenShiftCluster(cluster KubernetesCluster, moduleName string, modul
 				"namespace":   item.GetName(),
 				"description": description,
 			},
-		})
+		}
+		opt.ProcessUserTemplateStrings(moduleConf.DisplayName, moduleConf.StartDirectory)
+		result = append(result, opt)
 	}
 
-	return options, nil
+	return result, nil
 }

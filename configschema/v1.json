@@ -117,6 +117,14 @@
             "type": "string",
             "description": "User-defined name of the module"
         },
+        "display-name": {
+          "type": "string",
+          "description": "User-defined template for the option display name"
+        },
+        "start-directory": {
+          "type": "string",
+          "description": "User-defined template for the option start directory"
+        },
         "type": {
           "type": "string",
           "enum": ["backstage", "jira", "keycloak", "kubernetes", "ldap", "project", "rundeck", "ssh", "usql"]

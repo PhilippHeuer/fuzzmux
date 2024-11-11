@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const moduleName = "ldap"
+const moduleType = "ldap"
 
 type Module struct {
 	Config ModuleConfig
@@ -18,6 +18,12 @@ type Module struct {
 type ModuleConfig struct {
 	// Name is used to override the default module name
 	Name string `yaml:"name,omitempty"`
+
+	// DisplayName is a template string to render a custom display name
+	DisplayName string `yaml:"display-name"`
+
+	// StartDirectory is a template string that defines the start directory
+	StartDirectory string `yaml:"start-directory"`
 
 	// Host is the LDAP server hostname or IP address
 	Host string `yaml:"host"`
@@ -42,11 +48,11 @@ func (p Module) Name() string {
 	if p.Config.Name != "" {
 		return p.Config.Name
 	}
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Type() string {
-	return moduleName
+	return moduleType
 }
 
 func (p Module) Options() ([]recon.Option, error) {
@@ -89,7 +95,7 @@ func (p Module) Options() ([]recon.Option, error) {
 		entryAttributes := attributesToMap(entry.Attributes)
 		context := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
 
-		result = append(result, recon.Option{
+		opt := recon.Option{
 			ProviderName:   p.Name(),
 			ProviderType:   p.Type(),
 			Id:             entry.DN,
@@ -103,7 +109,9 @@ func (p Module) Options() ([]recon.Option, error) {
 				"ldapBindDN":       p.Config.BindDistinguishedName,
 				"ldapBindPassword": p.Config.BindPassword,
 			},
-		})
+		}
+		opt.ProcessUserTemplateStrings(p.Config.DisplayName, p.Config.StartDirectory)
+		result = append(result, opt)
 	}
 
 	return result, nil
