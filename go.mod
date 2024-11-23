@@ -11,7 +11,7 @@ require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/adrg/xdg v0.5.3
 	github.com/andygrunwald/go-jira v1.16.1-0.20220907185411-7a8f03318dea
-	github.com/cidverse/cidverseutils/zerologconfig v0.1.0
+	github.com/cidverse/cidverseutils/zerologconfig v0.1.1
 	github.com/cidverse/go-ptr v0.0.0-20240331160646-489e694bebbf
 	github.com/cidverse/go-rules v0.0.0-20231112122021-075e5e6f8abc
 	github.com/cidverse/repoanalyzer v0.1.1-0.20240510193438-abb053de8c14
