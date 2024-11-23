@@ -32,8 +32,8 @@ github.com/charlievieth/fastwalk v1.0.9 h1:Odb92AfoReO3oFBfDGT5J+nwgzQPF/gWAw6E6
 github.com/charlievieth/fastwalk v1.0.9/go.mod h1:yGy1zbxog41ZVMcKA/i8ojXLFsuayX5VvwhQVoj9PBI=
 github.com/cidverse/cidverseutils/filesystem v0.1.1 h1:xKGk+QhoywNKUp0artHkRPPOl+C3aa6wujkHhjTB6sI=
 github.com/cidverse/cidverseutils/filesystem v0.1.1/go.mod h1:cpAd2RNrNiBRtDJS8S/VRiTD88kU9pxV1i5aA+AqUso=
-github.com/cidverse/cidverseutils/zerologconfig v0.1.0 h1:iUJ9ANUCHH6IsM8MoeOv5Q8QvCd+iDl4X8QL/nfAdVw=
-github.com/cidverse/cidverseutils/zerologconfig v0.1.0/go.mod h1:X3mGXDU1BtdGk818+a0UL6vzhU9lLb8/oEslSnVQzuA=
+github.com/cidverse/cidverseutils/zerologconfig v0.1.1 h1:+DU7kB7rNqPLIYIZtPtvHkMWSu9cenXpxcZuqZ7SZtY=
+github.com/cidverse/cidverseutils/zerologconfig v0.1.1/go.mod h1:ax/tFT2mPv9hNkNkcSyilwuvwzxw6v93R0GxMKEKsZg=
 github.com/cidverse/go-ptr v0.0.0-20240331160646-489e694bebbf h1:/DLETx+e0J8mWZyOOK8dAOMrdHUpJo8KQRuMt1IymtE=
 github.com/cidverse/go-ptr v0.0.0-20240331160646-489e694bebbf/go.mod h1:nvQPqid2KB17xXiiFp/Fhd+dO5lusCSuBQtOXfsd+mk=
 github.com/cidverse/go-rules v0.0.0-20231112122021-075e5e6f8abc h1:eVuHW4U9BoiqjIwWPATHRm6oiphVlm3Jn7QgHGgeVq8=
