@@ -25,7 +25,7 @@ require (
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.10.0
-	github.com/tdabasinskas/go-backstage/v2 v2.5.1
+	github.com/tdabasinskas/go-backstage/v3 v3.0.0
 	github.com/testcontainers/testcontainers-go v0.34.0
 	go.i3wm.org/i3/v4 v4.21.0
 	golang.org/x/oauth2 v0.24.0
