@@ -2,7 +2,7 @@ package backstage
 
 import (
 	"fmt"
-	"github.com/tdabasinskas/go-backstage/v2/backstage"
+	"github.com/datolabs-io/go-backstage/v3"
 )
 
 func getStringValue(data map[string]interface{}, key string) string {
@@ -19,5 +19,4 @@ func entityRelationToString(data []backstage.EntityRelation, relationType string
 		}
 	}
 	return ""
-
 }

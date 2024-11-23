@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/types"
-	"github.com/tdabasinskas/go-backstage/v2/backstage"
+	"github.com/datolabs-io/go-backstage/v3"
 	"golang.org/x/oauth2"
 	"net/http"
 	"slices"
