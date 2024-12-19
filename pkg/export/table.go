@@ -1,36 +1,39 @@
 package export
 
 import (
+	"slices"
+
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
-	"slices"
 )
 
 // GenerateOptionTable generates a table of options with the given columns
-func GenerateOptionTable(options []recon.Option, columns []recon.Column) ([]string, []map[string]string) {
+func GenerateOptionTable(options []recon.Option, columns []recon.Column) ([]string, [][]interface{}) {
 	var headers []string
 	for _, col := range columns {
 		headers = util.AddToSet(headers, col.Key)
 	}
 
-	var rows []map[string]string
+	var rows [][]interface{}
 	for _, option := range options {
-		row := make(map[string]string)
+		var row []interface{}
 		for _, column := range columns {
+			var value interface{}
 			switch column.Key {
 			case "module":
-				row[column.Key] = option.ProviderName
+				value = option.ProviderName
 			case "id":
-				row[column.Key] = option.Id
+				value = option.Id
 			case "name":
-				row[column.Key] = option.Name
+				value = option.Name
 			case "display_name":
-				row[column.Key] = option.DisplayName
+				value = option.DisplayName
 			case "directory":
-				row[column.Key] = option.ResolveStartDirectory(true)
+				value = option.ResolveStartDirectory(true)
 			default:
-				row[column.Key] = option.Context[column.Key]
+				value = option.Context[column.Key]
 			}
+			row = append(row, value)
 		}
 		rows = append(rows, row)
 	}

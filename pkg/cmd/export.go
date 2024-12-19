@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/PhilippHeuer/fuzzmux/pkg/app"
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/export"
+	"github.com/cidverse/cidverseutils/core/clioutputwriter"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 func exportCmd() *cobra.Command {
@@ -33,11 +36,25 @@ func exportCmd() *cobra.Command {
 				log.Fatal().Msg("no options found")
 			}
 
-			// generate table
-			var columns = export.GenerateColumns(modules, outputColumns)
+			// generate data
+			columns := export.GenerateColumns(modules, outputColumns)
 			header, rows := export.GenerateOptionTable(options, columns)
 
-			// export options
+			// data
+			data := clioutputwriter.TabularData{
+				Headers: header,
+				Rows:    [][]interface{}{},
+			}
+			for _, row := range rows {
+				data.Rows = append(data.Rows, row)
+			}
+
+			// filter columns
+			if len(outputColumns) > 0 {
+				data = clioutputwriter.FilterColumns(data, outputColumns)
+			}
+
+			// print
 			writer := cmd.OutOrStdout()
 			if outputFile != "" {
 				file, createErr := os.Create(outputFile) // Use os.Create to open (or create) the file for writing
@@ -51,23 +68,18 @@ func exportCmd() *cobra.Command {
 				}()
 				writer = file
 			}
-			if outputFormat == "tsv" {
-				export.RenderAsTSV(header, rows, writer)
-			} else if outputFormat == "csv" {
-				err = export.RenderAsCSV(header, rows, writer)
-				if err != nil {
-					log.Fatal().Err(err).Msg("failed to generate CSV")
-				}
-			} else if outputFormat == "json" {
-				export.RenderAsJSON(rows, writer)
-			} else {
-				log.Fatal().Str("format", outputFormat).Msg("invalid format")
+			err = clioutputwriter.PrintData(writer, data, clioutputwriter.Format(outputFormat))
+			if err != nil {
+				log.Fatal().Err(err).Msg("failed to print data")
+				os.Exit(1)
 			}
 		},
 	}
-	cmd.PersistentFlags().StringArrayP("module", "m", []string{}, "modules to collect options from, empty for all")
-	cmd.PersistentFlags().StringArrayP("columns", "c", []string{}, "columns to include in output, default: all") // TODO: implement
-	cmd.PersistentFlags().StringP("format", "f", "tsv", "output format, valid: csv, tsv, json")
-	cmd.PersistentFlags().StringP("output", "o", "", "output file, empty for stdout")
+
+	cmd.Flags().StringArrayP("module", "m", []string{}, "modules to collect options from, empty for all")
+	cmd.Flags().StringP("format", "f", string(clioutputwriter.DefaultOutputFormat()), fmt.Sprintf("output format %s", clioutputwriter.SupportedOutputFormats()))
+	cmd.Flags().StringSliceP("columns", "c", []string{}, "columns to display")
+	cmd.Flags().StringP("output", "o", "", "output file, empty for stdout")
+
 	return cmd
 }
