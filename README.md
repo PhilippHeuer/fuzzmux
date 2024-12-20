@@ -72,7 +72,7 @@ modules:
       - source: metadata.name
         target: name
     query:
-      - service 
+      - service
       - openapi
       - user
       - website
@@ -208,6 +208,21 @@ The `usql` module reads db connections from the `~/.config/usql/config.yml` file
 modules:
   - type: usql
     start-directory: "~"
+```
+
+### Static
+
+The `static` module can be used to define static options.
+
+```yaml
+modules:
+  - id: my-static-option
+    name: "My Static Option"
+    display-name: "My Static Option"
+    description: "This is a static option"
+    web: "https://example.com"
+    tags:
+      - static
 ```
 
 ## Create your Layouts

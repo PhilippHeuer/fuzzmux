@@ -29,6 +29,9 @@ type StaticOption struct {
 	// DisplayName is the name that should be displayed in the fuzzy finder
 	DisplayName string `yaml:"display-name"`
 
+	// Description is a short description of the option
+	Description string `yaml:"description"`
+
 	// Web is the URL to open when the option is selected
 	Web string `yaml:"web"`
 
@@ -69,6 +72,7 @@ func (p Module) Options() ([]recon.Option, error) {
 			Id:             staticOption.Id,
 			Name:           staticOption.Name,
 			DisplayName:    staticOption.DisplayName,
+			Description:    staticOption.Description,
 			Web:            staticOption.Web,
 			StartDirectory: staticOption.StartDirectory,
 			Tags:           staticOption.Tags,

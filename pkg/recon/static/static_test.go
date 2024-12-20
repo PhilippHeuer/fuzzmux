@@ -13,6 +13,7 @@ func TestStaticOptions(t *testing.T) {
 				Id:          "1",
 				Name:        "custom-option",
 				DisplayName: "Custom Option",
+				Description: "This is a custom option",
 				Web:         "https://example.com",
 			},
 		},
@@ -25,5 +26,6 @@ func TestStaticOptions(t *testing.T) {
 	require.Equal(t, "1", options[0].Id)
 	require.Equal(t, "custom-option", options[0].Name)
 	require.Equal(t, "Custom Option", options[0].DisplayName)
+	require.Equal(t, "This is a custom option", options[0].Description)
 	require.Equal(t, "https://example.com", options[0].Web)
 }
