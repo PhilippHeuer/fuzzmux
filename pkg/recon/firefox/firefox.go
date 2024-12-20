@@ -65,18 +65,18 @@ func (p Module) Options() ([]recon.Option, error) {
 			Id:             fmt.Sprintf("%d", bookmark.ID),
 			DisplayName:    bookmark.Title,
 			Name:           bookmark.Title,
-			Description:    ptr.Value(bookmark.URL),
+			Description:    "",
+			Web:            ptr.Value(bookmark.URL),
 			StartDirectory: p.Config.StartDirectory,
 			Tags:           []string{"firefox", "bookmark"},
 			Context: map[string]string{
-				"url":    ptr.Value(bookmark.URL),
-				"title":  bookmark.Title,
 				"folder": bookmark.Folder,
-				"id":     fmt.Sprintf("%d", bookmark.ID),
 				"parent": fmt.Sprintf("%d", bookmark.Parent),
 			},
 		})
 	}
+
+	// TODO: query history
 
 	return result, nil
 }

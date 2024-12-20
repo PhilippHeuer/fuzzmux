@@ -121,7 +121,7 @@ func (p Module) Options() ([]recon.Option, error) {
 				Description:    issue.Fields.Summary,
 				Web:            fmt.Sprintf("%s/browse/%s", p.Config.Host, issue.Key),
 				StartDirectory: "~",
-				Tags:           []string{"jira"},
+				Tags:           []string{"jira", "ticket"},
 				Context:        attributes,
 				ModuleContext: map[string]string{
 					"jiraServer":      p.Config.Host,
