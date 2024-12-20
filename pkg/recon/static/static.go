@@ -23,11 +23,14 @@ type StaticOption struct {
 	// Id is a unique identifier for the option
 	Id string `yaml:"id"`
 
+	// Name is the name of the option
+	Name string `yaml:"name"`
+
 	// DisplayName is the name that should be displayed in the fuzzy finder
 	DisplayName string `yaml:"display-name"`
 
-	// Name is the name of the option
-	Name string `yaml:"name"`
+	// Web is the URL to open when the option is selected
+	Web string `yaml:"web"`
 
 	// StartDirectory is the initial working directory
 	StartDirectory string `yaml:"start-directory"`
@@ -64,8 +67,9 @@ func (p Module) Options() ([]recon.Option, error) {
 			ProviderName:   p.Name(),
 			ProviderType:   p.Type(),
 			Id:             staticOption.Id,
-			DisplayName:    staticOption.DisplayName,
 			Name:           staticOption.Name,
+			DisplayName:    staticOption.DisplayName,
+			Web:            staticOption.Web,
 			StartDirectory: staticOption.StartDirectory,
 			Tags:           staticOption.Tags,
 			Context:        staticOption.Context,
