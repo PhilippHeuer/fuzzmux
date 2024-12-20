@@ -4,3 +4,10 @@
 # generated artifacts
 .dist/*
 .tmp/*
+
+# sqlite
+/places.sqlite*
+/*.sqlite
+
+# notes
+notes

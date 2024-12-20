@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/backstage"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/firefox"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/jira"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/keycloak"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/kubernetes"
@@ -73,6 +74,8 @@ func (c *Config) UnmarshalYAML(value *yaml.Node) error {
 			module = &jira.ModuleConfig{}
 		case "rundeck":
 			module = &rundeck.ModuleConfig{}
+		case "firefox":
+			module = &firefox.ModuleConfig{}
 		default:
 			return fmt.Errorf("unknown module type '%s' for key %d", typeInfo.Type, key)
 		}

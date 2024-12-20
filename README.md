@@ -27,6 +27,7 @@ Similar rules can be defined for ssh connections, kubernetes namespaces, ... - s
 - rundeck (query jobs)
 - ssh config (parses `~/.ssh/config`)
 - usql connections (parses `~/.config/usql/config.yml`)
+- firefox bookmarks (specify sqlite db file to query)
 
 ## Supported Window Managers / Terminal Workspace Managers
 

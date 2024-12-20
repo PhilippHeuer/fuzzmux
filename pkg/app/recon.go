@@ -6,6 +6,7 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/backstage"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/firefox"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/jira"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/keycloak"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/kubernetes"
@@ -46,6 +47,8 @@ func ConfigToReconModules(conf config.Config) []recon.Module {
 			modules = append(modules, jira.NewModule(*cfg))
 		case *rundeck.ModuleConfig:
 			modules = append(modules, rundeck.NewModule(*cfg))
+		case *firefox.ModuleConfig:
+			modules = append(modules, firefox.NewModule(*cfg))
 		default:
 			log.Error().Interface("module", m).Msg("unrecognized module type")
 		}
