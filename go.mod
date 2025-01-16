@@ -5,7 +5,7 @@ module github.com/PhilippHeuer/fuzzmux
 
 go 1.23.0
 
-toolchain go1.23.4
+toolchain go1.23.5
 
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
