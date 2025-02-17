@@ -26,7 +26,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/openshift/client-go v0.0.0-20241217083110-35abaf51555b
 	github.com/rs/zerolog v1.33.0
-	github.com/spf13/cobra v1.9.0
+	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
 	github.com/testcontainers/testcontainers-go v0.35.0
 	go.i3wm.org/i3/v4 v4.21.0
