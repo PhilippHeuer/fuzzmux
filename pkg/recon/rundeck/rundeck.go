@@ -2,8 +2,10 @@ package rundeck
 
 import (
 	"fmt"
+
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/types"
+	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"github.com/rs/zerolog/log"
 )
 
@@ -52,7 +54,7 @@ func (p Module) Options() ([]recon.Option, error) {
 
 	// setup client
 	log.Debug().Str("host", p.Config.Host).Msg("connecting to rundeck")
-	client := NewClient(p.Config.Host, p.Config.AccessToken)
+	client := NewClient(p.Config.Host, util.ResolvePasswordValue(p.Config.AccessToken))
 
 	// query
 	for _, project := range p.Config.Projects {

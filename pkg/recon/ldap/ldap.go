@@ -2,11 +2,13 @@ package ldap
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/types"
+	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"github.com/go-ldap/ldap/v3"
 	"github.com/rs/zerolog/log"
-	"strings"
 )
 
 const moduleType = "ldap"
@@ -69,7 +71,7 @@ func (p Module) Options() ([]recon.Option, error) {
 	// bind
 	if p.Config.BindDistinguishedName != "" {
 		log.Debug().Str("bindDN", p.Config.BindDistinguishedName).Msg("binding to ldap")
-		err = l.Bind(p.Config.BindDistinguishedName, p.Config.BindPassword)
+		err = l.Bind(p.Config.BindDistinguishedName, util.ResolvePasswordValue(p.Config.BindPassword))
 		if err != nil {
 			return nil, fmt.Errorf("failed to bind to ldap: %w", err)
 		}

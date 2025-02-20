@@ -3,13 +3,15 @@ package backstage
 import (
 	"context"
 	"fmt"
-	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
-	"github.com/PhilippHeuer/fuzzmux/pkg/types"
-	"github.com/datolabs-io/go-backstage/v3"
-	"golang.org/x/oauth2"
 	"net/http"
 	"slices"
 	"strings"
+
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
+	"github.com/PhilippHeuer/fuzzmux/pkg/types"
+	"github.com/PhilippHeuer/fuzzmux/pkg/util"
+	"github.com/datolabs-io/go-backstage/v3"
+	"golang.org/x/oauth2"
 )
 
 const moduleType = "backstage"
@@ -59,7 +61,7 @@ func (p Module) Options() ([]recon.Option, error) {
 	var httpClient *http.Client
 	if p.Config.BearerToken != "" {
 		httpClient = oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(&oauth2.Token{
-			AccessToken: p.Config.BearerToken,
+			AccessToken: util.ResolvePasswordValue(p.Config.BearerToken),
 			TokenType:   "Bearer",
 		}))
 	}

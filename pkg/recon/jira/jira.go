@@ -3,12 +3,14 @@ package jira
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/types"
+	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"github.com/andygrunwald/go-jira"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/oauth2"
-	"net/http"
 )
 
 const moduleType = "jira"
@@ -59,7 +61,7 @@ func (p Module) Options() ([]recon.Option, error) {
 	if p.Config.BearerToken != "" {
 		log.Debug().Msg("using bearer token for jira authentication")
 		httpClient = oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(&oauth2.Token{
-			AccessToken: p.Config.BearerToken,
+			AccessToken: util.ResolvePasswordValue(p.Config.BearerToken),
 			TokenType:   "Bearer",
 		}))
 	}

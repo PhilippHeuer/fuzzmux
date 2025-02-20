@@ -3,13 +3,14 @@ package keycloak
 import (
 	"context"
 	"fmt"
+	"slices"
+
 	"github.com/Nerzal/gocloak/v13"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/types"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"github.com/cidverse/go-ptr"
 	"github.com/rs/zerolog/log"
-	"slices"
 )
 
 const moduleName = "keycloak"
@@ -67,7 +68,7 @@ func (p Module) Options() ([]recon.Option, error) {
 	// connect and login
 	log.Debug().Str("host", p.Config.Host).Str("realm", p.Config.RealmName).Str("user", p.Config.Username).Msg("connecting to keycloak")
 	client := gocloak.NewClient(p.Config.Host)
-	token, err := client.LoginAdmin(ctx, p.Config.Username, p.Config.Password, p.Config.RealmName)
+	token, err := client.LoginAdmin(ctx, p.Config.Username, util.ResolvePasswordValue(p.Config.Password), p.Config.RealmName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to authenticate on keycloak: %w", err)
 	}
