@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestResolvePasswordValue(t *testing.T) {
-	assert.Equal(t, "test", ResolvePasswordValue("test"))
+func TestResolveCredentialValue(t *testing.T) {
+	assert.Equal(t, "test", ResolveCredentialValue("test"))
 	_ = os.Setenv("TEST", "hello mum")
-	assert.Equal(t, "hello mum", ResolvePasswordValue("env:TEST"))
+	assert.Equal(t, "hello mum", ResolveCredentialValue("env:TEST"))
 }

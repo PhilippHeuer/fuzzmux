@@ -54,7 +54,7 @@ func (p Module) Options() ([]recon.Option, error) {
 
 	// setup client
 	log.Debug().Str("host", p.Config.Host).Msg("connecting to rundeck")
-	client := NewClient(p.Config.Host, util.ResolvePasswordValue(p.Config.AccessToken))
+	client := NewClient(p.Config.Host, p.Config.AccessToken)
 
 	// query
 	for _, project := range p.Config.Projects {
@@ -124,6 +124,9 @@ func (p Module) Columns() []recon.Column {
 }
 
 func NewModule(config ModuleConfig) Module {
+	config.Host = util.ResolveCredentialValue(config.Host)
+	config.AccessToken = util.ResolveCredentialValue(config.AccessToken)
+
 	return Module{
 		Config: config,
 	}

@@ -61,7 +61,7 @@ func (p Module) Options() ([]recon.Option, error) {
 	var httpClient *http.Client
 	if p.Config.BearerToken != "" {
 		httpClient = oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(&oauth2.Token{
-			AccessToken: util.ResolvePasswordValue(p.Config.BearerToken),
+			AccessToken: p.Config.BearerToken,
 			TokenType:   "Bearer",
 		}))
 	}
@@ -151,6 +151,9 @@ func (p Module) Columns() []recon.Column {
 }
 
 func NewModule(config ModuleConfig) Module {
+	config.Host = util.ResolveCredentialValue(config.Host)
+	config.BearerToken = util.ResolveCredentialValue(config.BearerToken)
+
 	return Module{
 		Config: config,
 	}

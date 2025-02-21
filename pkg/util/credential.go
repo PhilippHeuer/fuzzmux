@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func ResolvePasswordValue(value string) string {
+func ResolveCredentialValue(value string) string {
 	if strings.HasPrefix(value, "env:") {
 		return os.Getenv(strings.TrimPrefix(value, "env:"))
 	} else if strings.HasPrefix(value, "file:") {

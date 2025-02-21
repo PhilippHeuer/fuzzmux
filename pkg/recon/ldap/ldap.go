@@ -71,7 +71,7 @@ func (p Module) Options() ([]recon.Option, error) {
 	// bind
 	if p.Config.BindDistinguishedName != "" {
 		log.Debug().Str("bindDN", p.Config.BindDistinguishedName).Msg("binding to ldap")
-		err = l.Bind(p.Config.BindDistinguishedName, util.ResolvePasswordValue(p.Config.BindPassword))
+		err = l.Bind(p.Config.BindDistinguishedName, p.Config.BindPassword)
 		if err != nil {
 			return nil, fmt.Errorf("failed to bind to ldap: %w", err)
 		}
@@ -139,6 +139,11 @@ func (p Module) Columns() []recon.Column {
 }
 
 func NewModule(config ModuleConfig) Module {
+	config.Host = util.ResolveCredentialValue(config.Host)
+	config.BindDistinguishedName = util.ResolveCredentialValue(config.BindDistinguishedName)
+	config.BindPassword = util.ResolveCredentialValue(config.BindPassword)
+	config.BaseDistinguishedName = util.ResolveCredentialValue(config.BaseDistinguishedName)
+
 	if config.Filter == "" {
 		config.Filter = "(|(objectClass=*))"
 	}

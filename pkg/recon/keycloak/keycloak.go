@@ -68,7 +68,7 @@ func (p Module) Options() ([]recon.Option, error) {
 	// connect and login
 	log.Debug().Str("host", p.Config.Host).Str("realm", p.Config.RealmName).Str("user", p.Config.Username).Msg("connecting to keycloak")
 	client := gocloak.NewClient(p.Config.Host)
-	token, err := client.LoginAdmin(ctx, p.Config.Username, util.ResolvePasswordValue(p.Config.Password), p.Config.RealmName)
+	token, err := client.LoginAdmin(ctx, p.Config.Username, p.Config.Password, p.Config.RealmName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to authenticate on keycloak: %w", err)
 	}
@@ -192,6 +192,11 @@ func (p Module) Columns() []recon.Column {
 }
 
 func NewModule(config ModuleConfig) Module {
+	config.Host = util.ResolveCredentialValue(config.Host)
+	config.RealmName = util.ResolveCredentialValue(config.RealmName)
+	config.Username = util.ResolveCredentialValue(config.Username)
+	config.Password = util.ResolveCredentialValue(config.Password)
+
 	return Module{
 		Config: config,
 	}
