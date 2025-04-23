@@ -81,7 +81,7 @@ func (p Module) Options() ([]recon.Option, error) {
 
 		result = append(result, recon.Option{
 			ProviderName:   p.Name(),
-			ProviderType:   moduleType,
+			ProviderType:   p.Type(),
 			Id:             fmt.Sprintf("%d", bookmark.ID),
 			DisplayName:    bookmark.Title,
 			Name:           bookmark.Title,
