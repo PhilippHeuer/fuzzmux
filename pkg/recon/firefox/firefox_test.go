@@ -9,9 +9,9 @@ import (
 
 func TestSearchBookmarks(t *testing.T) {
 	// query
-	dbPath, _ := filepath.Abs("testdata/places.sqlite")
+	profilePath, _ := filepath.Abs("testdata")
 	firefoxModule := NewModule(ModuleConfig{
-		DbFile: dbPath,
+		ProfilePath: profilePath,
 	})
 	options, err := firefoxModule.Options()
 	require.NoError(t, err)

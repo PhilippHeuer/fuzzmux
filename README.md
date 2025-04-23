@@ -210,6 +210,25 @@ modules:
     start-directory: "~"
 ```
 
+### Browsers
+
+The `firefox` module can query bookmarks from Firefox-based browsers (e.g. Firefox, Librewolf, Floorp, Zen):
+
+```yaml
+- type: firefox
+  name: firefox
+  profile-path: ~/.mozilla/firefox/abcd1234.default
+- type: firefox
+  name: librewolf
+  profile-path: ~/.librewolf/abcd1234.default
+- type: firefox
+  name: floorp
+  profile-path: ~/.floorp/abcd1234.default
+- type: firefox
+  name: zen
+  profile-path: ~/.zen/abcd1234.default
+```
+
 ### Static
 
 The `static` module can be used to define static options.
