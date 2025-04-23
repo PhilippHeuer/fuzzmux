@@ -46,6 +46,13 @@ type ModuleConfig struct {
 	Filter string `yaml:"filter"`
 }
 
+func (c *ModuleConfig) DecodeConfig() {
+	c.Host = util.ResolveCredentialValue(c.Host)
+	c.BindDistinguishedName = util.ResolveCredentialValue(c.BindDistinguishedName)
+	c.BindPassword = util.ResolveCredentialValue(c.BindPassword)
+	c.BaseDistinguishedName = util.ResolveCredentialValue(c.BaseDistinguishedName)
+}
+
 func (p Module) Name() string {
 	if p.Config.Name != "" {
 		return p.Config.Name
@@ -58,6 +65,7 @@ func (p Module) Type() string {
 }
 
 func (p Module) Options() ([]recon.Option, error) {
+	p.Config.DecodeConfig()
 	var result []recon.Option
 
 	// connect
@@ -139,11 +147,6 @@ func (p Module) Columns() []recon.Column {
 }
 
 func NewModule(config ModuleConfig) Module {
-	config.Host = util.ResolveCredentialValue(config.Host)
-	config.BindDistinguishedName = util.ResolveCredentialValue(config.BindDistinguishedName)
-	config.BindPassword = util.ResolveCredentialValue(config.BindPassword)
-	config.BaseDistinguishedName = util.ResolveCredentialValue(config.BaseDistinguishedName)
-
 	if config.Filter == "" {
 		config.Filter = "(|(objectClass=*))"
 	}

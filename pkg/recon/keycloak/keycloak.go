@@ -42,6 +42,13 @@ type ModuleConfig struct {
 	Query []KeycloakContent `yaml:"query"`
 }
 
+func (c *ModuleConfig) DecodeConfig() {
+	c.Host = util.ResolveCredentialValue(c.Host)
+	c.RealmName = util.ResolveCredentialValue(c.RealmName)
+	c.Username = util.ResolveCredentialValue(c.Username)
+	c.Password = util.ResolveCredentialValue(c.Password)
+}
+
 type KeycloakContent string
 
 const (
@@ -62,6 +69,7 @@ func (p Module) Type() string {
 }
 
 func (p Module) Options() ([]recon.Option, error) {
+	p.Config.DecodeConfig()
 	var result []recon.Option
 	ctx := context.Background()
 
@@ -192,11 +200,6 @@ func (p Module) Columns() []recon.Column {
 }
 
 func NewModule(config ModuleConfig) Module {
-	config.Host = util.ResolveCredentialValue(config.Host)
-	config.RealmName = util.ResolveCredentialValue(config.RealmName)
-	config.Username = util.ResolveCredentialValue(config.Username)
-	config.Password = util.ResolveCredentialValue(config.Password)
-
 	return Module{
 		Config: config,
 	}

@@ -43,6 +43,11 @@ type ModuleConfig struct {
 	Query []string `yaml:"query"`
 }
 
+func (c *ModuleConfig) DecodeConfig() {
+	c.Host = util.ResolveCredentialValue(c.Host)
+	c.BearerToken = util.ResolveCredentialValue(c.BearerToken)
+}
+
 func (p Module) Name() string {
 	if p.Config.Name != "" {
 		return p.Config.Name
@@ -55,6 +60,7 @@ func (p Module) Type() string {
 }
 
 func (p Module) Options() ([]recon.Option, error) {
+	p.Config.DecodeConfig()
 	var result []recon.Option
 
 	// httpClient
@@ -151,9 +157,6 @@ func (p Module) Columns() []recon.Column {
 }
 
 func NewModule(config ModuleConfig) Module {
-	config.Host = util.ResolveCredentialValue(config.Host)
-	config.BearerToken = util.ResolveCredentialValue(config.BearerToken)
-
 	return Module{
 		Config: config,
 	}

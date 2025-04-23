@@ -38,6 +38,11 @@ type ModuleConfig struct {
 	Projects []string
 }
 
+func (c *ModuleConfig) DecodeConfig() {
+	c.Host = util.ResolveCredentialValue(c.Host)
+	c.AccessToken = util.ResolveCredentialValue(c.AccessToken)
+}
+
 func (p Module) Name() string {
 	if p.Config.Name != "" {
 		return p.Config.Name
@@ -50,6 +55,7 @@ func (p Module) Type() string {
 }
 
 func (p Module) Options() ([]recon.Option, error) {
+	p.Config.DecodeConfig()
 	var result []recon.Option
 
 	// setup client
@@ -124,9 +130,6 @@ func (p Module) Columns() []recon.Column {
 }
 
 func NewModule(config ModuleConfig) Module {
-	config.Host = util.ResolveCredentialValue(config.Host)
-	config.AccessToken = util.ResolveCredentialValue(config.AccessToken)
-
 	return Module{
 		Config: config,
 	}
