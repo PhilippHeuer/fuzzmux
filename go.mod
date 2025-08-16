@@ -1,7 +1,6 @@
 module github.com/PhilippHeuer/fuzzmux
 
 //go:platform linux/amd64
-//go:platform darwin/amd64
 
 go 1.25.0
 
