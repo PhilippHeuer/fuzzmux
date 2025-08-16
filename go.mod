@@ -14,7 +14,7 @@ require (
 	github.com/cidverse/go-ptr v0.0.0-20240331160646-489e694bebbf
 	github.com/cidverse/go-rules v0.0.0-20231112122021-075e5e6f8abc
 	github.com/cidverse/repoanalyzer v0.1.1-0.20240510193438-abb053de8c14
-	github.com/datolabs-io/go-backstage/v3 v3.1.0
+	github.com/datolabs-io/go-backstage/v3 v3.2.0
 	github.com/go-ldap/ldap/v3 v3.4.11
 	github.com/joshuarubin/go-sway v1.2.0
 	github.com/jubnzv/go-tmux v0.0.0-20240808014214-bf465a395e96
