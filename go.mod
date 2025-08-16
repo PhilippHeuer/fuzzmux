@@ -3,25 +3,25 @@ module github.com/PhilippHeuer/fuzzmux
 //go:platform linux/amd64
 //go:platform darwin/amd64
 
-go 1.24.0
+go 1.25.0
 
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/adrg/xdg v0.5.3
 	github.com/andygrunwald/go-jira v1.16.1-0.20220907185411-7a8f03318dea
-	github.com/cidverse/cidverseutils/core v0.0.0-20250420190557-91249a22dcfe
+	github.com/cidverse/cidverseutils/core v0.0.0-20250813174942-53da69ce92bd
 	github.com/cidverse/cidverseutils/zerologconfig v0.1.1
 	github.com/cidverse/go-ptr v0.0.0-20240331160646-489e694bebbf
-	github.com/cidverse/go-rules v0.0.0-20231112122021-075e5e6f8abc
+	github.com/cidverse/go-rules v0.0.0-20250614224628-52704bb6b812
 	github.com/cidverse/repoanalyzer v0.1.1-0.20240510193438-abb053de8c14
-	github.com/datolabs-io/go-backstage/v3 v3.1.0
+	github.com/datolabs-io/go-backstage/v3 v3.2.0
 	github.com/go-ldap/ldap/v3 v3.4.11
 	github.com/joshuarubin/go-sway v1.2.0
 	github.com/jubnzv/go-tmux v0.0.0-20240808014214-bf465a395e96
 	github.com/kevinburke/ssh_config v1.2.0
 	github.com/ktr0731/go-fuzzyfinder v0.9.0
 	github.com/labi-le/hyprland-ipc-client/v3 v3.1.1
-	github.com/mattn/go-sqlite3 v1.14.31
+	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/openshift/client-go v0.0.0-20250416201115-ab7eedf8c1f2
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.9.1
@@ -35,7 +35,7 @@ require (
 )
 
 require (
-	cel.dev/expr v0.23.1 // indirect
+	cel.dev/expr v0.24.0 // indirect
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358 // indirect
@@ -136,16 +136,16 @@ require (
 	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
-	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
-	golang.org/x/mod v0.24.0 // indirect
+	golang.org/x/exp v0.0.0-20250606033433-dcc06ee1d476 // indirect
+	golang.org/x/mod v0.25.0 // indirect
 	golang.org/x/net v0.39.0 // indirect
-	golang.org/x/sync v0.13.0 // indirect
+	golang.org/x/sync v0.15.0 // indirect
 	golang.org/x/sys v0.32.0 // indirect
 	golang.org/x/term v0.31.0 // indirect
-	golang.org/x/text v0.24.0 // indirect
+	golang.org/x/text v0.26.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250422160041-2d3770c4ea7f // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250422160041-2d3770c4ea7f // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250603155806-513f23925822 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
