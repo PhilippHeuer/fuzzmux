@@ -24,7 +24,7 @@ require (
 	github.com/openshift/client-go v0.0.0-20250416201115-ab7eedf8c1f2
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.9.1
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.0
 	github.com/testcontainers/testcontainers-go v0.38.0
 	go.i3wm.org/i3/v4 v4.24.0
 	golang.org/x/oauth2 v0.30.0
