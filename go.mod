@@ -7,7 +7,7 @@ go 1.25.0
 require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/adrg/xdg v0.5.3
-	github.com/andygrunwald/go-jira v1.16.1-0.20220907185411-7a8f03318dea
+	github.com/andygrunwald/go-jira v1.17.0
 	github.com/cidverse/cidverseutils/core v0.0.0-20250813174942-53da69ce92bd
 	github.com/cidverse/cidverseutils/zerologconfig v0.1.1
 	github.com/cidverse/go-ptr v0.0.0-20240331160646-489e694bebbf
