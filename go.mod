@@ -14,7 +14,7 @@ require (
 	github.com/cidverse/go-rules v0.0.0-20250614224628-52704bb6b812
 	github.com/cidverse/repoanalyzer v0.1.1-0.20240510193438-abb053de8c14
 	github.com/datolabs-io/go-backstage/v3 v3.2.0
-	github.com/go-ldap/ldap/v3 v3.4.11
+	github.com/go-ldap/ldap/v3 v3.4.12
 	github.com/joshuarubin/go-sway v1.2.0
 	github.com/jubnzv/go-tmux v0.0.0-20240808014214-bf465a395e96
 	github.com/kevinburke/ssh_config v1.4.0
