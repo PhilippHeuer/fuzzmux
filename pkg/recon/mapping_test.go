@@ -1,9 +1,10 @@
 package recon
 
 import (
-	"github.com/PhilippHeuer/fuzzmux/pkg/types"
 	"reflect"
 	"testing"
+
+	"github.com/PhilippHeuer/fuzzmux/pkg/types"
 )
 
 func TestContextMapping(t *testing.T) {

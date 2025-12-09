@@ -21,7 +21,7 @@ require (
 	github.com/ktr0731/go-fuzzyfinder v0.9.0
 	github.com/labi-le/hyprland-ipc-client/v3 v3.1.1
 	github.com/mattn/go-sqlite3 v1.14.32
-	github.com/openshift/client-go v0.0.0-20250416201115-ab7eedf8c1f2
+	github.com/openshift/client-go v0.0.0-20251205093018-96a6cbc1420c
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
@@ -106,7 +106,7 @@ require (
 	github.com/nsf/termbox-go v1.1.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
-	github.com/openshift/api v0.0.0-20250423165433-1dbd645b2121 // indirect
+	github.com/openshift/api v0.0.0-20251204164930-cd2e40c5883a // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
@@ -155,7 +155,6 @@ require (
 	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397 // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
-	sigs.k8s.io/structured-merge-diff/v4 v4.7.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
