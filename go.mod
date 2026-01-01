@@ -20,7 +20,7 @@ require (
 	github.com/kevinburke/ssh_config v1.4.0
 	github.com/ktr0731/go-fuzzyfinder v0.9.0
 	github.com/labi-le/hyprland-ipc-client/v3 v3.1.1
-	github.com/mattn/go-sqlite3 v1.14.32
+	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/openshift/client-go v0.0.0-20251205093018-96a6cbc1420c
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.10.2
