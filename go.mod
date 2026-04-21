@@ -22,7 +22,7 @@ require (
 	github.com/labi-le/hyprland-ipc-client/v3 v3.1.1
 	github.com/mattn/go-sqlite3 v1.14.42
 	github.com/openshift/client-go v0.0.0-20251205093018-96a6cbc1420c
-	github.com/rs/zerolog v1.35.0
+	github.com/rs/zerolog v1.35.1
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go v0.42.0
