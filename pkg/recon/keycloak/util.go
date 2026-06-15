@@ -5,11 +5,11 @@ import (
 	"strings"
 )
 
-func attributesToMap(attr *map[string]string, additionalAttributes map[string]interface{}) map[string]interface{} {
+func attributesToMap(attr map[string]string, additionalAttributes map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
 
 	if attr != nil {
-		for key, value := range *attr {
+		for key, value := range attr {
 			result[key] = value
 		}
 	}
@@ -21,11 +21,11 @@ func attributesToMap(attr *map[string]string, additionalAttributes map[string]in
 	return result
 }
 
-func attributeSlicesToMap(attr *map[string][]string, additionalAttributes map[string]interface{}) map[string]interface{} {
+func attributeSlicesToMap(attr map[string][]string, additionalAttributes map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
 
 	if attr != nil {
-		for key, values := range *attr {
+		for key, values := range attr {
 			if len(values) == 1 {
 				result[key] = values[0]
 			} else {
