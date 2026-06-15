@@ -153,7 +153,7 @@ func (p Module) SelectOption(option *recon.Option) error {
 }
 
 func (p Module) Columns() []recon.Column {
-	return append(recon.DefaultColumns())
+	return recon.DefaultColumns()
 }
 
 func NewModule(config ModuleConfig) Module {
