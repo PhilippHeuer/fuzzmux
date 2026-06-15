@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/Nerzal/gocloak/v13"
+	"github.com/Nerzal/gocloak/v14"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/types"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
@@ -133,7 +133,7 @@ func (p Module) Options() ([]recon.Option, error) {
 					"lastname":    ptr.Value(user.LastName),
 					"groups":      user.Groups,
 					"realmRoles":  user.RealmRoles,
-					"clientRoles": clientRolesToString(ptr.Value(user.ClientRoles)),
+					"clientRoles": clientRolesToString(user.ClientRoles),
 					"createdAt":   util.ConvertMilliUnixTimestampToRFC3339(user.CreatedTimestamp),
 				})
 				attributes := recon.AttributeMapping(entryAttributes, p.Config.AttributeMapping)
