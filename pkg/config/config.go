@@ -27,6 +27,15 @@ type Config struct {
 
 	// Finder
 	Finder *FinderConfig `yaml:"finder"`
+
+	// Launcher settings
+	Launcher *LauncherConfig `yaml:"launcher"`
+}
+
+// LauncherConfig holds launcher-specific configuration.
+type LauncherConfig struct {
+	// Disable is a list of launcher names to exclude from auto-detection.
+	Disable []string `yaml:"disable"`
 }
 
 type ModuleConfig interface{}
@@ -34,9 +43,10 @@ type ModuleConfig interface{}
 func (c *Config) UnmarshalYAML(value *yaml.Node) error {
 	// decode known fields, avoid infinite recursion
 	aux := &struct {
-		Modules []yaml.Node       `yaml:"modules"`
-		Layouts map[string]Layout `yaml:"layouts"`
-		Finder  *FinderConfig     `yaml:"finder"`
+		Modules  []yaml.Node       `yaml:"modules"`
+		Layouts  map[string]Layout `yaml:"layouts"`
+		Finder   *FinderConfig     `yaml:"finder"`
+		Launcher *LauncherConfig   `yaml:"launcher"`
 	}{}
 	if err := value.Decode(aux); err != nil {
 		return err
@@ -44,6 +54,7 @@ func (c *Config) UnmarshalYAML(value *yaml.Node) error {
 	c.Modules = nil
 	c.Finder = aux.Finder
 	c.Layouts = aux.Layouts
+	c.Launcher = aux.Launcher
 
 	// parse the "recon" field into the appropriate ModuleConfig types
 	for key, moduleNode := range aux.Modules {

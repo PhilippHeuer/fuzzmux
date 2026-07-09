@@ -71,7 +71,7 @@ func menuCmd() *cobra.Command {
 			}
 
 			// create session or window and attach
-			be, err := app.FindLauncher(flags.backend)
+			be, err := app.FindLauncher(flags.backend, conf)
 			if err != nil {
 				log.Fatal().Err(err).Msg("no suitable launcher found")
 			}
