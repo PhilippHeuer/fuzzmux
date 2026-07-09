@@ -22,8 +22,12 @@ func (p SWAY) Name() string {
 }
 
 func (p SWAY) Check() bool {
-	_, ok := os.LookupEnv("SWAYSOCK")
-	return ok
+	sock := os.Getenv("SWAYSOCK")
+	if sock == "" {
+		return false
+	}
+	_, err := os.Stat(sock)
+	return err == nil
 }
 
 func (p SWAY) Order() int {

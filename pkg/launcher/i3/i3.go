@@ -20,8 +20,12 @@ func (p I3) Name() string {
 }
 
 func (p I3) Check() bool {
-	_, ok := os.LookupEnv("I3SOCK")
-	return ok
+	sock := os.Getenv("I3SOCK")
+	if sock == "" {
+		return false
+	}
+	_, err := os.Stat(sock)
+	return err == nil
 }
 
 func (p I3) Order() int {
