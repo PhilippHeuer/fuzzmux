@@ -102,6 +102,24 @@ func (p Hyprland) Run(option *recon.Option, opts launcher.Opts) error {
 	return nil
 }
 
+func (p Hyprland) FocusedPID() (int, error) {
+	sig, ok := os.LookupEnv("HYPRLAND_INSTANCE_SIGNATURE")
+	if !ok {
+		return 0, fmt.Errorf("HYPRLAND_INSTANCE_SIGNATURE not set")
+	}
+	client := hyprclient.MustClient(sig)
+	if client == nil {
+		return 0, fmt.Errorf("failed to connect to hyprland ipc socket")
+	}
+
+	win, err := client.ActiveWindow()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get active window: %w", err)
+	}
+
+	return win.Pid, nil
+}
+
 func hyprlandIPCCommand(client *hyprclient.IPCClient, command string) error {
 	q := hyprclient.NewByteQueue()
 	q.Add([]byte(command))

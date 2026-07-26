@@ -106,6 +106,28 @@ func (p SWAY) Run(option *recon.Option, opts launcher.Opts) error {
 	return nil
 }
 
+func (p SWAY) FocusedPID() (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+
+	client, err := sway.New(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to connect to sway: %w", err)
+	}
+
+	tree, err := client.GetTree(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get sway tree: %w", err)
+	}
+
+	focused := tree.FocusedNode()
+	if focused == nil || focused.PID == nil {
+		return 0, fmt.Errorf("no focused window found")
+	}
+
+	return int(*focused.PID), nil
+}
+
 func currentSwayWorkspace(ctx context.Context, client sway.Client) (*sway.Node, error) {
 	// get current tree and workspace
 	n, err := client.GetTree(ctx)

@@ -6,6 +6,8 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"os"
+	"os/exec"
+	"strconv"
 	"strings"
 
 	"github.com/rs/zerolog/log"
@@ -91,6 +93,21 @@ func (p I3) Run(option *recon.Option, opts launcher.Opts) error {
 	}
 
 	return nil
+}
+
+func (p I3) FocusedPID() (int, error) {
+	if _, err := exec.LookPath("xdotool"); err != nil {
+		return 0, fmt.Errorf("xdotool not found, install it (e.g. apt install xdotool, pacman -S xdotool): %w", err)
+	}
+	out, err := exec.Command("xdotool", "getactivewindow", "getwindowpid").Output()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get focused PID: %w", err)
+	}
+	pid, err := strconv.Atoi(strings.TrimSpace(string(out)))
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse PID: %w", err)
+	}
+	return pid, nil
 }
 
 func currentI3Workspace() (*i3.Node, error) {

@@ -22,4 +22,5 @@ type Provider interface {
 	Check() bool
 	Order() int
 	Run(option *recon.Option, opts Opts) error
+	FocusedPID() (int, error)
 }

@@ -1,9 +1,11 @@
 package gnome
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/launcher"
@@ -80,6 +82,75 @@ func (p GNOME) Run(option *recon.Option, opts launcher.Opts) error {
 	}
 
 	return nil
+}
+
+func (p GNOME) FocusedPID() (int, error) {
+	if isWayland() {
+		return focusedPIDWayland()
+	}
+	return focusedPIDX11()
+}
+
+func isWayland() bool {
+	if os.Getenv("WAYLAND_DISPLAY") != "" {
+		return true
+	}
+	return strings.EqualFold(os.Getenv("XDG_SESSION_TYPE"), "wayland")
+}
+
+func focusedPIDX11() (int, error) {
+	if _, err := exec.LookPath("xdotool"); err != nil {
+		return 0, fmt.Errorf("xdotool not found, install it (e.g. apt install xdotool, pacman -S xdotool): %w", err)
+	}
+	out, err := exec.Command("xdotool", "getactivewindow", "getwindowpid").Output()
+	if err != nil {
+		return 0, fmt.Errorf("failed to get focused PID: %w", err)
+	}
+	pid, err := strconv.Atoi(strings.TrimSpace(string(out)))
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse PID: %w", err)
+	}
+	return pid, nil
+}
+
+type windowExtEntry struct {
+	Focus bool `json:"focus"`
+	PID   int  `json:"pid"`
+}
+
+func focusedPIDWayland() (int, error) {
+	out, err := exec.Command("gdbus", "call", "--session",
+		"--dest", "org.gnome.Shell",
+		"--object-path", "/org/gnome/Shell/Extensions/Windows",
+		"--method", "org.gnome.Shell.Extensions.Windows.List",
+	).Output()
+	if err != nil {
+		return 0, fmt.Errorf("focused PID on Wayland requires the 'Window Calls' GNOME extension. Install from https://extensions.gnome.org/extension/4974/window-calls-extended/: %w", err)
+	}
+
+	return parseWindowListPID(string(out))
+}
+
+func parseWindowListPID(s string) (int, error) {
+	s = strings.TrimSpace(s)
+	s = strings.Trim(s, "()")
+	s = strings.TrimRight(s, " ,")
+	if len(s) < 2 || s[0] != '\'' || s[len(s)-1] != '\'' {
+		return 0, fmt.Errorf("unexpected response format from Windows.List: %s", s)
+	}
+	s = s[1 : len(s)-1]
+
+	var windows []windowExtEntry
+	if err := json.Unmarshal([]byte(s), &windows); err != nil {
+		return 0, fmt.Errorf("failed to parse Windows.List JSON: %w", err)
+	}
+
+	for _, w := range windows {
+		if w.Focus {
+			return w.PID, nil
+		}
+	}
+	return 0, fmt.Errorf("no focused window found in Windows.List response")
 }
 
 // clearWorkspace closes all windows on the current GNOME virtual desktop via D-Bus.

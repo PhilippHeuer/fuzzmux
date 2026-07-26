@@ -1,6 +1,7 @@
 package shell
 
 import (
+	"fmt"
 	"github.com/PhilippHeuer/fuzzmux/pkg/launcher"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"os"
@@ -23,6 +24,10 @@ func (p Shell) Check() bool {
 
 func (p Shell) Order() int {
 	return 0
+}
+
+func (p Shell) FocusedPID() (int, error) {
+	return 0, fmt.Errorf("focused PID not supported for shell launcher")
 }
 
 func (p Shell) Run(option *recon.Option, opts launcher.Opts) error {

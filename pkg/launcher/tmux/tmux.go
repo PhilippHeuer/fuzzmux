@@ -46,6 +46,10 @@ func (p TMUX) Order() int {
 	return 100
 }
 
+func (p TMUX) FocusedPID() (int, error) {
+	return 0, fmt.Errorf("focused PID not supported for tmux launcher")
+}
+
 func (p TMUX) Run(option *recon.Option, opts launcher.Opts) error {
 	// references
 	var session *gotmux.Session
