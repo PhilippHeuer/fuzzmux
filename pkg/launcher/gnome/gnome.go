@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"syscall"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/launcher"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
@@ -23,6 +24,10 @@ func (p GNOME) Check() bool {
 	desktop := os.Getenv("XDG_CURRENT_DESKTOP")
 	if strings.Contains(strings.ToLower(desktop), "gnome") {
 		return true
+	}
+
+	if os.Getenv("XDG_SESSION_TYPE") == "tty" {
+		return false
 	}
 
 	_, err := exec.LookPath("gnome-shell")
@@ -65,7 +70,7 @@ func (p GNOME) Run(option *recon.Option, opts launcher.Opts) error {
 		if app.GUI && len(app.Commands) == 1 {
 			cmd := option.ResolvePlaceholders(app.Commands[0].Command)
 			log.Trace().Str("name", app.Name).Str("cmd", cmd).Msg("starting GUI app")
-			if err := exec.Command("sh", "-c", fmt.Sprintf("cd %q && %s", startDirectory, cmd)).Start(); err != nil {
+			if err := startDetached(fmt.Sprintf("cd %q && %s", startDirectory, cmd)); err != nil {
 				log.Fatal().Err(err).Str("name", app.Name).Msg("failed to start GUI app")
 			}
 		} else {
@@ -75,7 +80,7 @@ func (p GNOME) Run(option *recon.Option, opts launcher.Opts) error {
 			}
 
 			log.Trace().Str("name", app.Name).Str("cmd", launchCmd).Msg("starting terminal app")
-			if err := exec.Command("sh", "-c", launchCmd).Start(); err != nil {
+			if err := startDetached(launchCmd); err != nil {
 				log.Fatal().Err(err).Str("name", app.Name).Msg("failed to start terminal app")
 			}
 		}
@@ -151,6 +156,15 @@ func parseWindowListPID(s string) (int, error) {
 		}
 	}
 	return 0, fmt.Errorf("no focused window found in Windows.List response")
+}
+
+func startDetached(cmdStr string) error {
+	cmd := exec.Command("sh", "-c", cmdStr)
+	cmd.Stdin = nil
+	cmd.Stdout = nil
+	cmd.Stderr = nil
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	return cmd.Start()
 }
 
 // clearWorkspace closes all windows on the current GNOME virtual desktop via D-Bus.
