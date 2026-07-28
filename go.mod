@@ -5,7 +5,7 @@ module github.com/PhilippHeuer/fuzzmux
 go 1.26.0
 
 require (
-	github.com/Nerzal/gocloak/v14 v14.0.3
+	github.com/Nerzal/gocloak/v14 v14.0.4
 	github.com/adrg/xdg v0.5.3
 	github.com/andygrunwald/go-jira v1.17.0
 	github.com/cidverse/cidverseutils/core v0.0.0-20260723200732-9731cafac3c3
