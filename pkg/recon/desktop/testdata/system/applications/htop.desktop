@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Htop
+Comment=Show System Processes
+Exec=htop
+Terminal=true
+Categories=System;Monitor;ConsoleOnly;

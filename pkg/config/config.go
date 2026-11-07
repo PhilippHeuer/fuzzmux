@@ -5,6 +5,7 @@ import (
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/backstage"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/chrome"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/desktop"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/firefox"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/jira"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/keycloak"
@@ -91,6 +92,8 @@ func (c *Config) UnmarshalYAML(value *yaml.Node) error {
 			module = &firefox.ModuleConfig{}
 		case "chrome":
 			module = &chrome.ModuleConfig{}
+		case "desktop":
+			module = &desktop.ModuleConfig{}
 		default:
 			return fmt.Errorf("unknown module type '%s' for key %d", typeInfo.Type, key)
 		}

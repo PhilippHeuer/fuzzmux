@@ -28,6 +28,7 @@ Similar rules can be defined for ssh connections, kubernetes namespaces, ... - s
 - ssh config (parses `~/.ssh/config`)
 - usql connections (parses `~/.config/usql/config.yml`)
 - firefox bookmarks (specify sqlite db file to query)
+- desktop applications (parses XDG `.desktop` entries, e.g. on Ubuntu, Fedora, NixOS, Arch)
 
 ## Supported Window Managers / Terminal Workspace Managers
 
@@ -228,6 +229,32 @@ The `firefox` module can query bookmarks from Firefox-based browsers (e.g. Firef
   name: zen
   profile-path: ~/.zen/abcd1234.default
 ```
+
+### Desktop Applications
+
+The `desktop` module discovers installed applications from XDG desktop entries in `$XDG_DATA_HOME/applications` and `$XDG_DATA_DIRS/*/applications`.
+This covers distribution packages, Flatpak, Snap and Nix profiles, as long as their directories are part of `XDG_DATA_DIRS`.
+User entries take precedence over system entries, and entries flagged as `Hidden`, `NoDisplay` (unless `show-hidden` is set), restricted by `OnlyShowIn`/`NotShowIn` or with a missing `TryExec` binary are skipped.
+
+```yaml
+modules:
+  - type: desktop
+    # optional: additional directories to search (lowest precedence)
+    directories:
+      - ~/.local/share/flatpak/exports/share/applications
+    # optional: only include / exclude specific categories
+    categories: []
+    exclude-categories:
+      - Settings
+    # optional: exclude specific desktop file ids
+    exclude:
+      - org.gnome.Settings
+    # optional: include entries flagged with NoDisplay=true
+    show-hidden: false
+```
+
+The built-in `desktop` layout starts graphical applications directly through the window manager (`hyprland`, `sway`, `i3`, `gnome`), and runs `Terminal=true` applications in a terminal / tmux window.
+The command is available as `{{!exec}}` (already shell-quoted), alongside `{{desktopId}}`, `{{desktopFile}}`, `{{genericName}}`, `{{icon}}`, `{{categories}}` and `{{keywords}}`.
 
 ### Static
 

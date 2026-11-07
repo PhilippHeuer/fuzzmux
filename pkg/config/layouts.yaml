@@ -76,3 +76,22 @@ layouts:
           - command: export RD_URL={{rundeckHost}}
           - command: export RD_TOKEN={{rundeckToken}}
           - command: exec bash
+  desktop:
+    rules:
+      - PROVIDER_TYPE == "desktop"
+    apps:
+      # graphical apps are started directly by the window manager
+      - name: app
+        default: true
+        gui: true
+        rules:
+          - '!contains(TAGS, "terminal")'
+        commands:
+          - command: "{{!exec}}"
+      # Terminal=true apps run within a terminal / tmux window
+      - name: app
+        default: true
+        rules:
+          - contains(TAGS, "terminal")
+        commands:
+          - command: exec {{!exec}}

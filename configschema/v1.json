@@ -127,7 +127,7 @@
         },
         "type": {
           "type": "string",
-          "enum": ["backstage", "jira", "keycloak", "kubernetes", "ldap", "project", "rundeck", "ssh", "usql"]
+          "enum": ["backstage", "jira", "keycloak", "kubernetes", "ldap", "project", "rundeck", "ssh", "usql", "desktop"]
         }
       },
       "required": ["type"],
@@ -268,6 +268,42 @@
               "file": {
                 "type": "string",
                 "description": "path to usql config file, if not using the default (~/.config/usql/config.yaml)"
+              }
+            },
+            "required": []
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": { "const": "desktop" }
+            }
+          },
+          "then": {
+            "properties": {
+              "directories": {
+                "type": "array",
+                "description": "additional directories to search for .desktop files (lowest precedence)",
+                "items": { "type": "string" }
+              },
+              "show-hidden": {
+                "type": "boolean",
+                "description": "include entries flagged with NoDisplay=true"
+              },
+              "categories": {
+                "type": "array",
+                "description": "only include entries with at least one of the given categories",
+                "items": { "type": "string" }
+              },
+              "exclude-categories": {
+                "type": "array",
+                "description": "exclude entries with any of the given categories",
+                "items": { "type": "string" }
+              },
+              "exclude": {
+                "type": "array",
+                "description": "desktop file ids to exclude",
+                "items": { "type": "string" }
               }
             },
             "required": []

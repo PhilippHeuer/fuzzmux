@@ -9,6 +9,7 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/backstage"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/chrome"
+	"github.com/PhilippHeuer/fuzzmux/pkg/recon/desktop"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/firefox"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/jira"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon/keycloak"
@@ -53,6 +54,8 @@ func ConfigToReconModules(conf config.Config) []recon.Module {
 			modules = append(modules, firefox.NewModule(*cfg))
 		case *chrome.ModuleConfig:
 			modules = append(modules, chrome.NewModule(*cfg))
+		case *desktop.ModuleConfig:
+			modules = append(modules, desktop.NewModule(*cfg))
 		default:
 			log.Error().Interface("module", m).Msg("unrecognized module type")
 		}

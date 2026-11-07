@@ -1,0 +1,17 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Firefox
+Name[de]=Firefox DE
+GenericName=Web Browser
+GenericName[de]=Webbrowser
+Comment=Browse the Web
+Exec=firefox --name "my firefox" %u
+Icon=firefox
+Terminal=false
+Categories=Network;WebBrowser;
+Keywords=web;internet;
+
+[Desktop Action new-window]
+Name=New Window
+Exec=firefox --new-window %u
