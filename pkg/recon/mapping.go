@@ -76,6 +76,7 @@ func formatAttributeValue(value interface{}, format, source string) (string, err
 		if v != nil {
 			return fmt.Sprintf("%d", *v), nil
 		}
+		return "", nil
 	case int32:
 		return fmt.Sprintf("%d", v), nil
 	case *int32:
@@ -89,12 +90,14 @@ func formatAttributeValue(value interface{}, format, source string) (string, err
 		if v != nil {
 			return formatInt64(*v, format)
 		}
+		return "", nil
 	case time.Time:
 		return v.Format(time.RFC3339), nil
 	case *time.Time:
 		if v != nil {
 			return v.Format(time.RFC3339), nil
 		}
+		return "", nil
 	}
 	return "", fmt.Errorf("unsupported type for source %s with format %s", source, format)
 }
@@ -111,6 +114,9 @@ func formatString(value, format string) (string, error) {
 func formatStringSlice(values []string, format string) (string, error) {
 	switch format {
 	case "ldaptime":
+		if len(values) == 0 {
+			return "", nil
+		}
 		return util.ConvertLDAPTimeToRFC3339(values[0]), nil
 	default:
 		return strings.Join(values, ", "), nil

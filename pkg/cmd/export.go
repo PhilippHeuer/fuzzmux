@@ -13,16 +13,18 @@ import (
 )
 
 func exportCmd() *cobra.Command {
-	flags := RootFlags{}
 	cmd := &cobra.Command{
 		Use:   "export",
 		Short: "export option details to stdout",
 		Run: func(cmd *cobra.Command, args []string) {
 			// params
 			moduleNames, _ := cmd.Flags().GetStringArray("module")
-			outputColumns, _ := cmd.Flags().GetStringArray("columns")
+			outputColumns, _ := cmd.Flags().GetStringSlice("columns")
 			outputFormat, _ := cmd.Flags().GetString("format")
 			outputFile, _ := cmd.Flags().GetString("output")
+			maxCacheAge, _ := cmd.Flags().GetInt("cache-age")
+			showTags, _ := cmd.Flags().GetStringSlice("show-tags")
+			hideTags, _ := cmd.Flags().GetStringSlice("hide-tags")
 
 			// load config
 			conf, err := config.ResolvedConfig()
@@ -31,7 +33,7 @@ func exportCmd() *cobra.Command {
 			}
 
 			// collect options
-			modules, options := app.GatherReconOptions(conf, moduleNames, flags.showTags, flags.hideTags, flags.maxCacheAge)
+			modules, options := app.GatherReconOptions(conf, moduleNames, showTags, hideTags, maxCacheAge)
 			if len(options) == 0 {
 				log.Fatal().Msg("no options found")
 			}

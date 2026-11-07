@@ -17,12 +17,15 @@ func FuzzyFinderFZF(options []recon.Option, cfg config.FinderConfig) (recon.Opti
 	for _, option := range options {
 		builder.WriteString(fmt.Sprintf("%s%s%s\n", option.Id, cfg.FZFDelimiter, option.DisplayName))
 	}
-	optionFile, err := os.CreateTemp("/tmp", "tms-fzf")
+	optionFile, err := os.CreateTemp("", "tms-fzf")
 	if err != nil {
 		return recon.Option{}, fmt.Errorf("failed to create temp file for options: %w", err)
 	}
 	defer os.Remove(optionFile.Name())
 	_, err = optionFile.WriteString(builder.String())
+	if closeErr := optionFile.Close(); err == nil {
+		err = closeErr
+	}
 	if err != nil {
 		return recon.Option{}, fmt.Errorf("failed to write options to file: %w", err)
 	}

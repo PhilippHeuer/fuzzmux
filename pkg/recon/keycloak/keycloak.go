@@ -91,7 +91,9 @@ func (p Module) Options() ([]recon.Option, error) {
 	for _, realm := range realms {
 		// clients
 		if slices.Contains(p.Config.Query, KeycloakClient) {
-			allClients, err := client.GetClients(ctx, token.AccessToken, ptr.Value(realm.Realm), gocloak.GetClientsParams{})
+			allClients, err := paginate(func(first, max int) ([]*gocloak.Client, error) {
+				return client.GetClients(ctx, token.AccessToken, ptr.Value(realm.Realm), gocloak.GetClientsParams{First: &first, Max: &max})
+			})
 			if err != nil {
 				return nil, fmt.Errorf("failed to get clients: %w", err)
 			}
@@ -121,7 +123,9 @@ func (p Module) Options() ([]recon.Option, error) {
 		}
 		// users
 		if slices.Contains(p.Config.Query, KeycloakUser) {
-			users, err := client.GetUsers(ctx, token.AccessToken, ptr.Value(realm.Realm), gocloak.GetUsersParams{BriefRepresentation: ptr.False()})
+			users, err := paginate(func(first, max int) ([]*gocloak.User, error) {
+				return client.GetUsers(ctx, token.AccessToken, ptr.Value(realm.Realm), gocloak.GetUsersParams{BriefRepresentation: ptr.False(), First: &first, Max: &max})
+			})
 			if err != nil {
 				return nil, fmt.Errorf("failed to get users: %w", err)
 			}
@@ -154,7 +158,9 @@ func (p Module) Options() ([]recon.Option, error) {
 		}
 		// groups
 		if slices.Contains(p.Config.Query, KeycloakGroup) {
-			groups, err := client.GetGroups(ctx, token.AccessToken, ptr.Value(realm.Realm), gocloak.GetGroupsParams{BriefRepresentation: ptr.False()})
+			groups, err := paginate(func(first, max int) ([]*gocloak.Group, error) {
+				return client.GetGroups(ctx, token.AccessToken, ptr.Value(realm.Realm), gocloak.GetGroupsParams{BriefRepresentation: ptr.False(), First: &first, Max: &max})
+			})
 			if err != nil {
 				return nil, fmt.Errorf("failed to get groups: %w", err)
 			}

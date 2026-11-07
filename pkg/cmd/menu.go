@@ -35,17 +35,27 @@ func menuCmd() *cobra.Command {
 			}
 			log.Debug().Str("display-name", selected.DisplayName).Str("name", selected.Name).Str("directory", selected.StartDirectory).Interface("context", selected.Context).Msg("selected recon from menu")
 
+			// inherited root flags
+			maxCacheAge, _ := cmd.Flags().GetInt("cache-age")
+			hideTags, _ := cmd.Flags().GetStringSlice("hide-tags")
+
 			// select recon options (static options by tag, providers by name)
 			if len(selected.Tags) > 0 {
 				selected, err = optionFuzzyFinder(conf, []string{"static"}, RootFlags{
-					backend:  flags.backend,
-					template: flags.template,
-					showTags: []string{selected.Id},
+					backend:     flags.backend,
+					template:    flags.template,
+					maxCacheAge: maxCacheAge,
+					showTags:    []string{selected.Id},
+					hideTags:    hideTags,
 				})
 			} else {
+				showTags, _ := cmd.Flags().GetStringSlice("show-tags")
 				selected, err = optionFuzzyFinder(conf, []string{selected.Id}, RootFlags{
-					backend:  flags.backend,
-					template: flags.template,
+					backend:     flags.backend,
+					template:    flags.template,
+					maxCacheAge: maxCacheAge,
+					showTags:    showTags,
+					hideTags:    hideTags,
 				})
 			}
 			if err != nil {
@@ -76,7 +86,7 @@ func menuCmd() *cobra.Command {
 				log.Fatal().Err(err).Msg("no suitable launcher found")
 			}
 			err = be.Run(&selected, launcher.Opts{
-				SessionName: selected.Name,
+				SessionName: selected.SessionName(),
 				Layout:      template,
 				AppendMode:  launcher.CreateOrAttachSession,
 			})

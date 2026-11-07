@@ -3,6 +3,7 @@ package ssh
 import (
 	"fmt"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
+	"github.com/kevinburke/ssh_config"
 	"os"
 	"path/filepath"
 	"strings"
@@ -72,16 +73,20 @@ func (p Module) Options() ([]recon.Option, error) {
 			user := "root@"
 			var tags []string
 			for _, node := range host.Nodes {
-				line := strings.TrimSpace(node.String())
-				if strings.HasPrefix(line, "Hostname ") {
-					hostname = strings.TrimSpace(strings.TrimPrefix(line, "Hostname "))
-				}
-				if strings.HasPrefix(line, "User ") {
-					user = strings.TrimSpace(strings.TrimPrefix(line, "User ")) + "@"
-				}
-
-				if strings.HasPrefix(line, "# tag: ") {
-					tags = append(tags, strings.TrimSpace(strings.TrimPrefix(line, "# tag: ")))
+				switch n := node.(type) {
+				case *ssh_config.KV:
+					// keywords are case-insensitive, the parser already handles "=" and whitespace separators
+					switch strings.ToLower(n.Key) {
+					case "hostname":
+						hostname = strings.TrimSpace(n.Value)
+					case "user":
+						user = strings.TrimSpace(n.Value) + "@"
+					}
+				case *ssh_config.Empty:
+					comment := strings.TrimSpace(n.Comment)
+					if strings.HasPrefix(comment, "tag:") {
+						tags = append(tags, strings.TrimSpace(strings.TrimPrefix(comment, "tag:")))
+					}
 				}
 			}
 

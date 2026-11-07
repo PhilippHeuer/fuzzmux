@@ -13,8 +13,8 @@ layouts:
         rules:
           - inPath("sshfs") && contains(TAGS, "sftp")
         commands:
-          - command: mkdir -p "~/mnt/ssh/{{name}}"
-          - command: sshfs -o default_permissions,idmap=user,noatime,follow_symlinks,_netdev,reconnect {{name}}:/ ~/mnt/ssh/{{name}}
+          - command: mkdir -p ~/mnt/ssh/"{{name}}"
+          - command: sshfs -o default_permissions,idmap=user,noatime,follow_symlinks,_netdev,reconnect "{{name}}":/ ~/mnt/ssh/"{{name}}"
   project:
     apps:
       - name: sh

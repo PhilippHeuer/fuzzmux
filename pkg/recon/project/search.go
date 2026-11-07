@@ -72,6 +72,12 @@ func searchInDirectory(source SourceDirectory, checks []string) ([]Project, erro
 		excludePatterns = append(excludePatterns, excludePattern)
 	}
 
+	// default to direct children of the source directory
+	maxDepth := source.Depth
+	if maxDepth <= 0 {
+		maxDepth = 1
+	}
+
 	err := filepath.WalkDir(source.Directory, func(path string, info os.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -82,8 +88,11 @@ func searchInDirectory(source SourceDirectory, checks []string) ([]Project, erro
 			return nil
 		}
 
-		// exclusion patterns
+		// exclusion patterns (never exclude the source directory itself)
 		for _, pattern := range excludePatterns {
+			if path == source.Directory {
+				break
+			}
 			log.Trace().Str("path", path).Str("pattern", pattern.String()).Bool("match", pattern.MatchString(info.Name())).Msg("checking for matches with exclude pattern")
 			if pattern.MatchString(info.Name()) {
 				return filepath.SkipDir
@@ -95,8 +104,11 @@ func searchInDirectory(source SourceDirectory, checks []string) ([]Project, erro
 		if err != nil {
 			return err
 		}
-		depth := strings.Count(filepath.ToSlash(rel), "/") + 1
-		if depth > source.Depth {
+		depth := 0 // source directory itself
+		if rel != "." {
+			depth = strings.Count(filepath.ToSlash(rel), "/") + 1
+		}
+		if depth > maxDepth {
 			return filepath.SkipDir
 		}
 

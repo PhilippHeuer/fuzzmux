@@ -20,15 +20,15 @@ func TestSearchBookmarks(t *testing.T) {
 	require.NotEmpty(t, options)
 	require.Len(t, options, 3)
 
-	require.Equal(t, "1", options[0].Id)
+	require.Equal(t, "firefox-1", options[0].Id)
 	require.Equal(t, "Example Site 1", options[0].Name)
 	require.Equal(t, "https://example.com", options[0].Web)
 
-	require.Equal(t, "2", options[1].Id)
+	require.Equal(t, "firefox-2", options[1].Id)
 	require.Equal(t, "Example Site 2", options[1].Name)
 	require.Equal(t, "https://example.org", options[1].Web)
 
-	require.Equal(t, "3", options[2].Id)
+	require.Equal(t, "firefox-3", options[2].Id)
 	require.Equal(t, "Example Site 3", options[2].Name)
 	require.Equal(t, "https://example.net", options[2].Web)
 }

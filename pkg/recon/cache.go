@@ -29,14 +29,22 @@ func SaveOptions(providerName string, options []Option) error {
 		return fmt.Errorf("failed to marshal options: %w", err)
 	}
 
-	err = os.MkdirAll(dataDir, 0755)
+	// the cache may contain credentials (module context), restrict access to the current user
+	err = os.MkdirAll(dataDir, 0700)
 	if err != nil {
 		return fmt.Errorf("failed to create data directory: %w", err)
 	}
+	if err = os.Chmod(dataDir, 0700); err != nil {
+		return fmt.Errorf("failed to set data directory permissions: %w", err)
+	}
 
-	err = os.WriteFile(filepath.Join(dataDir, fmt.Sprintf("recon-%s.json", providerName)), jsonData, 0644)
+	cacheFile := filepath.Join(dataDir, fmt.Sprintf("recon-%s.json", providerName))
+	err = os.WriteFile(cacheFile, jsonData, 0600)
 	if err != nil {
 		return fmt.Errorf("failed to write options: %w", err)
+	}
+	if err = os.Chmod(cacheFile, 0600); err != nil { // WriteFile does not change the mode of existing files
+		return fmt.Errorf("failed to set cache file permissions: %w", err)
 	}
 
 	return nil

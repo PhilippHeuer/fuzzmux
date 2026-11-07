@@ -49,6 +49,9 @@ func rootCmd() *cobra.Command {
 
 			// fuzzy finder
 			selected, err := optionFuzzyFinder(conf, args, flags)
+			if err != nil {
+				log.Fatal().Err(err).Msg("failed to get selected option")
+			}
 
 			// layout
 			defaultLayout := selected.ProviderName
@@ -70,7 +73,7 @@ func rootCmd() *cobra.Command {
 				log.Fatal().Err(err).Msg("no suitable launcher found")
 			}
 			err = be.Run(&selected, launcher.Opts{
-				SessionName: selected.Name,
+				SessionName: selected.SessionName(),
 				Layout:      template,
 				AppendMode:  launcher.CreateOrAttachSession,
 			})
@@ -112,9 +115,6 @@ func optionFuzzyFinder(conf config.Config, args []string, flags RootFlags) (reco
 	// collect options
 	modules, options := app.GatherReconOptions(conf, args, flags.showTags, flags.hideTags, flags.maxCacheAge)
 	if len(options) == 0 {
-		log.Fatal().Msg("no options found")
-	}
-	if len(options) == 0 {
 		return recon.Option{}, types.ErrNoOptionsAvailable
 	}
 
@@ -136,12 +136,11 @@ func optionFuzzyFinder(conf config.Config, args []string, flags RootFlags) (reco
 		}
 		selected = s
 	} else {
-		for _, o := range options {
-			if o.Id == flags.selected {
-				selected = o
-				break
-			}
+		o, err := recon.OptionById(options, flags.selected)
+		if err != nil {
+			return recon.Option{}, errors.Join(types.ErrNoOptionSelected, err)
 		}
+		selected = *o
 	}
 	log.Debug().Str("display-name", selected.DisplayName).Str("name", selected.Name).Str("directory", selected.StartDirectory).Interface("context", selected.Context).Msg("selected item")
 

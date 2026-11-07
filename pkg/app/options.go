@@ -27,7 +27,7 @@ func CollectOptions(modules []recon.Module, maxCacheAge int) ([]recon.Option, []
 // FilterOptions filters the options, showTags are required, hideTags
 func FilterOptions(options []recon.Option, showTags []string, hideTags []string) []recon.Option {
 	var filtered []recon.Option
-	hideTags = append(hideTags, "hidden") // always hide hidden options, used for e.g. git ssh hosts
+	hideTags = append(slices.Clone(hideTags), "hidden") // always hide hidden options, used for e.g. git ssh hosts
 
 	for _, o := range options {
 		showTagFound := false

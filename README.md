@@ -257,21 +257,21 @@ layouts:
         rules:
           - inPath("idea-community") && (contains(TAGS, "language-java") || contains(TAGS, "language-kotlin"))
         commands:
-          - command: idea-community "${startDirectory}"
+          - command: idea-community "{{startDirectory}}"
         gui: true
         group: editor # the group is used to ensure only the first matching editor is opened
       - name: vscodium
         rules:
           - inPath("codium") && (contains(TAGS, "language-javascript") || contains(TAGS, "language-typescript"))
         commands:
-          - command: codium "${startDirectory}"
+          - command: codium "{{startDirectory}}"
         gui: true
         group: editor
       - name: vscode
         rules:
           - inPath("code") && (contains(TAGS, "language-javascript") || contains(TAGS, "language-typescript"))
         commands:
-          - command: code ${startDirectory}
+          - command: code "{{startDirectory}}"
         gui: true
         group: editor
       - name: nvim
@@ -284,9 +284,14 @@ layouts:
 
 The command can contain placeholders, e.g.:
 
-- `${name}` - name of the option (for ssh this would be the server alias -> `ssh ${name}`)
-- `${display-name}` - display name of the option
-- `${start-directory}` - start directory of the option
+- `{{name}}` - name of the option (for ssh this would be the server alias -> `ssh "{{name}}"`)
+- `{{displayName}}` - display name of the option
+- `{{startDirectory}}` - start directory of the option
+- `{{id}}`, `{{description}}`, `{{web}}`, `{{providerName}}`, `{{providerType}}` - other option fields
+- any key of the option context, e.g. `{{namespace}}` or `{{kubeConfig}}` for kubernetes
+
+`{{key}}` escapes the value for use inside double quotes (`"{{name}}"`), use `{{!key}}` to insert the raw value.
+Environment variables (`$HOME`, `${USER}`) in the command are expanded before placeholders are replaced.
 
 ## Window Manager / Terminal Workspace Manager Setup
 

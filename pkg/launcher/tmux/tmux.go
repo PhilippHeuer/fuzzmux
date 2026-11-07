@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/user"
 	"strconv"
+	"strings"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
 	gotmux "github.com/jubnzv/go-tmux"
@@ -58,6 +59,7 @@ func (p TMUX) Run(option *recon.Option, opts launcher.Opts) error {
 
 	// resolve vars
 	startDirectory := option.ResolveStartDirectory(true)
+	opts.SessionName = sanitizeSessionName(opts.SessionName)
 
 	// session lookup
 	session, err := FindSession(opts.SessionName)
@@ -181,16 +183,22 @@ func applyWindows(windows []gotmux.Window, add []config.App, baseIndex int, star
 				startDirectoryOrHome = usr.HomeDir
 			}
 
+			windowId := len(windows) + baseIndex
 			windows = append(windows, gotmux.Window{
 				Name:           w.Name,
-				Id:             len(windows) + baseIndex,
+				Id:             windowId,
 				StartDirectory: startDirectoryOrHome,
 			})
-			windowIds = append(windowIds, len(windows)+baseIndex)
+			windowIds = append(windowIds, windowId)
 		}
 	}
 
 	return windows, windowIds
+}
+
+// sanitizeSessionName replaces characters tmux does not allow in session names, otherwise the session lookup by name fails
+func sanitizeSessionName(name string) string {
+	return strings.NewReplacer(".", "_", ":", "_").Replace(name)
 }
 
 // ListPanes finds a window by id

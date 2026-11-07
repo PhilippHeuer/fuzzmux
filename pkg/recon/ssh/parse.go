@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"github.com/kevinburke/ssh_config"
 )
 
@@ -33,44 +34,99 @@ func ParseFile(path string) (*ssh_config.Config, error) {
 	return sshConfig, nil
 }
 
+// maxIncludeDepth limits nested Include statements, matches the limit used by OpenSSH
+const maxIncludeDepth = 16
+
 // resolveIncludes resolves Include statements in the SSH configuration file
 func resolveIncludes(rootFile string, configBytes []byte) ([]byte, error) {
-	// Split the configuration content into lines
+	return resolveIncludesDepth(filepath.Dir(rootFile), configBytes, 0)
+}
+
+func resolveIncludesDepth(baseDir string, configBytes []byte, depth int) ([]byte, error) {
+	if depth > maxIncludeDepth {
+		return nil, fmt.Errorf("too many nested include statements (max %d)", maxIncludeDepth)
+	}
+
 	lines := strings.Split(string(configBytes), "\n")
 	var resolvedConfig []string
 
 	for _, line := range lines {
-		if strings.HasPrefix(line, "Include") {
-			// Extract the file path from the Include statement
-			includePath := strings.TrimPrefix(line, "Include")
-			includePath = strings.TrimSpace(includePath)
-			if includePath == "" {
-				return nil, fmt.Errorf("include statement is missing a file path")
-			}
+		paths, isInclude := parseIncludeLine(line)
+		if !isInclude {
+			resolvedConfig = append(resolvedConfig, line)
+			continue
+		}
+		if len(paths) == 0 {
+			return nil, fmt.Errorf("include statement is missing a file path")
+		}
 
-			// resolve relative paths
-			includePath = strings.Replace(includePath, "~", os.Getenv("HOME"), 1)
+		for _, includePath := range paths {
+			// resolve home, env vars and relative paths
+			includePath = util.ExpandTilde(includePath)
 			includePath = os.ExpandEnv(includePath)
 			if !filepath.IsAbs(includePath) {
-				includePath = filepath.Join(filepath.Dir(rootFile), includePath)
+				includePath = filepath.Join(baseDir, includePath)
 			}
 
-			// Read the included file content
-			includeContent, err := os.ReadFile(includePath)
+			// glob patterns, e.g. Include ~/.ssh/config.d/*
+			matches, err := filepath.Glob(includePath)
 			if err != nil {
-				return nil, fmt.Errorf("failed to read included file '%s': %w", includePath, err)
+				return nil, fmt.Errorf("invalid include pattern '%s': %w", includePath, err)
+			}
+			if len(matches) == 0 && !hasGlobMeta(includePath) {
+				return nil, fmt.Errorf("failed to read included file '%s': %w", includePath, os.ErrNotExist)
 			}
 
-			// Insert the included content into the resolved configuration
-			resolvedConfig = append(resolvedConfig, string(includeContent))
-		} else {
-			// Preserve other lines as they are
-			resolvedConfig = append(resolvedConfig, line)
+			for _, match := range matches {
+				info, err := os.Stat(match)
+				if err != nil {
+					return nil, fmt.Errorf("failed to read included file '%s': %w", match, err)
+				}
+				if info.IsDir() {
+					continue
+				}
+
+				includeContent, err := os.ReadFile(match)
+				if err != nil {
+					return nil, fmt.Errorf("failed to read included file '%s': %w", match, err)
+				}
+
+				// nested includes, relative paths stay relative to the root config directory
+				includeContent, err = resolveIncludesDepth(baseDir, includeContent, depth+1)
+				if err != nil {
+					return nil, err
+				}
+
+				resolvedConfig = append(resolvedConfig, string(includeContent))
+			}
 		}
 	}
 
-	// Join the resolved lines and convert them back to bytes
-	resolvedBytes := []byte(strings.Join(resolvedConfig, "\n"))
+	return []byte(strings.Join(resolvedConfig, "\n")), nil
+}
 
-	return resolvedBytes, nil
+// parseIncludeLine checks if the line is an Include statement (case-insensitive, optional "=") and returns the paths
+func parseIncludeLine(line string) ([]string, bool) {
+	trimmed := strings.TrimSpace(line)
+	if len(trimmed) < len("include") || !strings.EqualFold(trimmed[:len("include")], "include") {
+		return nil, false
+	}
+
+	rest := trimmed[len("include"):]
+	if rest != "" && rest[0] != ' ' && rest[0] != '\t' && rest[0] != '=' {
+		return nil, false // other keyword with the same prefix
+	}
+	rest = strings.TrimSpace(rest)
+	rest = strings.TrimSpace(strings.TrimPrefix(rest, "="))
+
+	// strip trailing comment
+	if idx := strings.Index(rest, "#"); idx >= 0 {
+		rest = rest[:idx]
+	}
+
+	return strings.Fields(rest), true
+}
+
+func hasGlobMeta(path string) bool {
+	return strings.ContainsAny(path, "*?[")
 }

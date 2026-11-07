@@ -120,15 +120,20 @@ func (p Module) Options() ([]recon.Option, error) {
 			}
 			attributes := recon.AttributeMapping(data, p.Config.AttributeMapping)
 
+			tags := []string{"backstage"}
+			if entityType != "" {
+				tags = append(tags, entityType)
+			}
+
 			opt := recon.Option{
 				ProviderName: p.Name(),
 				ProviderType: p.Type(),
-				Id:           entity.Metadata.Name,
+				Id:           fmt.Sprintf("%s/%s/%s", entity.Metadata.Namespace, strings.ToLower(entity.Kind), entity.Metadata.Name),
 				DisplayName:  fmt.Sprintf("%s [%s]", entity.Metadata.Name, queryId),
 				Name:         entity.Metadata.Name,
 				Description:  entity.Metadata.Description,
 				Web:          fmt.Sprintf("%s/catalog/%s/%s/%s", p.Config.Host, entity.Metadata.Namespace, strings.ToLower(entity.Kind), entity.Metadata.Name),
-				Tags:         []string{"backstage", entityType},
+				Tags:         tags,
 				Context:      attributes,
 			}
 			opt.ProcessUserTemplateStrings(p.Config.DisplayName, p.Config.StartDirectory)

@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"github.com/PhilippHeuer/fuzzmux/pkg/database/sqlite"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
+	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	"github.com/adrg/xdg"
 	"github.com/cidverse/go-ptr"
 	"path"
 	"path/filepath"
-	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -42,7 +42,7 @@ type ModuleConfig struct {
 }
 
 func (c *ModuleConfig) DecodeConfig() {
-	c.ProfilePath = strings.Replace(c.ProfilePath, "~", xdg.Home, 1)
+	c.ProfilePath = util.ExpandTilde(c.ProfilePath)
 }
 
 func (p Module) Name() string {
@@ -65,6 +65,7 @@ func (p Module) Options() ([]recon.Option, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error opening db file %s: %v", p.Config.ProfilePath, err)
 	}
+	defer func() { _ = dbConn.Close() }()
 
 	// db operator
 	dbClient := NewDatabaseOperator(dbConn)
@@ -82,7 +83,7 @@ func (p Module) Options() ([]recon.Option, error) {
 		result = append(result, recon.Option{
 			ProviderName:   p.Name(),
 			ProviderType:   p.Type(),
-			Id:             fmt.Sprintf("%d", bookmark.ID),
+			Id:             fmt.Sprintf("%s-%d", p.Name(), bookmark.ID),
 			DisplayName:    bookmark.Title,
 			Name:           bookmark.Title,
 			Description:    "",
@@ -91,7 +92,7 @@ func (p Module) Options() ([]recon.Option, error) {
 			Tags:           []string{"firefox", "bookmark"},
 			Context: map[string]string{
 				"folder": bookmark.Folder,
-				"parent": fmt.Sprintf("%d", bookmark.Parent),
+				"parent": fmt.Sprintf("%d", ptr.Value(bookmark.Parent)),
 			},
 		})
 	}

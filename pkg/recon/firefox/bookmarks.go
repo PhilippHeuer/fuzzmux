@@ -34,6 +34,7 @@ func (d *DatabaseOperator) GetBookmarks(ctx context.Context) ([]Bookmark, error)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query db: %v", err)
 	}
+	defer rows.Close()
 
 	var bookmarks []Bookmark
 	for rows.Next() {
@@ -45,6 +46,22 @@ func (d *DatabaseOperator) GetBookmarks(ctx context.Context) ([]Bookmark, error)
 		}
 
 		bookmarks = append(bookmarks, bm)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("failed to read query results: %v", err)
+	}
+
+	// resolve folder names, entries without url are folders
+	folders := make(map[int]string)
+	for _, bm := range bookmarks {
+		if bm.URL == nil {
+			folders[bm.ID] = bm.Title
+		}
+	}
+	for i, bm := range bookmarks {
+		if bm.Parent != nil {
+			bookmarks[i].Folder = folders[*bm.Parent]
+		}
 	}
 
 	return bookmarks, nil

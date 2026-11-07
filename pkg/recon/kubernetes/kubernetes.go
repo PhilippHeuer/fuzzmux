@@ -8,7 +8,6 @@ import (
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
 	"github.com/PhilippHeuer/fuzzmux/pkg/util"
 	projectsv1 "github.com/openshift/client-go/project/clientset/versioned/typed/project/v1"
-	"github.com/rs/zerolog/log"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -84,22 +83,7 @@ func (p Module) Options() ([]recon.Option, error) {
 }
 
 func (p Module) OptionsOrCache(maxAge float64) ([]recon.Option, error) {
-	options, err := recon.LoadOptions(p.Name(), 0)
-	if err == nil {
-		return options, nil
-	}
-
-	options, err = p.Options()
-	if err != nil {
-		return nil, fmt.Errorf("failed to get options: %w", err)
-	}
-
-	err = recon.SaveOptions(p.Name(), options)
-	if err != nil {
-		log.Warn().Err(err).Msg("failed to save options to cache")
-	}
-
-	return options, nil
+	return recon.OptionsOrCache(p, maxAge)
 }
 
 func (p Module) SelectOption(option *recon.Option) error {
@@ -162,7 +146,7 @@ func processKubernetesCluster(cluster KubernetesCluster, moduleName string, modu
 		opt := recon.Option{
 			ProviderName:   moduleName,
 			ProviderType:   moduleType,
-			Id:             item.GetName(),
+			Id:             clusterName + "/" + item.GetName(),
 			DisplayName:    displayName,
 			Name:           item.GetName(),
 			StartDirectory: defaultStartDirectory,
@@ -175,6 +159,7 @@ func processKubernetesCluster(cluster KubernetesCluster, moduleName string, modu
 				"kubeConfig":  configFile,
 				"namespace":   item.GetName(),
 			},
+			ModuleContext: sessionContext(cluster, item.GetName()),
 		}
 		opt.ProcessUserTemplateStrings(moduleConf.DisplayName, moduleConf.StartDirectory)
 		result = append(result, opt)
@@ -230,7 +215,7 @@ func processOpenShiftCluster(cluster KubernetesCluster, moduleName string, modul
 		opt := recon.Option{
 			ProviderName:   moduleName,
 			ProviderType:   moduleType,
-			Id:             item.GetName(),
+			Id:             clusterName + "/" + item.GetName(),
 			DisplayName:    displayName,
 			Name:           item.GetName(),
 			StartDirectory: defaultStartDirectory,
@@ -244,10 +229,19 @@ func processOpenShiftCluster(cluster KubernetesCluster, moduleName string, modul
 				"namespace":   item.GetName(),
 				"description": description,
 			},
+			ModuleContext: sessionContext(cluster, item.GetName()),
 		}
 		opt.ProcessUserTemplateStrings(moduleConf.DisplayName, moduleConf.StartDirectory)
 		result = append(result, opt)
 	}
 
 	return result, nil
+}
+
+// sessionContext makes session names unique if the same namespace exists in multiple named clusters
+func sessionContext(cluster KubernetesCluster, namespace string) map[string]string {
+	if cluster.Name == "" {
+		return nil
+	}
+	return map[string]string{"sessionName": namespace + "@" + cluster.Name}
 }

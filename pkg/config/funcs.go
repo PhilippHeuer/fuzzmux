@@ -3,7 +3,10 @@ package config
 import (
 	_ "embed"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 
@@ -65,9 +68,12 @@ func LoadConfig() (Config, error) {
 	}
 
 	// user config
-	userConfig, err := loadConfig(filepath.Join(configDir, "fuzzmux.user.yaml"))
+	userConfigPath := filepath.Join(configDir, "fuzzmux.user.yaml")
+	userConfig, err := loadConfig(userConfigPath)
 	if err == nil {
 		config = MergeConfig(config, userConfig)
+	} else if !errors.Is(err, fs.ErrNotExist) {
+		return Config{}, fmt.Errorf("failed to load user config %s: %w", userConfigPath, err)
 	}
 
 	return config, nil
@@ -84,8 +90,10 @@ func loadConfig(path string) (Config, error) {
 
 	decoder := yaml.NewDecoder(file)
 	err = decoder.Decode(&config)
-	if err != nil {
-		return Config{}, err
+	if errors.Is(err, io.EOF) {
+		return Config{}, nil // empty file
+	} else if err != nil {
+		return Config{}, fmt.Errorf("failed to parse %s: %w", path, err)
 	}
 
 	return config, nil
@@ -122,6 +130,9 @@ func MergeConfig(a Config, b Config) Config {
 
 	// merge layouts
 	if b.Layouts != nil {
+		if a.Layouts == nil {
+			a.Layouts = make(map[string]Layout, len(b.Layouts))
+		}
 		for key, layout := range b.Layouts {
 			a.Layouts[key] = layout
 		}

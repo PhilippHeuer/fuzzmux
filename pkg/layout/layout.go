@@ -3,6 +3,7 @@ package layout
 import (
 	"fmt"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
+	"maps"
 	"slices"
 
 	"github.com/PhilippHeuer/fuzzmux/pkg/config"
@@ -28,7 +29,9 @@ func GetLayout(conf config.Config, selected *recon.Option, templateName string, 
 	// auto-detect template if not specified
 	if templateName == "" {
 		log.Debug().Str("template-name", templateName).Interface("layouts", conf.Layouts).Interface("context", ruleContext).Msg("no template specified, auto-detecting")
-		for key, l := range conf.Layouts {
+		// iterate in sorted order, map iteration order is random
+		for _, key := range slices.Sorted(maps.Keys(conf.Layouts)) {
+			l := conf.Layouts[key]
 			if len(l.Rules) > 0 && evalRules(l.Rules, ruleContext) > 0 {
 				templateName = key
 				break

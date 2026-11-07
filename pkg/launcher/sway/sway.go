@@ -38,8 +38,8 @@ func (p SWAY) Run(option *recon.Option, opts launcher.Opts) error {
 	// resolve vars
 	startDirectory := option.ResolveStartDirectory(true)
 
-	// context
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	// context, the sway client closes its connection once the context is done, so it must cover the whole launch
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
 	// sway client
@@ -59,13 +59,15 @@ func (p SWAY) Run(option *recon.Option, opts launcher.Opts) error {
 	// kill all active windows in workspace
 	if opts.Layout.ClearWorkspace {
 		log.Debug().Msg("clearing current workspace")
-		for _, node := range ws.Nodes {
-			if node.Type == "con" {
-				log.Trace().Int64("id", node.ID).Msg("killing window by nodeId")
-				_, killErr := client.RunCommand(ctx, fmt.Sprintf("[con_id=%d] kill", node.ID))
-				if killErr != nil {
-					log.Warn().Err(killErr).Msg("failed to kill window")
-				}
+		for _, node := range swayWindows(ws) {
+			if node.PID != nil && util.IsAncestorProcess(int(*node.PID)) {
+				log.Debug().Int64("id", node.ID).Msg("skipping window running tmx")
+				continue
+			}
+			log.Trace().Int64("id", node.ID).Msg("killing window by nodeId")
+			_, killErr := client.RunCommand(ctx, fmt.Sprintf("[con_id=%d] kill", node.ID))
+			if killErr != nil {
+				log.Warn().Err(killErr).Msg("failed to kill window")
 			}
 		}
 	}
@@ -97,7 +99,8 @@ func (p SWAY) Run(option *recon.Option, opts launcher.Opts) error {
 		log.Trace().Str("name", app.Name).Str("cmd", cmd).Msg("started app")
 
 		// execute command
-		_, cmdErr := client.RunCommand(ctx, fmt.Sprintf("exec cd %q && %s", startDirectory, cmd))
+		// sway keeps quotes for exec and only splits commands on ";" outside of quotes
+		_, cmdErr := client.RunCommand(ctx, fmt.Sprintf("exec cd %s && %s", util.ShellQuote(startDirectory), cmd))
 		if cmdErr != nil {
 			log.Fatal().Err(cmdErr).Str("name", app.Name).Msg("failed to start app")
 		}
@@ -134,6 +137,9 @@ func currentSwayWorkspace(ctx context.Context, client sway.Client) (*sway.Node, 
 	if err != nil {
 		return nil, fmt.Errorf("failed to get sway tree: %w", err)
 	}
+	if len(n.Focus) == 0 {
+		return nil, fmt.Errorf("failed to get focused workspace: no focused output")
+	}
 	ws, err := focusedWorkspace(n, n.Focus[0])
 	if err != nil {
 		return nil, fmt.Errorf("failed to get focused workspace: %w", err)
@@ -151,10 +157,27 @@ func focusedWorkspace(n *sway.Node, targetID int64) (*sway.Node, error) {
 
 		if node.Type == sway.NodeWorkspace {
 			return node, nil
-		} else {
-			return focusedWorkspace(node, node.Focus[0])
 		}
+		if len(node.Focus) == 0 {
+			break
+		}
+		return focusedWorkspace(node, node.Focus[0])
 	}
 
 	return nil, fmt.Errorf("workspace not found")
+}
+
+// swayWindows returns all windows (leaf containers, tiled and floating) within the node
+func swayWindows(n *sway.Node) []*sway.Node {
+	var result []*sway.Node
+	for _, child := range append(append([]*sway.Node{}, n.Nodes...), n.FloatingNodes...) {
+		if len(child.Nodes) == 0 && len(child.FloatingNodes) == 0 {
+			if child.Type == sway.NodeCon || child.Type == sway.NodeFloatingCon {
+				result = append(result, child)
+			}
+			continue
+		}
+		result = append(result, swayWindows(child)...)
+	}
+	return result
 }

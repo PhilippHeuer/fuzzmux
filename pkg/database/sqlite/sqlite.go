@@ -7,6 +7,7 @@ import (
 
 type DBConnection interface {
 	Query(query string, args ...any) (*sql.Rows, error)
+	Close() error
 }
 
 const sqliteDriverName = `sqlite3`
@@ -18,6 +19,7 @@ func NewDB(dbFilename string) (DBConnection, error) {
 		return nil, fmt.Errorf("failed to open SQLite DB: %v", err)
 	}
 	if err := conn.Ping(); err != nil {
+		_ = conn.Close()
 		return nil, fmt.Errorf("failed to ping SQLite DB: %v", err)
 	}
 

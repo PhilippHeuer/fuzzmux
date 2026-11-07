@@ -3,6 +3,7 @@ package static
 import (
 	"fmt"
 	"github.com/PhilippHeuer/fuzzmux/pkg/recon"
+	"os"
 )
 
 const moduleType = "static"
@@ -74,12 +75,13 @@ func (p Module) Options() ([]recon.Option, error) {
 			DisplayName:    staticOption.DisplayName,
 			Description:    staticOption.Description,
 			Web:            staticOption.Web,
-			StartDirectory: staticOption.StartDirectory,
+			StartDirectory: os.ExpandEnv(staticOption.StartDirectory),
 			Tags:           staticOption.Tags,
-			Context:        staticOption.Context,
+			Context:        make(map[string]string, len(staticOption.Context)),
 		}
-		if op.Context == nil {
-			op.Context = make(map[string]string)
+		// user-written values, environment variables are expanded here as they are inserted escaped into commands
+		for k, v := range staticOption.Context {
+			op.Context[k] = os.ExpandEnv(v)
 		}
 		if staticOption.Preview != "" {
 			op.Context["preview"] = staticOption.Preview

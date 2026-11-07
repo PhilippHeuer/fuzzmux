@@ -57,6 +57,10 @@ func (p Hyprland) Run(option *recon.Option, opts launcher.Opts) error {
 
 		for _, c := range clients {
 			if c.Workspace.Id == ws.Id {
+				if util.IsAncestorProcess(c.Pid) {
+					log.Debug().Int("pid", c.Pid).Msg("skipping window running tmx")
+					continue
+				}
 				log.Trace().Int("pid", c.Pid).Int("workspace", c.Workspace.Id).Msg("killing process")
 				err := util.KillProcessByPID(c.Pid)
 				if err != nil {
@@ -93,7 +97,7 @@ func (p Hyprland) Run(option *recon.Option, opts launcher.Opts) error {
 		log.Trace().Str("name", app.Name).Str("cmd", cmd).Msg("started app")
 
 		// execute command
-		cmdErr := hyprlandIPCCommand(client, fmt.Sprintf("exec cd %q && %s", startDirectory, cmd))
+		cmdErr := hyprlandIPCCommand(client, fmt.Sprintf("exec cd %s && %s", util.ShellQuote(startDirectory), cmd))
 		if cmdErr != nil {
 			log.Fatal().Err(cmdErr).Str("name", app.Name).Msg("failed to start app")
 		}

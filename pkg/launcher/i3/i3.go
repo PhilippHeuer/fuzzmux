@@ -48,8 +48,8 @@ func (p I3) Run(option *recon.Option, opts launcher.Opts) error {
 	// kill all active windows in workspace
 	if opts.Layout.ClearWorkspace {
 		log.Debug().Msg("clearing current workspace")
-		for _, node := range ws.Nodes {
-			if node.Type == "con" {
+		for _, node := range append(append([]*i3.Node{}, ws.Nodes...), ws.FloatingNodes...) {
+			if node.Type == i3.Con || node.Type == i3.FloatingCon {
 				log.Trace().Int64("id", int64(node.ID)).Msg("killing window by nodeId")
 				_, killErr := i3.RunCommand(fmt.Sprintf("[con_id=%d] kill", node.ID))
 				if killErr != nil {
@@ -86,7 +86,9 @@ func (p I3) Run(option *recon.Option, opts launcher.Opts) error {
 		log.Trace().Str("name", app.Name).Str("cmd", cmd).Msg("started app")
 
 		// execute command
-		_, cmdErr := i3.RunCommand(fmt.Sprintf("exec cd %q && %s", startDirectory, cmd))
+		// i3 ends unquoted command arguments at ";" or ",", so the whole shell command is passed as an i3 quoted string
+		shellCmd := fmt.Sprintf("cd %s && %s", util.ShellQuote(startDirectory), cmd)
+		_, cmdErr := i3.RunCommand("exec " + i3QuoteString(shellCmd))
 		if cmdErr != nil {
 			log.Fatal().Err(cmdErr).Str("name", app.Name).Msg("failed to start app")
 		}
@@ -116,6 +118,9 @@ func currentI3Workspace() (*i3.Node, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to get sway tree: %w", err)
 	}
+	if len(n.Root.Focus) == 0 {
+		return nil, fmt.Errorf("failed to get focused workspace: no focused output")
+	}
 	ws, err := focusedI3Workspace(n.Root, n.Root.Focus[0])
 	if err != nil {
 		return nil, fmt.Errorf("failed to get focused workspace: %w", err)
@@ -133,10 +138,17 @@ func focusedI3Workspace(n *i3.Node, targetID i3.NodeID) (*i3.Node, error) {
 
 		if node.Type == i3.WorkspaceNode {
 			return node, nil
-		} else {
-			return focusedI3Workspace(node, node.Focus[0])
 		}
+		if len(node.Focus) == 0 {
+			break
+		}
+		return focusedI3Workspace(node, node.Focus[0])
 	}
 
 	return nil, fmt.Errorf("workspace not found")
+}
+
+// i3QuoteString quotes the value as an i3 command string, i3 only unescapes \" and \\ within quoted strings
+func i3QuoteString(value string) string {
+	return `"` + strings.NewReplacer(`\`, `\\`, `"`, `\"`).Replace(value) + `"`
 }

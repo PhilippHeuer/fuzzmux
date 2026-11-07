@@ -13,14 +13,14 @@ func ResolveCredentialValue(value string) string {
 		return os.Getenv(strings.TrimPrefix(value, "env:"))
 	} else if strings.HasPrefix(value, "file:") {
 		file := strings.TrimPrefix(value, "file:")
-		file = strings.Replace(file, "~", os.Getenv("HOME"), 1)
+		file = ExpandTilde(file)
 		file = os.ExpandEnv(file)
 
 		bytes, err := os.ReadFile(file)
 		if err != nil {
 			return ""
 		}
-		return string(bytes)
+		return strings.TrimRight(string(bytes), "\r\n")
 	} else if strings.HasPrefix(value, "pass:") {
 		secretPath := os.ExpandEnv(strings.TrimPrefix(value, "pass:"))
 

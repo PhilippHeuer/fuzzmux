@@ -29,17 +29,25 @@ func (o *Option) ResolveStartDirectory(full bool) string {
 	if startDirectory == "" {
 		startDirectory = "~"
 	}
-	startDirectory = util.ExpandPlaceholders(startDirectory, "name", o.Name)
-	startDirectory = util.ExpandPlaceholders(startDirectory, "displayName", o.DisplayName)
+	startDirectory = util.ExpandPlaceholdersRaw(startDirectory, "name", o.Name)
+	startDirectory = util.ExpandPlaceholdersRaw(startDirectory, "displayName", o.DisplayName)
 	for k, v := range o.Context {
-		startDirectory = util.ExpandPlaceholders(startDirectory, k, v)
+		startDirectory = util.ExpandPlaceholdersRaw(startDirectory, k, v)
 	}
 
 	if full {
-		startDirectory = strings.Replace(startDirectory, "~", os.Getenv("HOME"), -1)
+		startDirectory = util.ExpandTilde(startDirectory)
 	}
 
 	return startDirectory
+}
+
+// SessionName returns the name for the session / window, modules can override it to avoid collisions (e.g. same namespace in multiple clusters)
+func (o *Option) SessionName() string {
+	if name := o.ModuleContext["sessionName"]; name != "" {
+		return name
+	}
+	return o.Name
 }
 
 func (o *Option) CreateStartDirectoryIfMissing() error {
@@ -58,28 +66,38 @@ func (o *Option) CreateStartDirectoryIfMissing() error {
 	return nil
 }
 
+// ResolvePlaceholders resolves placeholders in a shell command, {{key}} values are escaped for use within double quotes
 func (o *Option) ResolvePlaceholders(input string) string {
-	input = util.ExpandPlaceholders(input, "providerName", o.ProviderName)
-	input = util.ExpandPlaceholders(input, "providerType", o.ProviderType)
-	input = util.ExpandPlaceholders(input, "id", o.Id)
-	input = util.ExpandPlaceholders(input, "name", o.Name)
-	input = util.ExpandPlaceholders(input, "displayName", o.DisplayName)
-	input = util.ExpandPlaceholders(input, "description", o.Description)
-	input = util.ExpandPlaceholders(input, "web", o.Web)
-	input = util.ExpandPlaceholders(input, "startDirectory", o.ResolveStartDirectory(true))
+	return o.resolvePlaceholders(input, util.ExpandPlaceholders)
+}
+
+// ResolvePlaceholdersRaw resolves placeholders in templates that are not evaluated by a shell (display names, paths)
+func (o *Option) ResolvePlaceholdersRaw(input string) string {
+	return o.resolvePlaceholders(input, util.ExpandPlaceholdersRaw)
+}
+
+func (o *Option) resolvePlaceholders(input string, expand func(input, key, value string) string) string {
+	// environment variables, expanded before placeholders to avoid expanding variables contained in option values
+	input = os.ExpandEnv(input)
+
+	input = expand(input, "providerName", o.ProviderName)
+	input = expand(input, "providerType", o.ProviderType)
+	input = expand(input, "id", o.Id)
+	input = expand(input, "name", o.Name)
+	input = expand(input, "displayName", o.DisplayName)
+	input = expand(input, "description", o.Description)
+	input = expand(input, "web", o.Web)
+	input = expand(input, "startDirectory", o.ResolveStartDirectory(true))
 
 	// module context
 	for k, v := range o.ModuleContext {
-		input = util.ExpandPlaceholders(input, k, v)
+		input = expand(input, k, v)
 	}
 
 	// context
 	for k, v := range o.Context {
-		input = util.ExpandPlaceholders(input, k, v)
+		input = expand(input, k, v)
 	}
-
-	// environment variables
-	input = os.ExpandEnv(input)
 
 	return input
 }
@@ -159,10 +177,10 @@ func (o *Option) RenderPreview() string {
 
 func (o *Option) ProcessUserTemplateStrings(displayNameTemplate string, startDirectoryTemplate string) {
 	if startDirectoryTemplate != "" {
-		o.StartDirectory = o.ResolvePlaceholders(startDirectoryTemplate)
+		o.StartDirectory = o.ResolvePlaceholdersRaw(startDirectoryTemplate)
 	}
 	if displayNameTemplate != "" {
-		o.DisplayName = o.ResolvePlaceholders(displayNameTemplate)
+		o.DisplayName = o.ResolvePlaceholdersRaw(displayNameTemplate)
 	}
 }
 
