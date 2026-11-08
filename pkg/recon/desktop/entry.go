@@ -219,7 +219,7 @@ func ParseExec(exec string, name string, icon string, path string) ([]string, er
 		}
 
 		var b strings.Builder
-		onlyFieldCodes := true
+		onlyFieldCodes := token != ""
 		for i := 0; i < len(token); i++ {
 			if token[i] != '%' || i+1 >= len(token) {
 				b.WriteByte(token[i])
