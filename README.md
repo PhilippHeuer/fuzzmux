@@ -1,6 +1,5 @@
 # FuzzMux
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/PhilippHeuer/fuzzmux)](https://goreportcard.com/report/github.com/PhilippHeuer/fuzzmux)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/PhilippHeuer/fuzzmux/badge)](https://securityscorecards.dev/viewer/?uri=github.com/PhilippHeuer/fuzzmux)
 
 ## What is FuzzMux?
@@ -51,7 +50,7 @@ curl -o ~/.local/bin/tmx -L https://github.com/PhilippHeuer/fuzzmux/releases/lat
 ## Usage
 
 | Command                 | Description                                                         |
-|-------------------------|---------------------------------------------------------------------|
+| ----------------------- | ------------------------------------------------------------------- |
 | `tmx`                   | Start a layout, lookup over all supported providers                 |
 | `tmx project`           | Start a layout for a project                                        |
 | `tmx ssh`               | Start a layout for a ssh connection                                 |
